@@ -7,7 +7,14 @@ interface HeaderProps {
   notificationCount: number;
   currentView?: string;
   onViewChange?: (
-    view: "main" | "recordings" | "ai" | "settings" | "files",
+    view:
+      | "main"
+      | "recordings"
+      | "ai"
+      | "settings"
+      | "files"
+      | "templates"
+      | "toolbox",
   ) => void;
 }
 
@@ -20,9 +27,11 @@ const Header: React.FC<HeaderProps> = ({
   onViewChange,
 }) => {
   const quickActions = [
-    { id: "recordings", icon: "🎬", label: "Library", color: "knoux-purple" },
-    { id: "ai", icon: "🧠", label: "AI Tools", color: "knoux-neon" },
-    { id: "files", icon: "📁", label: "Files", color: "green-400" },
+    { id: "templates", icon: "📽️", label: "Templates", color: "knoux-purple" },
+    { id: "toolbox", icon: "🛠️", label: "Toolbox", color: "knoux-neon" },
+    { id: "recordings", icon: "🎬", label: "Library", color: "green-400" },
+    { id: "ai", icon: "🧠", label: "AI Tools", color: "yellow-400" },
+    { id: "files", icon: "📁", label: "Files", color: "blue-400" },
   ];
 
   return (

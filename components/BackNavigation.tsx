@@ -4,7 +4,14 @@ interface BackNavigationProps {
   currentView: string;
   onBack: () => void;
   onNavigate: (
-    view: "main" | "recordings" | "ai" | "settings" | "files",
+    view:
+      | "main"
+      | "recordings"
+      | "ai"
+      | "settings"
+      | "files"
+      | "templates"
+      | "toolbox",
   ) => void;
 }
 
@@ -15,10 +22,14 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
 }) => {
   const getViewTitle = (view: string) => {
     switch (view) {
+      case "templates":
+        return "📽️ Video Templates";
+      case "toolbox":
+        return "🛠️ AI Toolbox";
       case "recordings":
         return "🎬 Recording Library";
       case "ai":
-        return "🧠 AI Tools";
+        return "🧠 AI Analysis";
       case "files":
         return "📁 File Manager";
       case "settings":
@@ -30,6 +41,8 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
 
   const navigationItems = [
     { id: "main", icon: "🏠", label: "Home" },
+    { id: "templates", icon: "📽️", label: "Templates" },
+    { id: "toolbox", icon: "🛠️", label: "Toolbox" },
     { id: "recordings", icon: "🎬", label: "Recordings" },
     { id: "ai", icon: "🧠", label: "AI Tools" },
     { id: "files", icon: "📁", label: "Files" },

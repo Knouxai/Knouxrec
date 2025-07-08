@@ -18,7 +18,13 @@ import { generateFileName } from "./utils";
 
 const App = () => {
   const [currentView, setCurrentView] = useState<
-    "main" | "recordings" | "ai" | "settings" | "files"
+    | "main"
+    | "recordings"
+    | "ai"
+    | "settings"
+    | "files"
+    | "templates"
+    | "toolbox"
   >("main");
   const [settings, setSettings] = useState<RecordingSettings>({
     recordScreen: true,
