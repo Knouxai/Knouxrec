@@ -1,0 +1,9 @@
+{
+  "name": "Copy of Copy of KNOUX REC",
+  "description": "A sophisticated screen recording application for professionals and creators, featuring a sleek, futuristic interface. It allows for high-quality recording of the screen, system audio, microphone, and camera, with smart features for organization and post-processing.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "prompt": ""
+}
