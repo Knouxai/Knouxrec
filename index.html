@@ -1,108 +1,367 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KNOUX REC</title>
+    <title>KNOUX REC - Luxury Screen Recorder</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
       :root {
-        --bg-color: #f0f2f5;
-        --text-color: #1c1c1c;
-        --card-bg: rgba(255, 255, 255, 0.5);
-        --card-border: rgba(0, 0, 0, 0.1);
-        --card-shadow: rgba(0, 0, 0, 0.1);
-        --header-color: #4A00E0;
-        --accent-color: #00F0FF;
-        --primary-text: #333;
-        --secondary-text: #555;
-        --icon-color: #444;
+        /* Light Theme */
+        --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --bg-secondary: rgba(255, 255, 255, 0.1);
+        --glass-bg: rgba(255, 255, 255, 0.15);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-shadow: rgba(0, 0, 0, 0.1);
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.8);
+        --accent-purple: #8b5cf6;
+        --accent-neon: #00d9ff;
+        --accent-success: #10b981;
+        --accent-warning: #f59e0b;
+        --accent-error: #ef4444;
       }
 
       .dark {
-        --bg-color: #0d0618;
-        --text-color: #e5e7eb;
-        --card-bg: rgba(28, 28, 28, 0.5);
-        --card-border: rgba(255, 255, 255, 0.1);
-        --card-shadow: rgba(0, 0, 0, 0.37);
-        --header-color: #7A00FF;
-        --accent-color: #00F0FF;
-        --primary-text: #ffffff;
-        --secondary-text: #a0aec0;
-        --icon-color: #d1d5db;
+        /* Dark Glassmorphism Theme */
+        --bg-primary: linear-gradient(
+          135deg,
+          #1a0033 0%,
+          #330066 25%,
+          #4a0080 50%,
+          #6600cc 75%,
+          #8000ff 100%
+        );
+        --bg-secondary: rgba(0, 0, 0, 0.2);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(139, 92, 246, 0.3);
+        --glass-shadow: rgba(139, 92, 246, 0.1);
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.7);
+        --accent-purple: #8b5cf6;
+        --accent-neon: #00d9ff;
+        --accent-success: #10b981;
+        --accent-warning: #f59e0b;
+        --accent-error: #ef4444;
       }
-      
+
       body {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-family: 'Rajdhani', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: "Rajdhani", sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* Glassmorphism Base */
+      .glass {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 8px 32px var(--glass-shadow);
       }
 
       .glass-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid var(--card-border);
-        box-shadow: 0 8px 32px 0 var(--card-shadow);
-        transition: background 0.3s ease, border 0.3s ease;
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 12px 40px var(--glass-shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .interactive-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+      .glass-card:hover {
+        background: rgba(139, 92, 246, 0.1);
+        border-color: var(--accent-purple);
+        box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+        transform: translateY(-2px);
       }
-      .dark .interactive-card {
-         background: rgba(28, 28, 28, 0.6);
-         border: 1px solid rgba(255, 255, 255, 0.1);
+
+      /* Neon Effects */
+      .neon-purple {
+        box-shadow:
+          0 0 20px var(--accent-purple),
+          0 0 40px var(--accent-purple),
+          0 0 60px var(--accent-purple);
       }
-       .light .interactive-card {
-         background: rgba(255, 255, 255, 0.4);
-         border: 1px solid rgba(255, 255, 255, 0.2);
+
+      .neon-blue {
+        box-shadow:
+          0 0 20px var(--accent-neon),
+          0 0 40px var(--accent-neon),
+          0 0 60px var(--accent-neon);
+      }
+
+      .glow-button {
+        background: linear-gradient(
+          45deg,
+          var(--accent-purple),
+          var(--accent-neon)
+        );
+        border: none;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .glow-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px var(--accent-purple);
+      }
+
+      .glow-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .glow-button:hover::before {
+        left: 100%;
+      }
+
+      /* Animated Background */
+      .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: var(--bg-primary);
+      }
+
+      .animated-bg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(139, 92, 246, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(0, 217, 255, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 60% 40%,
+            rgba(139, 92, 246, 0.2) 0%,
+            transparent 50%
+          );
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        33% {
+          transform: translateY(-20px) rotate(1deg);
+        }
+        66% {
+          transform: translateY(10px) rotate(-1deg);
+        }
+      }
+
+      /* Interactive Elements */
+      .interactive {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+      }
+
+      .interactive:hover {
+        transform: translateY(-4px) scale(1.02);
+        filter: brightness(1.1);
+      }
+
+      /* Scroll Effects */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--glass-bg);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(
+          45deg,
+          var(--accent-purple),
+          var(--accent-neon)
+        );
+        border-radius: 10px;
+        box-shadow: 0 0 10px var(--accent-purple);
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(
+          45deg,
+          var(--accent-neon),
+          var(--accent-purple)
+        );
+      }
+
+      /* Loading Animation */
+      .loading-dots {
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+      }
+
+      .loading-dots div {
+        position: absolute;
+        top: 33px;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--accent-purple);
+        animation-timing-function: cubic-bezier(0, 1, 1, 0);
+      }
+
+      .loading-dots div:nth-child(1) {
+        left: 8px;
+        animation: lds-ellipsis1 0.6s infinite;
+      }
+
+      .loading-dots div:nth-child(2) {
+        left: 8px;
+        animation: lds-ellipsis2 0.6s infinite;
+      }
+
+      .loading-dots div:nth-child(3) {
+        left: 32px;
+        animation: lds-ellipsis2 0.6s infinite;
+      }
+
+      .loading-dots div:nth-child(4) {
+        left: 56px;
+        animation: lds-ellipsis3 0.6s infinite;
+      }
+
+      @keyframes lds-ellipsis1 {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes lds-ellipsis3 {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(0);
+        }
+      }
+
+      @keyframes lds-ellipsis2 {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(24px, 0);
+        }
       }
     </style>
+
     <script>
       tailwind.config = {
-        darkMode: 'class',
+        darkMode: "class",
         theme: {
           extend: {
             fontFamily: {
-              'orbitron': ['Orbitron', 'sans-serif'],
-              'rajdhani': ['Rajdhani', 'sans-serif'],
+              orbitron: ["Orbitron", "monospace"],
+              rajdhani: ["Rajdhani", "sans-serif"],
             },
             colors: {
-              'knoux-purple': '#7A00FF',
-              'knoux-neon-blue': '#00F0FF',
-              'knoux-dark-glass': '#1C1C1C',
-              'knoux-red': '#FF3B3B',
+              knoux: {
+                purple: "#8B5CF6",
+                neon: "#00D9FF",
+                dark: "#1a0033",
+                glass: "rgba(255, 255, 255, 0.05)",
+              },
             },
-             boxShadow: {
-              'neon-blue': '0 0 10px #00F0FF, 0 0 20px #00F0FF, 0 0 30px #00F0FF',
-              'neon-purple': '0 0 10px #7A00FF, 0 0 20px #7A00FF, 0 0 30px #7A00FF',
+            backdropBlur: {
+              xs: "2px",
+              xl: "25px",
+              "2xl": "40px",
+              "3xl": "64px",
             },
-          }
+            boxShadow: {
+              "neon-purple":
+                "0 0 20px #8B5CF6, 0 0 40px #8B5CF6, 0 0 60px #8B5CF6",
+              "neon-blue":
+                "0 0 20px #00D9FF, 0 0 40px #00D9FF, 0 0 60px #00D9FF",
+              glass: "0 8px 32px rgba(139, 92, 246, 0.1)",
+              "glass-lg": "0 12px 40px rgba(139, 92, 246, 0.15)",
+              "glass-xl": "0 20px 60px rgba(139, 92, 246, 0.2)",
+            },
+            animation: {
+              float: "float 6s ease-in-out infinite",
+              glow: "glow 2s ease-in-out infinite alternate",
+              "pulse-neon":
+                "pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            },
+            keyframes: {
+              glow: {
+                "0%": { boxShadow: "0 0 20px #8B5CF6" },
+                "100%": { boxShadow: "0 0 40px #8B5CF6, 0 0 60px #8B5CF6" },
+              },
+              "pulse-neon": {
+                "0%, 100%": { opacity: "1" },
+                "50%": { opacity: "0.5" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "react/": "https://esm.sh/react@^19.1.0/",
+          "react": "https://esm.sh/react@^19.1.0",
+          "react-dom/": "https://esm.sh/react-dom@^19.1.0/"
         }
       }
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.1.0/",
-    "react": "https://esm.sh/react@^19.1.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.8.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+  </head>
+
   <body>
-    <div class="fixed inset-0 -z-10 h-full w-full bg-[var(--bg-color)] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(122,0,255,0.3),rgba(255,255,255,0))]"></div>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Main App Container -->
     <div id="root"></div>
+
     <script type="module" src="./index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>
