@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Recording } from "../types";
-import { processTranscript } from "../services/geminiService";
+import { processTranscript, getAIStatus } from "../services/geminiService";
+import PerformancePanel from "./PerformancePanel";
 
 interface AIPanelProps {
   recordings: Recording[];
@@ -20,27 +21,47 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
       icon: "🎤",
       description: "Extract and analyze speech from recordings",
       color: "knoux-purple",
+      status: "active",
+    },
+    {
+      id: "performance",
+      name: "Performance Monitor",
+      icon: "⚡",
+      description: "Real-time system performance tracking",
+      color: "knoux-neon",
+      status: "active",
     },
     {
       id: "ocr",
       name: "Text Recognition",
       icon: "📝",
       description: "Extract text from screen recordings (OCR)",
-      color: "knoux-neon",
+      color: "yellow-400",
+      status: "coming-soon",
     },
     {
       id: "face",
       name: "Face Detection",
       icon: "👥",
-      description: "Detect faces and expressions (Coming Soon)",
+      description: "Detect faces and expressions (MediaPipe)",
       color: "green-400",
+      status: "coming-soon",
     },
     {
       id: "audio",
       name: "Audio Analysis",
       icon: "🎵",
-      description: "Analyze audio patterns and quality (Coming Soon)",
-      color: "yellow-400",
+      description: "Analyze audio patterns and quality",
+      color: "red-400",
+      status: "coming-soon",
+    },
+    {
+      id: "object",
+      name: "Object Detection",
+      icon: "🎯",
+      description: "Identify objects in screen recordings",
+      color: "purple-400",
+      status: "coming-soon",
     },
   ];
 
@@ -67,6 +88,9 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
 
   const renderToolContent = () => {
     switch (selectedTool) {
+      case "performance":
+        return <PerformancePanel />;
+
       case "transcript":
         return (
           <div className="space-y-4">
@@ -217,17 +241,30 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
       </div>
 
       {/* AI Tools Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {aiTools.map((tool) => (
           <button
             key={tool.id}
             onClick={() => setSelectedTool(tool.id as any)}
-            className={`glass-card interactive p-6 rounded-xl text-center transition-all duration-300 ${
+            disabled={tool.status === "coming-soon"}
+            className={`glass-card interactive p-6 rounded-xl text-center transition-all duration-300 relative ${
               selectedTool === tool.id
                 ? `bg-${tool.color}/20 border-${tool.color}`
-                : "hover:bg-white/10"
+                : tool.status === "coming-soon"
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:bg-white/10"
             }`}
           >
+            {/* Status Badge */}
+            {tool.status === "active" && (
+              <div className="absolute top-2 right-2 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            )}
+            {tool.status === "coming-soon" && (
+              <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-400/20 border border-yellow-400/30 rounded text-xs text-yellow-400">
+                Soon
+              </div>
+            )}
+
             <div className="text-3xl mb-2">{tool.icon}</div>
             <div className={`font-orbitron font-bold text-${tool.color} mb-1`}>
               {tool.name}
