@@ -11,6 +11,8 @@ import TrimModal from "./components/TrimModal";
 import AIPanel from "./components/AIPanel";
 import FileManager from "./components/FileManager";
 import BackNavigation from "./components/BackNavigation";
+import TemplatesPanel from "./components/TemplatesPanel";
+import ToolboxPanel from "./components/ToolboxPanel";
 import { useRecorder } from "./hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "./types";
 import { processTranscript } from "./services/geminiService";
