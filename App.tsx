@@ -315,13 +315,35 @@ const App = () => {
         />
 
         {/* Quick Access Cards */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <button
-            onClick={() => setCurrentView("recordings")}
+            onClick={() => setCurrentView("templates")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-purple/20 transition-all duration-300"
           >
-            <div className="text-3xl mb-2">🎬</div>
+            <div className="text-3xl mb-2">📽️</div>
             <div className="font-orbitron font-bold text-knoux-purple">
+              Templates
+            </div>
+            <div className="text-sm text-white/70">Video Templates</div>
+          </button>
+
+          <button
+            onClick={() => setCurrentView("toolbox")}
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-neon/20 transition-all duration-300"
+          >
+            <div className="text-3xl mb-2">🛠️</div>
+            <div className="font-orbitron font-bold text-knoux-neon">
+              Toolbox
+            </div>
+            <div className="text-sm text-white/70">AI Tools</div>
+          </button>
+
+          <button
+            onClick={() => setCurrentView("recordings")}
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-green-400/20 transition-all duration-300"
+          >
+            <div className="text-3xl mb-2">🎬</div>
+            <div className="font-orbitron font-bold text-green-400">
               Recordings
             </div>
             <div className="text-sm text-white/70">
@@ -331,11 +353,11 @@ const App = () => {
 
           <button
             onClick={() => setCurrentView("ai")}
-            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-neon/20 transition-all duration-300"
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-yellow-400/20 transition-all duration-300"
           >
             <div className="text-3xl mb-2">🧠</div>
-            <div className="font-orbitron font-bold text-knoux-neon">
-              AI Tools
+            <div className="font-orbitron font-bold text-yellow-400">
+              AI Analysis
             </div>
             <div className="text-sm text-white/70">Offline AI</div>
           </button>
@@ -346,6 +368,18 @@ const App = () => {
 
   const renderContent = () => {
     switch (currentView) {
+      case "templates":
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <TemplatesPanel />
+          </div>
+        );
+      case "toolbox":
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <ToolboxPanel />
+          </div>
+        );
       case "recordings":
         return (
           <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
