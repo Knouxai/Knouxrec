@@ -437,6 +437,17 @@ const App = () => {
           </button>
 
           <button
+            onClick={() => setCurrentView("elysian")}
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 border border-purple-500/30"
+          >
+            <div className="text-3xl mb-2">✨</div>
+            <div className="font-orbitron font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Elysian Canvas
+            </div>
+            <div className="text-sm text-white/70">Adult Art Studio</div>
+          </button>
+
+          <button
             onClick={() => setCurrentView("recordings")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-green-400/20 transition-all duration-300"
           >
