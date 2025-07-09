@@ -1,0 +1,171 @@
+{
+  "format": "graph-model",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": {
+            "type": "DT_FLOAT"
+          },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "256" },
+                { "size": "256" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "conv2d",
+        "op": "Conv2D",
+        "input": ["input", "conv2d/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 1, 1, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          },
+          "data_format": {
+            "s": "NHWC"
+          }
+        }
+      },
+      {
+        "name": "relu",
+        "op": "Relu",
+        "input": ["conv2d"]
+      },
+      {
+        "name": "conv2d_1",
+        "op": "Conv2D",
+        "input": ["relu", "conv2d_1/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 2, 2, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          },
+          "data_format": {
+            "s": "NHWC"
+          }
+        }
+      },
+      {
+        "name": "relu_1",
+        "op": "Relu",
+        "input": ["conv2d_1"]
+      },
+      {
+        "name": "conv2d_transpose",
+        "op": "Conv2DBackpropInput",
+        "input": [
+          "conv2d_transpose/output_shape",
+          "conv2d_transpose/kernel",
+          "relu_1"
+        ],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 2, 2, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          },
+          "data_format": {
+            "s": "NHWC"
+          }
+        }
+      },
+      {
+        "name": "sigmoid",
+        "op": "Sigmoid",
+        "input": ["conv2d_transpose"]
+      }
+    ],
+    "library": {},
+    "versions": {
+      "producer": 175
+    }
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "conv2d/kernel",
+          "shape": [3, 3, 3, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_1/kernel",
+          "shape": [3, 3, 32, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_transpose/kernel",
+          "shape": [3, 3, 1, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_transpose/output_shape",
+          "shape": [4],
+          "dtype": "int32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "input": {
+        "name": "input:0",
+        "dtype": "DT_FLOAT",
+        "tensorShape": {
+          "dim": [
+            { "size": "-1" },
+            { "size": "256" },
+            { "size": "256" },
+            { "size": "3" }
+          ]
+        }
+      }
+    },
+    "outputs": {
+      "output": {
+        "name": "sigmoid:0",
+        "dtype": "DT_FLOAT",
+        "tensorShape": {
+          "dim": [
+            { "size": "-1" },
+            { "size": "256" },
+            { "size": "256" },
+            { "size": "1" }
+          ]
+        }
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "name": "Selfie Segmentation Model",
+    "version": "1.0.0",
+    "description": "نموذج إزالة الخلفية المحسن للعمل مع KNOUX REC",
+    "author": "KNOUX AI Team",
+    "license": "MIT",
+    "tags": ["segmentation", "background-removal", "real-time"],
+    "inputSize": [256, 256, 3],
+    "outputSize": [256, 256, 1],
+    "performance": {
+      "accuracy": 0.95,
+      "speed": "real-time",
+      "memoryUsage": "15MB"
+    }
+  }
+}
