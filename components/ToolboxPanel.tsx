@@ -559,19 +559,19 @@ const ToolboxPanel: React.FC = () => {
             <div className="text-2xl font-bold text-knoux-purple">
               {userCredits.remaining}
             </div>
-            <div className="text-sm text-white/70">Credits Left</div>
+            <div className="text-sm text-white/70">النقاط المتبقية</div>
           </div>
           <div className="text-center p-3 bg-knoux-neon/10 rounded-lg">
             <div className="text-2xl font-bold text-knoux-neon">
               {tools.filter((t) => t.ai_powered).length}
             </div>
-            <div className="text-sm text-white/70">AI Tools</div>
+            <div className="text-sm text-white/70">أدوات ذكية</div>
           </div>
           <div className="text-center p-3 bg-green-400/10 rounded-lg">
             <div className="text-2xl font-bold text-green-400">
               {tools.filter((t) => t.popular).length}
             </div>
-            <div className="text-sm text-white/70">Popular</div>
+            <div className="text-sm text-white/70">شائعة</div>
           </div>
           <div className="text-center p-3 bg-yellow-400/10 rounded-lg">
             <div className="text-2xl font-bold text-yellow-400 capitalize">
