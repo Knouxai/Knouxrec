@@ -161,8 +161,8 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "ai-background-remover",
-        name: "AI Background Remover",
-        description: "Remove backgrounds from videos and images automatically",
+        name: "مزيل الخلفية الذكي",
+        description: "إزالة الخلفيات من الفيديوهات والصور تلقائياً",
         category: "ai-tools",
         icon: "🎭",
         ai_powered: true,
@@ -373,11 +373,11 @@ const ToolboxPanel: React.FC = () => {
 
   const handleToolSelect = (tool: AITool) => {
     if (tool.credits_cost > userCredits.remaining) {
-      alert("نقاط ��ير كافية! يرجى تر��ية الخطة.");
+      alert("نقاط ��ير كافية! يرجى ترقية الخطة.");
       return;
     }
 
-    // استخدام الأداة مباشرة
+    // استخدام الأداة مبا��رة
     handleToolUse(tool);
   };
 
