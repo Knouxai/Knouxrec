@@ -232,6 +232,9 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
           </div>
         );
 
+      case "models":
+        return <AIModelsManager />;
+
       default:
         return null;
     }
