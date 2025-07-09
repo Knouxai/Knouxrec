@@ -23,14 +23,16 @@ interface ElysianCanvasProps {
 
 export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
   const [isVerified, setIsVerified] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null,
-  );
+  const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
   const [activeView, setActiveView] = useState<
     "gallery" | "editor" | "preview"
   >("gallery");
   const [renderConfig, setRenderConfig] = useState<Partial<RenderConfig>>({});
   const [masterIntensity, setMasterIntensity] = useState(1.0);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(
+    null,
+  );
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const masterRenderer = useRef<MasterRenderer | null>(null);
