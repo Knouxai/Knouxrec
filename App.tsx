@@ -21,6 +21,7 @@ import { videoProcessor } from "./services/videoProcessor";
 import { audioProcessor } from "./services/audioProcessor";
 import { imageProcessor } from "./services/imageProcessor";
 import { feedbackService } from "./services/feedbackService";
+import { systemTester } from "./services/systemTester";
 import { generateFileName } from "./utils";
 
 const App = () => {
@@ -73,7 +74,7 @@ const App = () => {
     null,
   );
 
-  const addNotification = useCallback(
+    const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
       const newNotification: Notification = {
         id: `notif-${Date.now()}`,
@@ -84,13 +85,13 @@ const App = () => {
 
       // استخدام نظام الإشعارات المتقدم
       switch (type) {
-        case "success":
+        case 'success':
           feedbackService.success(message);
           break;
-        case "error":
+        case 'error':
           feedbackService.error(message);
           break;
-        case "warning":
+        case 'warning':
           feedbackService.warning(message);
           break;
         default:
@@ -122,16 +123,16 @@ const App = () => {
       }
 
       try {
-        const loadingId = feedbackService.loading(
+                const loadingId = feedbackService.loading(
           `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
-          0,
+          0
         );
         addNotification(
           `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
           "info",
         );
 
-        // استخدام نظام الذكاء الاصطناعي الجد��د
+        // استخ��ام نظام الذكاء الاصطناعي الجديد
         const taskId = await offlineAI.addTask({
           type: "text",
           operation: "text_analysis",
@@ -159,7 +160,7 @@ const App = () => {
                     : r,
                 ),
               );
-              feedbackService.dismiss(loadingId);
+                            feedbackService.dismiss(loadingId);
               addNotification(
                 `اكتمل التحليل الذكي لـ "${recording.name}"`,
                 "success",
@@ -176,7 +177,7 @@ const App = () => {
                     : r,
                 ),
               );
-              feedbackService.dismiss(loadingId);
+                            feedbackService.dismiss(loadingId);
               addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
             } else if (task.status === "processing") {
               // استمرار المراقبة
@@ -189,6 +190,9 @@ const App = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
+                if (typeof loadingId !== 'undefined') {
+          feedbackService.dismiss(loadingId);
+        }
         addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
@@ -225,15 +229,15 @@ const App = () => {
         setPendingRecording(newRecording);
       } else {
         setRecordings((prev) => [newRecording, ...prev]);
-        addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
+                addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
         feedbackService.success(`تم حفظ التسجيل بنجاح! 🎬`, {
           actions: [
             {
-              label: "عرض",
-              action: () => setCurrentView("recordings"),
-              style: "primary",
-            },
-          ],
+              label: 'عرض',
+              action: () => setCurrentView('recordings'),
+              style: 'primary'
+            }
+          ]
         });
 
         // بدء المعالجة الذكية التلقائية إذا كانت مفعلة
@@ -244,10 +248,7 @@ const App = () => {
         // استخراج الصوت تلقائياً إذا لم يكن هناك نسخ نصي
         if (!transcript && settings.aiProcessingEnabled) {
           try {
-            const audioLoadingId = feedbackService.loading(
-              "جار استخراج الصوت وتحويله لنص...",
-              0,
-            );
+                        const audioLoadingId = feedbackService.loading("جار استخراج الصوت وتحويله لنص...", 0);
             addNotification("جار استخراج الصوت وتحويله لنص...", "info");
             const audioBlob = await audioProcessor.extractAudioFromVideo(blob);
             const extractedText = await audioProcessor.speechToText(
@@ -265,13 +266,11 @@ const App = () => {
               ),
             );
 
-            feedbackService.dismiss(audioLoadingId);
+                        feedbackService.dismiss(audioLoadingId);
             if (extractedText.trim().length > 10) {
               runAiProcessing(updatedRecording);
             } else {
-              feedbackService.warning(
-                "لم يتم اكتشاف نص واضح في التسجيل الصوتي",
-              );
+              feedbackService.warning('لم يتم اكتشاف نص واضح في التسجيل الصوتي');
             }
           } catch (error) {
             console.warn("فشل في استخراج النص من الصوت:", error);
@@ -282,7 +281,7 @@ const App = () => {
     [settings, addNotification, runAiProcessing],
   );
 
-  // ا��تخدام النظام الجديد
+  // استخدام النظام الجديد
   const { state: recorderState, actions: recorderActions } = useRecorder();
 
   useEffect(() => {
@@ -294,10 +293,10 @@ const App = () => {
     setSettings(newSettings);
   };
 
-  const onSettingsSave = (newSettings: RecordingSettings) => {
+    const onSettingsSave = (newSettings: RecordingSettings) => {
     handleSettingsChange(newSettings);
     addNotification("Settings saved!", "success");
-    feedbackService.success("تم حفظ الإعدادات بنجاح! ⚙️");
+    feedbackService.success('تم حفظ الإعدادات بنجاح! ⚙️');
   };
 
   const handleDeleteRecording = (id: string) => {
@@ -313,14 +312,14 @@ const App = () => {
         return true;
       }),
     );
-    addNotification("Recording deleted.", "info");
-    feedbackService.warning("تم حذف التسجيل");
+        addNotification("Recording deleted.", "info");
+    feedbackService.warning('تم حذف التسجيل');
   };
 
   // معالج لقطة الشاشة المحدث
   const handleScreenshot = useCallback(async () => {
     try {
-      const loadingId = feedbackService.loading("جار التقاط لقطة الشاشة...", 0);
+      const loadingId = feedbackService.loading('جار التقاط لقطة الشاشة...', 0);
 
       const result = await recorderActions.takeScreenshot();
 
@@ -331,25 +330,26 @@ const App = () => {
           message: `الملف: ${result.filename}`,
           actions: [
             {
-              label: "فتح",
+              label: 'فتح',
               action: () => {
                 if (result.dataUrl) {
-                  window.open(result.dataUrl, "_blank");
+                  window.open(result.dataUrl, '_blank');
                 }
               },
-              style: "primary",
-            },
-          ],
+              style: 'primary'
+            }
+          ]
         });
       } else {
         feedbackService.error(`فشل في التقاط لقطة الشاشة: ${result.error}`);
       }
     } catch (error) {
       feedbackService.error(
-        `خطأ في التقاط لقطة الشاشة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+        `خطأ في التقاط لقطة الشاشة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
       );
     }
   }, [recorderActions]);
+  };
 
   const handleUpdateRecording = (updatedRecording: Recording) => {
     setRecordings((prev) =>
@@ -414,7 +414,9 @@ const App = () => {
         }
       } else if (checkHotkey(e, settings.hotkeys.screenshot)) {
         e.preventDefault();
-        handleScreenshot();
+        if (recorderState.isRecording) {
+          recorderActions.takeScreenshot();
+        }
       }
     };
 
@@ -426,7 +428,6 @@ const App = () => {
     recorderActions,
     isSettingsOpen,
     pendingRecording,
-    handleScreenshot,
   ]);
 
   const handleStartRecording = () => {
@@ -466,9 +467,9 @@ const App = () => {
           onStop={recorderActions.stopRecording}
           onPause={recorderActions.pauseRecording}
           onResume={recorderActions.resumeRecording}
-          onScreenshot={handleScreenshot}
+                    onScreenshot={handleScreenshot}
           disabled={false}
-          timer={recorderState.recordingTime.toString()}
+          timer={recorderState.recordingTime}
           fps={recorderState.frameRate}
           scheduleStatus={null}
           hotkeys={settings.hotkeys}
@@ -493,7 +494,7 @@ const App = () => {
             onClick={() => setCurrentView("templates")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-purple/20 transition-all duration-300"
           >
-            <div className="text-3xl mb-2">📽️</div>
+            <div className="text-3xl mb-2">📽��</div>
             <div className="font-orbitron font-bold text-knoux-purple">
               Templates
             </div>
@@ -645,16 +646,16 @@ const App = () => {
       {pendingRecording && (
         <TrimModal
           recording={pendingRecording}
-          onSave={(rec, trimData) => {
+                    onSave={(rec, trimData) => {
             addNotification("تم قص الفيديو بنجاح! ✂️", "success");
-            feedbackService.success("تم قص الفيديو بنجاح! ✂️");
+            feedbackService.success('تم قص الفيديو بنجاح! ✂️');
             setRecordings((prev) => [{ ...rec, trim: trimData }, ...prev]);
             setPendingRecording(null);
           }}
           onSaveFull={(rec) => {
             setRecordings((prev) => [rec, ...prev]);
             addNotification(`Recording "${rec.name}" saved.`, "success");
-            feedbackService.success("تم حفظ التسجيل كاملاً! 🎬");
+            feedbackService.success('تم حفظ التسجيل كاملاً! 🎬');
             if (rec.isProcessing) runAiProcessing(rec);
             setPendingRecording(null);
           }}
