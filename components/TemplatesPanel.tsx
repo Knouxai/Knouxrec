@@ -236,7 +236,7 @@ const TemplatesPanel: React.FC = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search templates..."
+              placeholder="ابحث عن القوالب..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-64 px-4 py-2 pl-10 bg-black/30 border border-knoux-purple/30 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-knoux-purple focus:border-knoux-purple"
