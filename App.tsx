@@ -86,7 +86,7 @@ const App = () => {
     async (recording: Recording) => {
       if (!recording.transcript || recording.transcript.trim().length < 10) {
         addNotification(
-          `AI analysis skipped for "${recording.name}" (transcript too short).`,
+          `تم تخطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
           "info",
         );
         setRecordings((prev) =>
@@ -95,7 +95,7 @@ const App = () => {
               ? {
                   ...r,
                   isProcessing: false,
-                  summary: "No significant speech detected.",
+                  summary: "لم يتم اكتشاف كلام واضح.",
                 }
               : r,
           ),
@@ -105,38 +105,74 @@ const App = () => {
 
       try {
         addNotification(
-          `Processing AI analysis for "${recording.name}"...`,
+          `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
           "info",
         );
-        const result = await processTranscript(recording.transcript);
-        setRecordings((prev) =>
-          prev.map((r) =>
-            r.id === recording.id
-              ? {
-                  ...r,
-                  name: result.title,
-                  summary: result.summary,
-                  keywords: result.keywords,
-                  isProcessing: false,
-                }
-              : r,
-          ),
-        );
-        addNotification(
-          `AI analysis complete for "${result.title}"`,
-          "success",
-        );
+
+        // استخدام نظام الذكاء الاصطناعي الجديد
+        const taskId = await offlineAI.addTask({
+          type: "text",
+          operation: "text_analysis",
+          input: recording.transcript,
+          credits: 10,
+          estimatedTime: 60,
+        });
+
+        // مراقبة حالة المهمة
+        const checkTaskStatus = () => {
+          const task = offlineAI.getTaskStatus(taskId);
+          if (task) {
+            if (task.status === "completed" && task.output) {
+              const result = JSON.parse(task.output as string);
+              setRecordings((prev) =>
+                prev.map((r) =>
+                  r.id === recording.id
+                    ? {
+                        ...r,
+                        name: result.title || recording.name,
+                        summary: result.summary || "تم التحليل بنجاح",
+                        keywords: result.keywords || [],
+                        isProcessing: false,
+                      }
+                    : r,
+                ),
+              );
+              addNotification(
+                `اكتمل التحليل الذكي لـ "${recording.name}"`,
+                "success",
+              );
+            } else if (task.status === "error") {
+              setRecordings((prev) =>
+                prev.map((r) =>
+                  r.id === recording.id
+                    ? {
+                        ...r,
+                        isProcessing: false,
+                        summary: `فشل التحليل الذكي: ${task.error}`,
+                      }
+                    : r,
+                ),
+              );
+              addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
+            } else if (task.status === "processing") {
+              // استمرار المراقبة
+              setTimeout(checkTaskStatus, 2000);
+            }
+          }
+        };
+
+        setTimeout(checkTaskStatus, 1000);
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        addNotification(`AI analysis failed: ${errorMessage}`, "error");
+          err instanceof Error ? err.message : "خطأ غير معروف";
+        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
             r.id === recording.id
               ? {
                   ...r,
                   isProcessing: false,
-                  summary: `AI Analysis Failed: ${errorMessage}`,
+                  summary: `فشل التحليل الذكي: ${errorMessage}`,
                 }
               : r,
           ),
