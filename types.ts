@@ -1,5 +1,3 @@
-
-
 export interface ClickEffect {
   id: number;
   x: number;
@@ -32,11 +30,11 @@ export interface Recording {
 }
 
 export enum RecordingState {
-  Idle = 'IDLE',
-  Recording = 'RECORDING',
-  Paused = 'PAUSED',
-  Stopped = 'STOPPED',
-  Starting = 'STARTING', // Added for clarity during setup
+  Idle = "IDLE",
+  Recording = "RECORDING",
+  Paused = "PAUSED",
+  Stopped = "STOPPED",
+  Starting = "STARTING", // Added for clarity during setup
 }
 
 export interface RecordingSettings {
@@ -44,7 +42,7 @@ export interface RecordingSettings {
   recordMic: boolean;
   recordSystemAudio: boolean;
   recordCamera: boolean;
-  videoQuality: '1080p' | '720p' | '480p';
+  videoQuality: "1080p" | "720p" | "480p";
   fps: 30 | 60;
   gameMode: boolean;
   aiProcessingEnabled: boolean;
@@ -53,19 +51,24 @@ export interface RecordingSettings {
   instantTrimEnabled: boolean;
   fileNamePattern: string;
   hotkeys: Hotkeys;
-  liveFilter: string;
+  liveFilter: "none" | "vintage" | "cool" | "warm" | "cyberpunk" | "neon";
   enableRegionSelection: boolean;
   countdownEnabled: boolean;
   countdownSeconds: number;
   highlightMouse: boolean;
-  cameraPipPosition: 'none' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-  cameraPipSize: 'small' | 'medium' | 'large';
+  cameraPipPosition:
+    | "none"
+    | "topLeft"
+    | "topRight"
+    | "bottomLeft"
+    | "bottomRight";
+  cameraPipSize: "small" | "medium" | "large";
 }
 
-export type Theme = 'light' | 'dark';
+export type Theme = "light" | "dark";
 
 export interface Notification {
-    id: string;
-    message: string;
-    type: 'success' | 'error' | 'info' | 'warning';
+  id: string;
+  message: string;
+  type: "success" | "error" | "info" | "warning";
 }

@@ -1,0 +1,177 @@
+{
+  "format": "graph-model",
+  "modelName": "LLaMA2 Local Language Model",
+  "version": "7B-Chat",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "description": "نموذج لغوي محلي متقدم - LLaMA2 7B للمحادثة والتوصيات",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "input_tokens",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_INT32" },
+          "shape": {
+            "shape": {
+              "dim": [{ "size": "-1" }, { "size": "2048" }]
+            }
+          }
+        }
+      },
+      {
+        "name": "token_embedding",
+        "op": "Gather",
+        "input": ["embedding_table", "input_tokens"]
+      },
+      {
+        "name": "positional_encoding",
+        "op": "Add",
+        "input": ["token_embedding", "position_embeddings"]
+      },
+      {
+        "name": "transformer_layer_1",
+        "op": "MatMul",
+        "input": ["positional_encoding", "transformer_weights_1"]
+      },
+      {
+        "name": "attention_layer_1",
+        "op": "Softmax",
+        "input": ["transformer_layer_1"]
+      },
+      {
+        "name": "transformer_layer_2",
+        "op": "MatMul",
+        "input": ["attention_layer_1", "transformer_weights_2"]
+      },
+      {
+        "name": "output_logits",
+        "op": "MatMul",
+        "input": ["transformer_layer_2", "output_projection"]
+      },
+      {
+        "name": "token_probabilities",
+        "op": "Softmax",
+        "input": ["output_logits"]
+      }
+    ]
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "embedding_table",
+          "shape": [32000, 4096],
+          "dtype": "float32"
+        },
+        {
+          "name": "position_embeddings",
+          "shape": [2048, 4096],
+          "dtype": "float32"
+        },
+        {
+          "name": "transformer_weights_1",
+          "shape": [4096, 4096],
+          "dtype": "float32"
+        },
+        {
+          "name": "transformer_weights_2",
+          "shape": [4096, 4096],
+          "dtype": "float32"
+        },
+        {
+          "name": "output_projection",
+          "shape": [4096, 32000],
+          "dtype": "float32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "input_tokens": {
+        "name": "input_tokens:0",
+        "dtype": "DT_INT32"
+      }
+    },
+    "outputs": {
+      "token_probabilities": {
+        "name": "token_probabilities:0",
+        "dtype": "DT_FLOAT"
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "capabilities": [
+      "intelligent_recommendations",
+      "user_behavior_analysis",
+      "content_organization",
+      "educational_assistance",
+      "template_suggestions",
+      "smart_categorization"
+    ],
+    "specializations": {
+      "forYouTemplate": {
+        "enabled": true,
+        "features": [
+          "behavior_analysis",
+          "content_recommendation",
+          "personalization"
+        ]
+      },
+      "educationTemplate": {
+        "enabled": true,
+        "features": [
+          "slide_organization",
+          "text_structuring",
+          "learning_assistance"
+        ]
+      },
+      "businessTemplate": {
+        "enabled": true,
+        "features": [
+          "professional_content",
+          "marketing_copy",
+          "presentation_enhancement"
+        ]
+      }
+    },
+    "languages": ["ar", "en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja"],
+    "contextWindow": 2048,
+    "maxTokens": 4096,
+    "performance": {
+      "inferenceSpeed": "fast",
+      "memoryUsage": "3.5GB",
+      "accuracy": 0.94,
+      "responseTime": "1-3s"
+    },
+    "templateIntegration": {
+      "forYou": {
+        "analysisTypes": [
+          "user_preferences",
+          "viewing_patterns",
+          "content_affinity"
+        ],
+        "recommendationEngine": true,
+        "personalizationLevel": "high"
+      },
+      "education": {
+        "contentStructuring": true,
+        "pedagogicalAnalysis": true,
+        "learningPathSuggestions": true
+      }
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "نموذج التوصيات الذكية",
+      "en": "Smart Recommendations Model"
+    },
+    "benchmarkStats": {
+      "loadTime": "4.2s",
+      "averageResponseTime": "2.1s",
+      "memoryEfficiency": 0.82
+    }
+  }
+}

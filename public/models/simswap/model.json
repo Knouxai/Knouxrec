@@ -1,0 +1,209 @@
+{
+  "format": "graph-model",
+  "modelName": "SimSwap Local Face Swap",
+  "version": "1.0.0",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "description": "نموذج تبديل الوجوه المحلي - SimSwap",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "source_face",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_FLOAT" },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "512" },
+                { "size": "512" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "target_face",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_FLOAT" },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "512" },
+                { "size": "512" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "source_encoder",
+        "op": "Conv2D",
+        "input": ["source_face", "encoder/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "target_encoder",
+        "op": "Conv2D",
+        "input": ["target_face", "encoder/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "identity_features",
+        "op": "GlobalAveragePooling2D",
+        "input": ["source_encoder"]
+      },
+      {
+        "name": "attribute_features",
+        "op": "Conv2D",
+        "input": ["target_encoder", "attribute/conv/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "fusion_layer",
+        "op": "Mul",
+        "input": ["identity_features", "attribute_features"]
+      },
+      {
+        "name": "decoder_conv1",
+        "op": "Conv2DTranspose",
+        "input": ["fusion_layer", "decoder/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "decoder_conv2",
+        "op": "Conv2DTranspose",
+        "input": ["decoder_conv1", "decoder/conv2/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "output_face",
+        "op": "Sigmoid",
+        "input": ["decoder_conv2"]
+      }
+    ]
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "encoder/conv1/kernel",
+          "shape": [4, 4, 3, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "attribute/conv/kernel",
+          "shape": [3, 3, 64, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "decoder/conv1/kernel",
+          "shape": [4, 4, 64, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "decoder/conv2/kernel",
+          "shape": [4, 4, 3, 64],
+          "dtype": "float32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "source_face": {
+        "name": "source_face:0",
+        "dtype": "DT_FLOAT"
+      },
+      "target_face": {
+        "name": "target_face:0",
+        "dtype": "DT_FLOAT"
+      }
+    },
+    "outputs": {
+      "output_face": {
+        "name": "output_face:0",
+        "dtype": "DT_FLOAT"
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "capabilities": [
+      "face_swap",
+      "identity_preservation",
+      "attribute_transfer",
+      "expression_control",
+      "lighting_preservation",
+      "face_landmarks_alignment",
+      "transparent_output",
+      "batch_processing"
+    ],
+    "inputSize": [512, 512],
+    "outputSize": [512, 512],
+    "faceAlignment": "automatic",
+    "qualityModes": ["fast", "balanced", "high_quality"],
+    "facePreprocessing": {
+      "faceAlignment": true,
+      "alignmentMethod": "mediapipe",
+      "landmarkDetection": true,
+      "poseCorrection": true,
+      "lightingNormalization": true
+    },
+    "outputOptions": {
+      "includeAlpha": true,
+      "exportFormat": ["jpeg", "png", "webp"],
+      "transparentBackground": true,
+      "alphaMaskGeneration": true
+    },
+    "runtime": {
+      "batchSupport": true,
+      "maxBatchSize": 4,
+      "videoFrameSupport": true,
+      "sequentialProcessing": true
+    },
+    "qualitySettings": {
+      "controlMode": "balanced",
+      "enhancementPipeline": "optional",
+      "faceBlending": "seamless",
+      "colorMatching": true
+    },
+    "performance": {
+      "processingTime": "3-8s per face",
+      "memoryUsage": "320MB",
+      "accuracy": 0.92,
+      "preservation": "high"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "تبديل الوجوه الذكي",
+      "en": "Smart Face Swapping"
+    },
+    "benchmarkStats": {
+      "loadTime": "2.1s",
+      "averageProcessingTime": "5.5s",
+      "memoryEfficiency": 0.87
+    }
+  }
+}

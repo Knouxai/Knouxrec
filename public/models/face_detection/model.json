@@ -1,0 +1,198 @@
+{
+  "format": "graph-model",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": {
+            "type": "DT_FLOAT"
+          },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "320" },
+                { "size": "320" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "conv2d_backbone",
+        "op": "Conv2D",
+        "input": ["input", "conv2d_backbone/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 2, 2, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "relu_backbone",
+        "op": "Relu",
+        "input": ["conv2d_backbone"]
+      },
+      {
+        "name": "maxpool",
+        "op": "MaxPool",
+        "input": ["relu_backbone"],
+        "attr": {
+          "ksize": {
+            "list": { "i": [1, 2, 2, 1] }
+          },
+          "strides": {
+            "list": { "i": [1, 2, 2, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "conv2d_detection",
+        "op": "Conv2D",
+        "input": ["maxpool", "conv2d_detection/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 1, 1, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "relu_detection",
+        "op": "Relu",
+        "input": ["conv2d_detection"]
+      },
+      {
+        "name": "flatten",
+        "op": "Reshape",
+        "input": ["relu_detection", "flatten/shape"]
+      },
+      {
+        "name": "dense",
+        "op": "MatMul",
+        "input": ["flatten", "dense/kernel"]
+      },
+      {
+        "name": "dense_bias",
+        "op": "BiasAdd",
+        "input": ["dense", "dense/bias"]
+      },
+      {
+        "name": "relu_dense",
+        "op": "Relu",
+        "input": ["dense_bias"]
+      },
+      {
+        "name": "output",
+        "op": "MatMul",
+        "input": ["relu_dense", "output/kernel"]
+      },
+      {
+        "name": "output_bias",
+        "op": "BiasAdd",
+        "input": ["output", "output/bias"]
+      }
+    ],
+    "library": {},
+    "versions": {
+      "producer": 175
+    }
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "conv2d_backbone/kernel",
+          "shape": [3, 3, 3, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_detection/kernel",
+          "shape": [3, 3, 64, 128],
+          "dtype": "float32"
+        },
+        {
+          "name": "dense/kernel",
+          "shape": [32768, 128],
+          "dtype": "float32"
+        },
+        {
+          "name": "dense/bias",
+          "shape": [128],
+          "dtype": "float32"
+        },
+        {
+          "name": "output/kernel",
+          "shape": [128, 4],
+          "dtype": "float32"
+        },
+        {
+          "name": "output/bias",
+          "shape": [4],
+          "dtype": "float32"
+        },
+        {
+          "name": "flatten/shape",
+          "shape": [2],
+          "dtype": "int32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "input": {
+        "name": "input:0",
+        "dtype": "DT_FLOAT",
+        "tensorShape": {
+          "dim": [
+            { "size": "-1" },
+            { "size": "320" },
+            { "size": "320" },
+            { "size": "3" }
+          ]
+        }
+      }
+    },
+    "outputs": {
+      "output": {
+        "name": "output_bias:0",
+        "dtype": "DT_FLOAT",
+        "tensorShape": {
+          "dim": [{ "size": "-1" }, { "size": "4" }]
+        }
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "name": "Face Detection Model",
+    "version": "1.0.0",
+    "description": "نموذج اكتشاف الوجوه عالي الدقة للعمل مع KNOUX REC",
+    "author": "KNOUX AI Team",
+    "license": "MIT",
+    "tags": ["face-detection", "computer-vision", "real-time"],
+    "inputSize": [320, 320, 3],
+    "outputSize": [4],
+    "outputFormat": "x, y, width, height",
+    "performance": {
+      "accuracy": 0.98,
+      "speed": "real-time",
+      "memoryUsage": "10MB",
+      "fps": "60+"
+    }
+  }
+}

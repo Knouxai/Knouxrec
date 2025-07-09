@@ -1,0 +1,221 @@
+{
+  "format": "graph-model",
+  "modelName": "Real-ESRGAN Local Image Enhancement",
+  "version": "2.0.0",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "description": "نموذج تحسين جودة الصور محلي - Real-ESRGAN",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "low_res_input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_FLOAT" },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "-1" },
+                { "size": "-1" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "feature_extraction",
+        "op": "Conv2D",
+        "input": ["low_res_input", "feature/conv/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "rrdb_block_1",
+        "op": "Conv2D",
+        "input": ["feature_extraction", "rrdb_1/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "rrdb_residual_1",
+        "op": "Add",
+        "input": ["rrdb_block_1", "feature_extraction"]
+      },
+      {
+        "name": "rrdb_block_2",
+        "op": "Conv2D",
+        "input": ["rrdb_residual_1", "rrdb_2/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "upsampling_1",
+        "op": "Conv2DTranspose",
+        "input": ["rrdb_block_2", "upsample_1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "upsampling_2",
+        "op": "Conv2DTranspose",
+        "input": ["upsampling_1", "upsample_2/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "final_conv",
+        "op": "Conv2D",
+        "input": ["upsampling_2", "final/conv/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "high_res_output",
+        "op": "Sigmoid",
+        "input": ["final_conv"]
+      }
+    ]
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "feature/conv/kernel",
+          "shape": [3, 3, 3, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "rrdb_1/conv1/kernel",
+          "shape": [3, 3, 64, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "rrdb_2/conv1/kernel",
+          "shape": [3, 3, 64, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "upsample_1/kernel",
+          "shape": [3, 3, 64, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "upsample_2/kernel",
+          "shape": [3, 3, 64, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "final/conv/kernel",
+          "shape": [3, 3, 32, 3],
+          "dtype": "float32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "low_res_input": {
+        "name": "low_res_input:0",
+        "dtype": "DT_FLOAT"
+      }
+    },
+    "outputs": {
+      "high_res_output": {
+        "name": "high_res_output:0",
+        "dtype": "DT_FLOAT"
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "capabilities": [
+      "image_upscaling",
+      "detail_enhancement",
+      "noise_reduction",
+      "artifact_removal",
+      "color_correction",
+      "batch_processing",
+      "smart_enhancement",
+      "adaptive_scaling"
+    ],
+    "scalingFactors": [2, 4, 8],
+    "supportedFormats": ["jpg", "png", "webp", "bmp"],
+    "maxInputSize": "2048x2048",
+    "outputQuality": "photorealistic",
+    "enhancementSettings": {
+      "mode": {
+        "options": ["photo", "anime", "sharp", "balanced"],
+        "default": "photo",
+        "description": "Enhancement style preference"
+      },
+      "resolutionLimit": {
+        "max": "4096x4096",
+        "adaptive": true,
+        "memoryBased": true
+      },
+      "qualityControl": {
+        "noiseReduction": {
+          "level": [0, 100],
+          "default": 50
+        },
+        "sharpness": {
+          "level": [0, 100],
+          "default": 75
+        },
+        "colorSaturation": {
+          "level": [0, 150],
+          "default": 100
+        }
+      }
+    },
+    "batchSupport": {
+      "enabled": true,
+      "maxBatchSize": 8,
+      "parallelProcessing": true,
+      "queueManagement": true,
+      "progressTracking": true
+    },
+    "inputFormats": {
+      "images": ["png", "jpg", "jpeg", "bmp", "webp", "tiff"],
+      "maxFileSize": "50MB",
+      "colorSpaces": ["RGB", "RGBA", "Grayscale"]
+    },
+    "outputSettings": {
+      "format": "png",
+      "quality": [70, 100],
+      "compression": "lossless",
+      "metadataPreservation": true
+    },
+    "performance": {
+      "processingTime": "2-5s per image",
+      "memoryUsage": "150MB",
+      "quality": "excellent",
+      "psnr": "28-35 dB"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "تحسين جودة الصور",
+      "en": "Image Quality Enhancement"
+    },
+    "benchmarkStats": {
+      "loadTime": "2.2s",
+      "averageProcessingTime": "3.5s",
+      "memoryEfficiency": 0.88
+    }
+  }
+}

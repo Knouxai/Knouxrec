@@ -1,239 +1,430 @@
-import React from 'react';
-// Ensure correct paths for icons and types
-import { ScreenIcon, MicIcon, SystemAudioIcon, CameraIcon, TimerIcon, CropIcon, CursorClickIcon } from './icons'; 
-import { RecordingSettings } from '../types'; 
-import ToggleSwitch from './ToggleSwitch';
+import React, { useState, useEffect } from "react";
+import { useRecorder } from "../hooks/useRecorder";
+import { formatTime } from "../utils";
+import ToggleSwitch from "./ToggleSwitch";
+import { ScreenIcon, MicIcon, SystemAudioIcon, CameraIcon } from "./icons";
 
-// Re-using ControlCard for toggle-based settings
-const ControlCard = ({ icon, label, description, enabled, onToggle, disabled }: { icon: React.ReactNode, label: string, description: string, enabled: boolean, onToggle: (enabled: boolean) => void, disabled: boolean }) => (
-  // Disabled style updated to reflect non-interactiveness
-  <div className={`p-4 rounded-lg transition-all duration-300 interactive-card flex items-center justify-between ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
+const ControlCard = ({
+  icon,
+  label,
+  description,
+  enabled,
+  onToggle,
+  disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+  enabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  disabled: boolean;
+}) => (
+  <div
+    className={`glass-card p-4 rounded-xl transition-all duration-300 flex items-center justify-between border ${
+      enabled && !disabled
+        ? "border-knoux-purple bg-knoux-purple/10"
+        : "border-knoux-purple/20 hover:border-knoux-purple/40"
+    } ${disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "interactive"}`}
+  >
     <div className="flex items-center gap-4">
-      <div className="text-knoux-neon-blue flex-shrink-0">
+      <div
+        className={`flex-shrink-0 text-2xl ${enabled ? "text-knoux-purple" : "text-knoux-neon"}`}
+      >
         {icon}
       </div>
       <div className="flex-grow">
-        <h4 className="font-bold text-md text-[var(--primary-text)]">{label}</h4>
-        <p className="text-xs text-[var(--secondary-text)]">{description}</p>
+        <h4 className="font-rajdhani font-bold text-white">{label}</h4>
+        <p className="text-sm text-white/70">{description}</p>
       </div>
     </div>
     <ToggleSwitch enabled={enabled} onChange={onToggle} disabled={disabled} />
   </div>
 );
 
-// Component for Select inputs (e.g., Video Quality, FPS, PIP Position/Size)
-const SelectControl = <T extends string | number>({ label, value, options, onChange, disabled }: {
+const SelectControl = <T extends string | number>({
+  label,
+  value,
+  options,
+  onChange,
+  disabled,
+  icon,
+}: {
   label: string;
   value: T;
-  options: { value: T, label: string }[];
+  options: { value: T; label: string }[];
   onChange: (value: T) => void;
   disabled: boolean;
+  icon?: React.ReactNode;
 }) => (
-    <div className={`p-4 rounded-lg transition-all duration-300 interactive-card flex items-center justify-between ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
-        <label className="flex-grow text-md font-bold text-[var(--primary-text)]">{label}</label>
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value as T)} // Type assertion
-            disabled={disabled}
-            className="p-2 ml-2 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--primary-text)] disabled:opacity-50 disabled:cursor-not-allowed focus:ring-knoux-neon-blue focus:border-knoux-neon-blue"
-        >
-            {options.map(option => (
-                <option key={option.value.toString()} value={option.value}>
-                    {option.label}
-                </option>
-            ))}
-        </select>
+  <div
+    className={`glass-card p-4 rounded-xl transition-all duration-300 flex items-center justify-between border border-knoux-purple/20 ${
+      disabled
+        ? "opacity-50 cursor-not-allowed pointer-events-none"
+        : "hover:border-knoux-purple/40"
+    }`}
+  >
+    <div className="flex items-center gap-3">
+      {icon && <div className="text-knoux-neon text-xl">{icon}</div>}
+      <label className="font-rajdhani font-bold text-white">{label}</label>
     </div>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as T)}
+      disabled={disabled}
+      className="p-2 rounded-lg bg-black/30 border border-knoux-purple/30 text-white disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-knoux-purple focus:border-knoux-purple min-w-[120px]"
+    >
+      {options.map((option) => (
+        <option
+          key={option.value}
+          value={option.value}
+          className="bg-black text-white"
+        >
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
 );
 
-// Component for Number inputs (e.g., Countdown Seconds)
-const NumberInputControl = ({ label, value, onChange, disabled, min = 0, max }: {
-    label: string;
-    value: number;
-    onChange: (value: number) => void;
-    disabled: boolean;
-    min?: number;
-    max?: number;
-}) => (
-     <div className={`p-4 rounded-lg transition-all duration-300 interactive-card flex items-center justify-between ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
-        <label className="flex-grow text-md font-bold text-[var(--primary-text)]">{label}</label>
-         <input
-             type="number"
-             value={value}
-             onChange={(e) => onChange(Number(e.target.value))} // Convert to number
-             disabled={disabled}
-             min={min}
-             max={max}
-             className="p-2 ml-2 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--primary-text)] w-20 text-center disabled:opacity-50 disabled:cursor-not-allowed focus:ring-knoux-neon-blue focus:border-knoux-neon-blue"
-         />
-     </div>
-);
+export function Controls() {
+  const { state, actions } = useRecorder();
+  const [recordingMode, setRecordingMode] = useState<
+    "screen" | "webcam" | "window"
+  >("screen");
 
+  useEffect(() => {
+    if (!state.isInitialized) {
+      actions.initialize();
+    }
+  }, [state.isInitialized, actions]);
 
-interface ControlsProps {
-  settings: RecordingSettings;
-  onSettingsChange: (settings: RecordingSettings) => void;
-  isRecording: boolean;
-  isGameModeActive: boolean;
-}
-
-const Controls = ({ settings, onSettingsChange, isRecording, isGameModeActive }: ControlsProps) => {
-
-  const isDisabled = isRecording || isGameModeActive;
-
-  const handleSettingChange = <K extends keyof RecordingSettings>(key: K, value: RecordingSettings[K]) => {
-      onSettingsChange({
-          ...settings,
-          [key]: value
-      });
+  const handleStartRecording = async () => {
+    try {
+      switch (recordingMode) {
+        case "screen":
+          await actions.startRecording();
+          break;
+        case "webcam":
+          await actions.startWebcamRecording();
+          break;
+        case "window":
+          await actions.recordSpecificWindow();
+          break;
+      }
+    } catch (error) {
+      console.error("خطأ في بدء التسجيل:", error);
+    }
   };
 
-   const handleToggle = (key: keyof RecordingSettings) => {
-       if (typeof settings[key] === 'boolean') {
-            handleSettingChange(key, !settings[key]);
-       }
-   };
+  const videoQualityOptions = [
+    { value: "low" as const, label: "منخفضة (720p)" },
+    { value: "medium" as const, label: "متوسطة (1080p)" },
+    { value: "high" as const, label: "عالية (1440p)" },
+    { value: "ultra" as const, label: "فائقة (4K)" },
+  ];
 
+  const fpsOptions = [
+    { value: 15 as const, label: "15 FPS" },
+    { value: 30 as const, label: "30 FPS" },
+    { value: 60 as const, label: "60 FPS" },
+  ];
+
+  const bitRateOptions = [
+    { value: 2500000 as const, label: "2.5 Mbps" },
+    { value: 5000000 as const, label: "5 Mbps" },
+    { value: 8000000 as const, label: "8 Mbps" },
+    { value: 15000000 as const, label: "15 Mbps" },
+  ];
 
   return (
-    <div className="p-4 glass-card rounded-xl">
-      <h3 className="text-lg font-bold font-orbitron mb-4 text-knoux-purple">SOURCES</h3>
-      <div className="space-y-3">
-        <ControlCard
-          icon={<ScreenIcon className="w-7 h-7"/>}
-          label="Screen"
-          description="Record entire screen or a window"
-          enabled={settings.recordScreen}
-          onToggle={() => handleToggle('recordScreen')}
-          disabled={isDisabled}
-        />
-        <ControlCard
-          icon={<MicIcon className="w-7 h-7"/>}
-          label="Microphone"
-          description="Record audio from your mic"
-          enabled={settings.recordMic}
-          onToggle={() => handleToggle('recordMic')}
-          disabled={isDisabled}
-        />
-        <ControlCard
-          icon={<SystemAudioIcon className="w-7 h-7"/>}
-          label="System Audio"
-          description="Record audio from your computer"
-          enabled={settings.recordSystemAudio}
-          onToggle={() => handleToggle('recordSystemAudio')}
-          disabled={isDisabled}
-        />
-        <ControlCard
-          icon={<CameraIcon className="w-7 h-7"/>}
-          label="Camera"
-          description="Record camera Picture-in-Picture"
-          enabled={settings.recordCamera}
-          onToggle={() => handleToggle('recordCamera')}
-          disabled={isDisabled}
-        />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="glass-card p-4 rounded-xl border border-knoux-purple/30">
+        <h3 className="text-xl font-orbitron font-bold text-white mb-2">
+          🎛️ أدوات التسجيل المتقدمة
+        </h3>
+        <p className="text-white/70">نظام تسجيل احترافي مع ذكاء اصطناعي</p>
       </div>
 
-      <h3 className="text-lg font-bold font-orbitron my-4 text-knoux-purple">VIDEO & SCREEN</h3>
-      <div className="space-y-3">
-         <ControlCard
-             icon={<CropIcon className="w-7 h-7"/>}
-             label="Select Region"
-             description="Choose a specific screen area to record"
-             enabled={settings.enableRegionSelection}
-             onToggle={() => handleToggle('enableRegionSelection')}
-             disabled={isDisabled || !settings.recordScreen}
-         />
-
-          <SelectControl
-               label="Video Quality"
-               value={settings.videoQuality}
-               options={[
-                   { value: '1080p', label: '1080p (Full HD)' },
-                   { value: '720p', label: '720p (HD)' },
-                   { value: '480p', label: '480p (SD)' },
-               ]}
-               disabled={isDisabled || !settings.recordScreen}
-               onChange={(value) => handleSettingChange('videoQuality', value as '1080p' | '720p' | '480p')}
-           />
-
-          <SelectControl
-               label="Frames Per Second (FPS)"
-               value={settings.fps}
-                options={[
-                   { value: 30, label: '30 FPS' },
-                   { value: 60, label: '60 FPS' },
-               ]}
-                disabled={isDisabled || (!settings.recordScreen && !settings.recordCamera)}
-               onChange={(value) => handleSettingChange('fps', Number(value) as 30 | 60)}
-           />
-
-          <ControlCard
-             icon={<CursorClickIcon className="w-7 h-7"/>}
-             label="Highlight Mouse"
-             description="Highlight pointer movement and clicks"
-             enabled={settings.highlightMouse}
-             onToggle={() => handleToggle('highlightMouse')}
-             disabled={isDisabled || !settings.recordScreen}
-          />
+      {/* Recording Mode Selection */}
+      <div className="glass-card p-4 rounded-xl border border-knoux-purple/20">
+        <h4 className="font-orbitron font-bold text-white mb-4">
+          📹 نوع التسجيل
+        </h4>
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            onClick={() => setRecordingMode("screen")}
+            disabled={state.isRecording}
+            className={`p-4 rounded-xl border transition-all duration-300 ${
+              recordingMode === "screen"
+                ? "border-knoux-purple bg-knoux-purple/20 text-knoux-purple"
+                : "border-knoux-purple/30 text-white hover:border-knoux-purple/50"
+            } ${state.isRecording ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+          >
+            <div className="text-2xl mb-2">🖥️</div>
+            <div className="text-sm font-medium">الشاشة</div>
+          </button>
+          <button
+            onClick={() => setRecordingMode("webcam")}
+            disabled={state.isRecording}
+            className={`p-4 rounded-xl border transition-all duration-300 ${
+              recordingMode === "webcam"
+                ? "border-knoux-purple bg-knoux-purple/20 text-knoux-purple"
+                : "border-knoux-purple/30 text-white hover:border-knoux-purple/50"
+            } ${state.isRecording ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+          >
+            <div className="text-2xl mb-2">📹</div>
+            <div className="text-sm font-medium">الكاميرا</div>
+          </button>
+          <button
+            onClick={() => setRecordingMode("window")}
+            disabled={state.isRecording}
+            className={`p-4 rounded-xl border transition-all duration-300 ${
+              recordingMode === "window"
+                ? "border-knoux-purple bg-knoux-purple/20 text-knoux-purple"
+                : "border-knoux-purple/30 text-white hover:border-knoux-purple/50"
+            } ${state.isRecording ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+          >
+            <div className="text-2xl mb-2">🪟</div>
+            <div className="text-sm font-medium">نافذة</div>
+          </button>
+        </div>
       </div>
 
-        {settings.recordCamera && (
-             <>
-              <h3 className="text-lg font-bold font-orbitron my-4 text-knoux-purple">CAMERA PICTURE-IN-PICTURE</h3>
-               <div className="space-y-3">
-                  <SelectControl
-                       label="PIP Position"
-                       value={settings.cameraPipPosition}
-                       options={[
-                           { value: 'topLeft', label: 'Top Left' },
-                           { value: 'topRight', label: 'Top Right' },
-                           { value: 'bottomLeft', label: 'Bottom Left' },
-                           { value: 'bottomRight', label: 'Bottom Right' },
-                       ]}
-                       disabled={isDisabled}
-                       onChange={(value) => handleSettingChange('cameraPipPosition', value as 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight')}
-                   />
+      {/* Recording Controls */}
+      <div className="glass-card p-6 rounded-xl border border-knoux-purple/20">
+        <div className="flex items-center justify-center mb-6">
+          {!state.isRecording ? (
+            <button
+              onClick={handleStartRecording}
+              disabled={!state.isInitialized}
+              className="glass-button-primary px-8 py-4 rounded-2xl text-white font-semibold text-lg hover:scale-105 transform transition-all duration-200 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              🔴 بدء التسجيل
+            </button>
+          ) : (
+            <div className="flex space-x-3">
+              {!state.isPaused ? (
+                <button
+                  onClick={actions.pauseRecording}
+                  className="glass-button-secondary px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
+                >
+                  ⏸️ إيقاف مؤقت
+                </button>
+              ) : (
+                <button
+                  onClick={actions.resumeRecording}
+                  className="glass-button-accent px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
+                >
+                  ▶️ استئناف
+                </button>
+              )}
+              <button
+                onClick={actions.stopRecording}
+                className="glass-button-danger px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
+              >
+                ⏹️ إيقاف
+              </button>
+              <button
+                onClick={actions.takeScreenshot}
+                className="glass-button-accent px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
+              >
+                📸 لقطة
+              </button>
+            </div>
+          )}
+        </div>
 
-                    {settings.cameraPipPosition !== 'none' && (
-                        <SelectControl
-                             label="PIP Size"
-                             value={settings.cameraPipSize}
-                              options={[
-                                 { value: 'small', label: 'Small' },
-                                 { value: 'medium', label: 'Medium' },
-                                 { value: 'large', label: 'Large' },
-                             ]}
-                             disabled={isDisabled}
-                             onChange={(value) => handleSettingChange('cameraPipSize', value as 'small' | 'medium' | 'large')}
-                         />
-                    )}
-               </div>
-             </>
+        {/* Recording Timer */}
+        {state.isRecording && (
+          <div className="text-center mb-6">
+            <div className="text-4xl font-bold text-white mb-3 font-mono">
+              {formatTime(state.recordingTime)}
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-3 mb-2">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full animate-pulse w-full"></div>
+            </div>
+            <div className="text-sm text-white/70">
+              {state.isPaused ? "⏸️ متوقف مؤقتاً" : "🔴 يسجل الآن..."}
+            </div>
+          </div>
         )}
 
-         <h3 className="text-lg font-bold font-orbitron my-4 text-knoux-purple">TIMER</h3>
-         <div className="space-y-3">
-             <ControlCard
-                icon={<TimerIcon className="w-7 h-7"/>}
-                label="Recording Countdown"
-                description="Delay recording start by X seconds"
-                enabled={settings.countdownEnabled}
-                onToggle={() => handleToggle('countdownEnabled')}
-                disabled={isDisabled}
-             />
-             {settings.countdownEnabled && (
-                  <NumberInputControl
-                     label="Countdown Seconds"
-                     value={settings.countdownSeconds}
-                     onChange={(value) => handleSettingChange('countdownSeconds', value)}
-                     disabled={isDisabled}
-                     min={1}
-                     max={10}
-                  />
-             )}
-         </div>
+        {/* Action Buttons */}
+        {state.recordingBlob && (
+          <div className="flex space-x-3 justify-center mb-6">
+            <button
+              onClick={actions.downloadRecording}
+              className="glass-button-success px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
+            >
+              💾 تحميل التسجيل
+            </button>
+            <button
+              onClick={actions.clearRecording}
+              className="glass-button-secondary px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
+            >
+              🗑️ مسح
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Audio Settings */}
+      <div className="space-y-4">
+        <h4 className="font-orbitron font-bold text-white mb-3">
+          🔊 إعدادات الصوت
+        </h4>
+
+        <ControlCard
+          icon={<SystemAudioIcon />}
+          label="صوت النظام"
+          description="تسجيل صوت الك��بيوتر والتطبيقات"
+          enabled={state.includeAudio}
+          onToggle={actions.setIncludeAudio}
+          disabled={state.isRecording}
+        />
+
+        <ControlCard
+          icon={<MicIcon />}
+          label="الميكروفون"
+          description="تسجيل صوت الميكروفون"
+          enabled={state.includeMicrophone}
+          onToggle={actions.setIncludeMicrophone}
+          disabled={state.isRecording}
+        />
+      </div>
+
+      {/* Quality Settings */}
+      <div className="space-y-4">
+        <h4 className="font-orbitron font-bold text-white mb-3">
+          ⚡ إعدادات الجودة
+        </h4>
+
+        <SelectControl
+          label="جودة الفيديو"
+          value={state.recordingQuality}
+          options={videoQualityOptions}
+          onChange={actions.setRecordingQuality}
+          disabled={state.isRecording}
+          icon="🎥"
+        />
+
+        <SelectControl
+          label="معدل الإطارات"
+          value={state.frameRate}
+          options={fpsOptions}
+          onChange={actions.setFrameRate}
+          disabled={state.isRecording}
+          icon="📊"
+        />
+
+        <SelectControl
+          label="معدل البت"
+          value={state.bitRate}
+          options={bitRateOptions}
+          onChange={actions.setBitRate}
+          disabled={state.isRecording}
+          icon="💾"
+        />
+      </div>
+
+      {/* Device Selection */}
+      {state.devices.length > 0 && (
+        <div className="space-y-4">
+          <h4 className="font-orbitron font-bold text-white mb-3">
+            📹 أجهزة التسجيل
+          </h4>
+
+          <SelectControl
+            label="الكاميرا"
+            value={state.currentDevice || ""}
+            options={state.devices.map((device) => ({
+              value: device.deviceId,
+              label: device.label || `كاميرا ${device.deviceId.slice(0, 8)}`,
+            }))}
+            onChange={actions.setDevice}
+            disabled={state.isRecording}
+            icon="📷"
+          />
+        </div>
+      )}
+
+      {/* Status Summary */}
+      <div className="glass-card p-4 rounded-xl border border-knoux-purple/20">
+        <h4 className="font-orbitron font-bold text-white mb-3">
+          📊 ملخص الحالة
+        </h4>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div
+            className={`p-3 rounded-lg text-center transition-all ${
+              state.includeAudio
+                ? "bg-knoux-purple/20 text-knoux-purple border border-knoux-purple/50"
+                : "bg-gray-500/20 text-gray-500 border border-gray-500/30"
+            }`}
+          >
+            <div className="text-lg mb-1">🔊</div>
+            <div className="text-xs font-medium">صوت النظام</div>
+          </div>
+
+          <div
+            className={`p-3 rounded-lg text-center transition-all ${
+              state.includeMicrophone
+                ? "bg-knoux-neon/20 text-knoux-neon border border-knoux-neon/50"
+                : "bg-gray-500/20 text-gray-500 border border-gray-500/30"
+            }`}
+          >
+            <div className="text-lg mb-1">🎤</div>
+            <div className="text-xs font-medium">الميكروفون</div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-white/70">الجودة:</span>
+            <span className="text-knoux-purple font-medium capitalize">
+              {state.recordingQuality}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/70">معدل الإطارات:</span>
+            <span className="text-knoux-purple font-medium">
+              {state.frameRate} FPS
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/70">معدل البت:</span>
+            <span className="text-knoux-purple font-medium">
+              {(state.bitRate / 1000000).toFixed(1)} Mbps
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/70">الحالة:</span>
+            <span
+              className={`font-medium ${
+                state.isInitialized ? "text-green-400" : "text-yellow-400"
+              }`}
+            >
+              {state.isInitialized ? "✅ جاهز" : "⏳ يتم التحميل..."}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Display */}
+      {state.error && (
+        <div className="glass-card p-4 rounded-xl border border-red-500/30 bg-red-500/10">
+          <div className="flex items-center space-x-3">
+            <div className="text-red-400 text-xl">❌</div>
+            <div>
+              <h4 className="text-red-400 font-medium">خطأ في التسجيل</h4>
+              <p className="text-red-300 text-sm">{state.error}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default Controls;

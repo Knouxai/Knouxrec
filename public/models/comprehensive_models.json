@@ -1,0 +1,365 @@
+{
+  "models_registry": {
+    "total_models": 35,
+    "total_size_gb": 28.5,
+    "categories": ["video", "audio", "image", "text", "multimodal"],
+    "last_updated": "2024-12-19"
+  },
+  "video_models": {
+    "yolov8": {
+      "name": "YOLOv8 Object Detection",
+      "file": "yolov8n.onnx",
+      "size_mb": 12,
+      "type": "object_detection",
+      "use_cases": ["ai_effects", "ai_transition", "auto_bg_removal"],
+      "performance": "fast",
+      "description": "نموذج كشف الكائنات للتأثيرات الذكية"
+    },
+    "animatediff": {
+      "name": "AnimateDiff Motion Generator",
+      "file": "animatediff_v1.ckpt",
+      "size_mb": 2800,
+      "type": "video_generation",
+      "use_cases": ["ai_animation", "image_to_video"],
+      "performance": "slow",
+      "description": "نموذج توليد الحركة والرسوم المتحركة"
+    },
+    "stable_video": {
+      "name": "Stable Video Diffusion",
+      "file": "svd_xt.safetensors",
+      "size_mb": 3200,
+      "type": "video_generation",
+      "use_cases": ["text_to_video", "ai_video_generator"],
+      "performance": "slow",
+      "description": "نموذج توليد الفيديو من النص والصور"
+    },
+    "videocrafter": {
+      "name": "VideoCrafter Text-to-Video",
+      "file": "videocrafter_512.ckpt",
+      "size_mb": 4200,
+      "type": "text_to_video",
+      "use_cases": ["text_to_video", "ai_video_generator"],
+      "performance": "slow",
+      "description": "نموذج متخصص في توليد الفيديو من النص"
+    },
+    "modnet": {
+      "name": "MODNet Background Removal",
+      "file": "modnet_photographic.onnx",
+      "size_mb": 180,
+      "type": "segmentation",
+      "use_cases": ["auto_bg_removal", "blur_background"],
+      "performance": "fast",
+      "description": "نموذج إزالة الخلفية المتقدم"
+    },
+    "dain": {
+      "name": "DAIN Video Interpolation",
+      "file": "dain_model.pth",
+      "size_mb": 850,
+      "type": "frame_interpolation",
+      "use_cases": ["video_stabilization", "ai_effects"],
+      "performance": "medium",
+      "description": "نموذج تحسين وتثبيت الفيديو"
+    },
+    "simswap": {
+      "name": "SimSwap Face Swap",
+      "file": "simswap_512.pth",
+      "size_mb": 520,
+      "type": "face_swap",
+      "use_cases": ["face_swap"],
+      "performance": "medium",
+      "description": "نموذج تبديل الوجوه الواقعي"
+    },
+    "scenecut": {
+      "name": "SceneCut Smart Transitions",
+      "file": "scenecut_v2.onnx",
+      "size_mb": 45,
+      "type": "scene_analysis",
+      "use_cases": ["ai_transition", "ai_shorts"],
+      "performance": "fast",
+      "description": "نموذج تحليل المشاهد للانتقالات الذكية"
+    }
+  },
+  "audio_models": {
+    "whisper_large": {
+      "name": "Whisper Large v3",
+      "file": "whisper_large_v3.pt",
+      "size_mb": 3100,
+      "type": "speech_to_text",
+      "use_cases": ["speech_to_text", "subtitle_maker", "video_translator"],
+      "performance": "medium",
+      "languages": ["ar", "en", "fr", "es", "de", "it", "pt"],
+      "description": "نموذج تحويل الكلام لنص متعدد اللغات"
+    },
+    "spleeter": {
+      "name": "Spleeter 5-stems",
+      "file": "spleeter_5stems.h5",
+      "size_mb": 320,
+      "type": "source_separation",
+      "use_cases": ["vocal_remover", "beat_detection"],
+      "performance": "medium",
+      "description": "نموذج فصل المسارات الصوتية"
+    },
+    "bark_tts": {
+      "name": "Bark Text-to-Speech",
+      "file": "bark_v0_0_1.pt",
+      "size_mb": 1200,
+      "type": "text_to_speech",
+      "use_cases": ["text_to_speech", "video_translator"],
+      "performance": "medium",
+      "voices": [
+        "arabic_male",
+        "arabic_female",
+        "english_male",
+        "english_female"
+      ],
+      "description": "نموذج تحويل النص لكلام طبيعي"
+    },
+    "sovits": {
+      "name": "So-VITS Voice Conversion",
+      "file": "sovits_v4.pth",
+      "size_mb": 220,
+      "type": "voice_conversion",
+      "use_cases": ["voice_change"],
+      "performance": "fast",
+      "description": "نموذج تغيي�� وتحويل الأصوات"
+    },
+    "rnnoise": {
+      "name": "RNNoise Noise Reduction",
+      "file": "rnnoise_model.onnx",
+      "size_mb": 15,
+      "type": "noise_reduction",
+      "use_cases": ["noise_reduction"],
+      "performance": "fast",
+      "description": "نموذج إزالة ضوضاء الصوت"
+    },
+    "beat_tracker": {
+      "name": "AI Beat Detection",
+      "file": "beat_detector.onnx",
+      "size_mb": 25,
+      "type": "audio_analysis",
+      "use_cases": ["beat_detection"],
+      "performance": "fast",
+      "description": "نموذج كشف الإيقاع الموسيقي"
+    },
+    "wav2lip": {
+      "name": "Wav2Lip Lip Sync",
+      "file": "wav2lip_gan.pth",
+      "size_mb": 280,
+      "type": "lip_sync",
+      "use_cases": ["ai_avatar"],
+      "performance": "medium",
+      "description": "نموذج مزامنة حركة الشفاه"
+    }
+  },
+  "image_models": {
+    "real_esrgan": {
+      "name": "Real-ESRGAN Image Upscaler",
+      "file": "RealESRGAN_x4plus.pth",
+      "size_mb": 65,
+      "type": "super_resolution",
+      "use_cases": ["photo_enhancer", "image_upscaler"],
+      "performance": "fast",
+      "max_resolution": "8K",
+      "description": "نموذج تحسين وتكبير جودة الصور"
+    },
+    "u2net": {
+      "name": "U-2-Net Background Removal",
+      "file": "u2net.pth",
+      "size_mb": 170,
+      "type": "segmentation",
+      "use_cases": ["image_bg_removal", "custom_cutout"],
+      "performance": "fast",
+      "description": "نموذج إزالة خلفية الصور بدقة عالية"
+    },
+    "sam": {
+      "name": "Segment Anything Model",
+      "file": "sam_vit_h.pth",
+      "size_mb": 650,
+      "type": "segmentation",
+      "use_cases": ["custom_cutout"],
+      "performance": "medium",
+      "description": "نموذج تقطيع وقص أي عنصر في الصورة"
+    },
+    "stable_diffusion": {
+      "name": "Stable Diffusion XL",
+      "file": "sd_xl_base_1.0.safetensors",
+      "size_mb": 3500,
+      "type": "image_generation",
+      "use_cases": ["text_to_image", "reference_image"],
+      "performance": "slow",
+      "max_resolution": "1024x1024",
+      "description": "نموذج توليد الصور من النص"
+    },
+    "controlnet": {
+      "name": "ControlNet Reference",
+      "file": "control_v11p_sd15.pth",
+      "size_mb": 680,
+      "type": "conditional_generation",
+      "use_cases": ["reference_image"],
+      "performance": "medium",
+      "description": "نموذج توليد الصور باستخدام صور مرجعية"
+    },
+    "gfpgan": {
+      "name": "GFPGAN Face Restoration",
+      "file": "gfpgan_v1.4.pth",
+      "size_mb": 350,
+      "type": "face_restoration",
+      "use_cases": ["photo_enhancer"],
+      "performance": "fast",
+      "description": "نموذج ترميم وتحسين الوجوه في الصور"
+    },
+    "sadtalker": {
+      "name": "SadTalker Talking Face",
+      "file": "sadtalker_256.pth",
+      "size_mb": 580,
+      "type": "face_animation",
+      "use_cases": ["ai_avatar"],
+      "performance": "medium",
+      "description": "نموذج تحريك الوجوه للكلام"
+    }
+  },
+  "text_models": {
+    "gpt4all": {
+      "name": "GPT4All Arabic Model",
+      "file": "gpt4all-13b-snoozy-q4_0.gguf",
+      "size_mb": 8200,
+      "type": "language_model",
+      "use_cases": ["ai_copywriting", "text_generation"],
+      "performance": "medium",
+      "languages": ["ar", "en"],
+      "description": "نموذج لغوي كبير للكتابة الإبداعية"
+    },
+    "llama2_arabic": {
+      "name": "LLaMA2 Arabic 7B",
+      "file": "llama2_7b_arabic.gguf",
+      "size_mb": 3800,
+      "type": "language_model",
+      "use_cases": ["ai_copywriting", "text_generation"],
+      "performance": "fast",
+      "languages": ["ar"],
+      "description": "نموذج لغوي عربي متخصص"
+    },
+    "m2m100": {
+      "name": "M2M100 Multilingual Translation",
+      "file": "m2m100_418M.pt",
+      "size_mb": 420,
+      "type": "translation",
+      "use_cases": ["video_translator", "subtitle_maker"],
+      "performance": "fast",
+      "languages": ["ar", "en", "fr", "es", "de", "zh", "ja", "ko"],
+      "description": "نموذج ترجمة متعدد اللغات"
+    },
+    "arabert": {
+      "name": "AraBERT Text Understanding",
+      "file": "arabert_v02.bin",
+      "size_mb": 540,
+      "type": "language_understanding",
+      "use_cases": ["split_subtitles", "text_analysis"],
+      "performance": "fast",
+      "languages": ["ar"],
+      "description": "نموذج فهم النصوص العربية"
+    }
+  },
+  "specialized_models": {
+    "luma_ai": {
+      "name": "Luma AI Camera Motion",
+      "file": "luma_camera_v1.onnx",
+      "size_mb": 180,
+      "type": "camera_motion",
+      "use_cases": ["image_to_video"],
+      "performance": "fast",
+      "description": "نموذج إنشاء حركة كاميرا افتراضية"
+    },
+    "clip": {
+      "name": "CLIP Vision-Language",
+      "file": "clip_vit_b32.pt",
+      "size_mb": 340,
+      "type": "vision_language",
+      "use_cases": ["text_to_image", "ai_video_generator"],
+      "performance": "fast",
+      "description": "نموذج ربط النص بالصورة"
+    },
+    "openpose": {
+      "name": "OpenPose Human Detection",
+      "file": "openpose_pose.onnx",
+      "size_mb": 85,
+      "type": "pose_estimation",
+      "use_cases": ["ai_effects", "face_swap"],
+      "performance": "fast",
+      "description": "نموذج كشف الوضعيات البشرية"
+    }
+  },
+  "model_dependencies": {
+    "ai_effects": ["yolov8", "openpose", "dain"],
+    "ai_animation": ["animatediff", "stable_video", "clip"],
+    "ai_transition": ["scenecut", "dain"],
+    "image_to_video": ["luma_ai", "animatediff", "stable_video"],
+    "text_to_video": ["videocrafter", "stable_video", "gpt4all", "clip"],
+    "face_swap": ["simswap", "openpose"],
+    "ai_avatar": ["sadtalker", "wav2lip"],
+    "vocal_remover": ["spleeter"],
+    "voice_change": ["sovits"],
+    "noise_reduction": ["rnnoise"],
+    "photo_enhancer": ["real_esrgan", "gfpgan"],
+    "image_bg_removal": ["u2net"],
+    "custom_cutout": ["sam", "u2net"],
+    "text_to_image": ["stable_diffusion", "clip"],
+    "text_to_speech": ["bark_tts"],
+    "speech_to_text": ["whisper_large"],
+    "ai_copywriting": ["gpt4all", "llama2_arabic"],
+    "subtitle_maker": ["whisper_large", "arabert"],
+    "video_translator": ["whisper_large", "m2m100", "bark_tts"]
+  },
+  "performance_profiles": {
+    "light": {
+      "description": "خفيف - للأجهزة محدودة الموارد",
+      "max_memory_gb": 4,
+      "recommended_models": ["yolov8", "u2net", "rnnoise", "bark_tts"],
+      "processing_time_multiplier": 1.5
+    },
+    "balanced": {
+      "description": "متوازن - للأجهزة متوسطة الموارد",
+      "max_memory_gb": 8,
+      "recommended_models": [
+        "whisper_large",
+        "real_esrgan",
+        "modnet",
+        "simswap"
+      ],
+      "processing_time_multiplier": 1.0
+    },
+    "high_performance": {
+      "description": "أداء عالي - للأجهزة القوية",
+      "max_memory_gb": 16,
+      "recommended_models": [
+        "stable_diffusion",
+        "animatediff",
+        "gpt4all",
+        "videocrafter"
+      ],
+      "processing_time_multiplier": 0.7
+    },
+    "workstation": {
+      "description": "محطة عمل - لأقوى الأجهزة",
+      "max_memory_gb": 32,
+      "recommended_models": ["all_models"],
+      "processing_time_multiplier": 0.5
+    }
+  },
+  "download_info": {
+    "base_url": "https://local-ai-models.knoux.com/",
+    "mirror_urls": [
+      "https://mirror1.knoux.com/models/",
+      "https://mirror2.knoux.com/models/"
+    ],
+    "verification": {
+      "checksums_file": "model_checksums.sha256",
+      "signature_file": "models.sig"
+    },
+    "auto_update": {
+      "enabled": true,
+      "check_interval_hours": 24,
+      "update_notification": true
+    }
+  }
+}
