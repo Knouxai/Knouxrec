@@ -41,7 +41,7 @@ export async function processTranscript(
     if (result.audioAnalysis) {
       console.log(`🧠 KNOUX AI: جودة الصوت: ${result.audioAnalysis.quality}`);
       console.log(
-        `🧠 KNOUX AI: نسبة الكلام: ${result.audioAnalysis.speechRatio.toFixed(1)}%`,
+        `🧠 KNOUX AI: ��سبة الكلام: ${result.audioAnalysis.speechRatio.toFixed(1)}%`,
       );
     }
 
@@ -180,7 +180,7 @@ export function getAIStatus(): {
     ready: true,
     features: [
       "تحليل الكلام المحلي",
-      "استخراج الكلمات المفتاحية",
+      "استخ��اج الكلمات المفتاحية",
       "تلخيص ذكي",
       "اكتشاف اللغة",
       "تحليل المشاعر",
@@ -203,4 +203,4 @@ export function getAIStatus(): {
 }
 
 // تصدير جميع الواجهات والفئات
-export { AdvancedAIResult };
+// AdvancedAIResult is imported from offlineAI.ts
