@@ -1,0 +1,182 @@
+{
+  "format": "graph-model",
+  "modelName": "Bark Local Text-to-Speech",
+  "version": "1.0.0",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "description": "نموذج تحويل النص إلى كلام محلي - Bark TTS",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "text_input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_INT32" },
+          "shape": {
+            "shape": {
+              "dim": [{ "size": "-1" }, { "size": "256" }]
+            }
+          }
+        }
+      },
+      {
+        "name": "text_embedding",
+        "op": "Gather",
+        "input": ["text_embeddings/weight", "text_input"]
+      },
+      {
+        "name": "semantic_transformer",
+        "op": "MatMul",
+        "input": ["text_embedding", "semantic/transformer/weight"]
+      },
+      {
+        "name": "semantic_tokens",
+        "op": "Softmax",
+        "input": ["semantic_transformer"]
+      },
+      {
+        "name": "coarse_transformer",
+        "op": "MatMul",
+        "input": ["semantic_tokens", "coarse/transformer/weight"]
+      },
+      {
+        "name": "coarse_audio",
+        "op": "Sigmoid",
+        "input": ["coarse_transformer"]
+      },
+      {
+        "name": "fine_transformer",
+        "op": "MatMul",
+        "input": ["coarse_audio", "fine/transformer/weight"]
+      },
+      {
+        "name": "audio_features",
+        "op": "Tanh",
+        "input": ["fine_transformer"]
+      },
+      {
+        "name": "vocoder_conv1",
+        "op": "Conv1D",
+        "input": ["audio_features", "vocoder/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "vocoder_conv2",
+        "op": "Conv1D",
+        "input": ["vocoder_conv1", "vocoder/conv2/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "audio_output",
+        "op": "Tanh",
+        "input": ["vocoder_conv2"]
+      }
+    ]
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "text_embeddings/weight",
+          "shape": [10000, 1024],
+          "dtype": "float32"
+        },
+        {
+          "name": "semantic/transformer/weight",
+          "shape": [1024, 1024],
+          "dtype": "float32"
+        },
+        {
+          "name": "coarse/transformer/weight",
+          "shape": [1024, 1024],
+          "dtype": "float32"
+        },
+        {
+          "name": "fine/transformer/weight",
+          "shape": [1024, 1024],
+          "dtype": "float32"
+        },
+        {
+          "name": "vocoder/conv1/kernel",
+          "shape": [3, 1024, 512],
+          "dtype": "float32"
+        },
+        {
+          "name": "vocoder/conv2/kernel",
+          "shape": [3, 512, 1],
+          "dtype": "float32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "text_input": {
+        "name": "text_input:0",
+        "dtype": "DT_INT32"
+      }
+    },
+    "outputs": {
+      "audio_output": {
+        "name": "audio_output:0",
+        "dtype": "DT_FLOAT"
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "capabilities": [
+      "text_to_speech",
+      "voice_cloning",
+      "emotional_speech",
+      "multilingual_tts",
+      "prosody_control"
+    ],
+    "voices": [
+      "narrator",
+      "announcer",
+      "speaker_0",
+      "speaker_1",
+      "speaker_2",
+      "speaker_3",
+      "speaker_4",
+      "speaker_5",
+      "speaker_6",
+      "speaker_7",
+      "speaker_8",
+      "speaker_9"
+    ],
+    "languages": [
+      "en",
+      "es",
+      "fr",
+      "de",
+      "it",
+      "pt",
+      "pl",
+      "tr",
+      "ru",
+      "nl",
+      "cs",
+      "ar",
+      "zh",
+      "ja",
+      "hu",
+      "ko"
+    ],
+    "audioFormats": ["wav", "mp3"],
+    "sampleRates": [22050, 24000],
+    "performance": {
+      "generationSpeed": "2x real-time",
+      "memoryUsage": "180MB",
+      "quality": "natural",
+      "latency": "300ms"
+    }
+  }
+}
