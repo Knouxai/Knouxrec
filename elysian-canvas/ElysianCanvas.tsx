@@ -320,19 +320,17 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .elysian-canvas-main {
           position: fixed;
           top: 0;
           left: 0;
           width: 100vw;
           height: 100vh;
-          background: linear-gradient(
-            135deg,
-            rgba(0, 0, 0, 0.95) 0%,
-            rgba(20, 20, 40, 0.98) 50%,
-            rgba(40, 20, 60, 0.95) 100%
-          );
+          background: linear-gradient(135deg, 
+            rgba(0, 0, 0, 0.95) 0%, 
+            rgba(20, 20, 40, 0.98) 50%, 
+            rgba(40, 20, 60, 0.95) 100%);
           backdrop-filter: blur(20px);
           z-index: 8888;
           display: flex;
@@ -510,27 +508,23 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
           line-height: 1.5;
         }
 
-        .editor-view,
-        .preview-view {
+        .editor-view, .preview-view {
           max-width: 1400px;
           margin: 0 auto;
         }
 
-        .editor-header,
-        .preview-header {
+        .editor-header, .preview-header {
           text-align: center;
           margin-bottom: 30px;
         }
 
-        .editor-header h2,
-        .preview-header h2 {
+        .editor-header h2, .preview-header h2 {
           color: white;
           font-size: 1.8rem;
           margin: 0 0 8px 0;
         }
 
-        .editor-header p,
-        .preview-header p {
+        .editor-header p, .preview-header p {
           color: rgba(255, 255, 255, 0.7);
           margin: 0;
         }
@@ -554,8 +548,7 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
           gap: 20px;
         }
 
-        .preview-canvas,
-        .final-canvas {
+        .preview-canvas, .final-canvas {
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 12px;
@@ -604,9 +597,7 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
           gap: 16px;
         }
 
-        .edit-button,
-        .export-button,
-        .save-button {
+        .edit-button, .export-button, .save-button {
           background: rgba(255, 255, 255, 0.1);
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 10px;
@@ -626,9 +617,7 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
           color: #333;
         }
 
-        .edit-button:hover,
-        .export-button:hover,
-        .save-button:hover {
+        .edit-button:hover, .export-button:hover, .save-button:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
