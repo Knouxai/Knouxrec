@@ -1,503 +1,514 @@
-import React, { useState, useRef, useEffect } from "react";
-import { UploadedImage } from "../services/ImageUploadService";
+import React, { useState, useEffect, useRef } from "react";
 
 interface ImageEditingToolsProps {
-  selectedImage: UploadedImage | null;
-  onImageUpdate: (imageData: string) => void;
-  canvas: HTMLCanvasElement | null;
+  selectedImage: any;
+  onImageUpdate: (processedImage: any) => void;
 }
 
-interface FilterSettings {
-  brightness: number;
-  contrast: number;
-  saturation: number;
-  hue: number;
-  blur: number;
-  sepia: number;
-  invert: number;
-  grayscale: number;
-  vintage: number;
-  dramatic: number;
+interface FilterPreset {
+  id: string;
+  name: string;
+  icon: string;
+  filters: {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    hue: number;
+    blur: number;
+    sepia: number;
+    invert: number;
+    opacity: number;
+  };
 }
 
 export const ImageEditingTools: React.FC<ImageEditingToolsProps> = ({
   selectedImage,
   onImageUpdate,
-  canvas,
 }) => {
-  const [activeTab, setActiveTab] = useState<
-    "filters" | "adjustments" | "effects" | "crop"
-  >("filters");
-  const [filterSettings, setFilterSettings] = useState<FilterSettings>({
-    brightness: 100,
-    contrast: 100,
-    saturation: 100,
-    hue: 0,
-    blur: 0,
-    sepia: 0,
-    invert: 0,
-    grayscale: 0,
-    vintage: 0,
-    dramatic: 0,
-  });
+  // Filter states
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+  const [hue, setHue] = useState(0);
+  const [blur, setBlur] = useState(0);
+  const [sepia, setSepia] = useState(0);
+  const [invert, setInvert] = useState(0);
+  const [opacity, setOpacity] = useState(100);
 
-  const [cropSettings, setCropSettings] = useState({
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-  });
+  // Advanced tools states
+  const [activetool, setActiveTools] = useState<string>("filters");
+  const [cropMode, setCropMode] = useState(false);
+  const [textMode, setTextMode] = useState(false);
+  const [textContent, setTextContent] = useState("");
+  const [textColor, setTextColor] = useState("#ffffff");
+  const [textSize, setTextSize] = useState(24);
 
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const originalImageRef = useRef<HTMLImageElement>(null);
 
-  useEffect(() => {
-    if (selectedImage && previewCanvasRef.current) {
-      applyFilters();
-    }
-  }, [selectedImage, filterSettings]);
+  // Filter presets
+  const filterPresets: FilterPreset[] = [
+    {
+      id: "original",
+      name: "Original",
+      icon: "🎯",
+      filters: {
+        brightness: 100,
+        contrast: 100,
+        saturation: 100,
+        hue: 0,
+        blur: 0,
+        sepia: 0,
+        invert: 0,
+        opacity: 100,
+      },
+    },
+    {
+      id: "vintage",
+      name: "Vintage",
+      icon: "📸",
+      filters: {
+        brightness: 110,
+        contrast: 90,
+        saturation: 80,
+        hue: 10,
+        blur: 0,
+        sepia: 30,
+        invert: 0,
+        opacity: 100,
+      },
+    },
+    {
+      id: "noir",
+      name: "Film Noir",
+      icon: "🎭",
+      filters: {
+        brightness: 90,
+        contrast: 130,
+        saturation: 0,
+        hue: 0,
+        blur: 0,
+        sepia: 0,
+        invert: 0,
+        opacity: 100,
+      },
+    },
+    {
+      id: "dreamy",
+      name: "Dreamy",
+      icon: "☁️",
+      filters: {
+        brightness: 120,
+        contrast: 80,
+        saturation: 120,
+        hue: -10,
+        blur: 1,
+        sepia: 0,
+        invert: 0,
+        opacity: 90,
+      },
+    },
+    {
+      id: "dramatic",
+      name: "Dramatic",
+      icon: "⚡",
+      filters: {
+        brightness: 85,
+        contrast: 140,
+        saturation: 110,
+        hue: 5,
+        blur: 0,
+        sepia: 0,
+        invert: 0,
+        opacity: 100,
+      },
+    },
+    {
+      id: "soft",
+      name: "Soft Glow",
+      icon: "✨",
+      filters: {
+        brightness: 115,
+        contrast: 85,
+        saturation: 105,
+        hue: 0,
+        blur: 0.5,
+        sepia: 5,
+        invert: 0,
+        opacity: 95,
+      },
+    },
+  ];
 
+  // Apply filters to canvas
   const applyFilters = () => {
-    if (!selectedImage || !previewCanvasRef.current) return;
+    if (!canvasRef.current || !selectedImage) return;
 
-    const canvas = previewCanvasRef.current;
-    const ctx = canvas.getContext("2d")!;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Load and draw the original image
     const img = new Image();
-
     img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Build filter string
-      const filters = [
-        `brightness(${filterSettings.brightness}%)`,
-        `contrast(${filterSettings.contrast}%)`,
-        `saturate(${filterSettings.saturation}%)`,
-        `hue-rotate(${filterSettings.hue}deg)`,
-        `blur(${filterSettings.blur}px)`,
-        `sepia(${filterSettings.sepia}%)`,
-        `invert(${filterSettings.invert}%)`,
-        `grayscale(${filterSettings.grayscale}%)`,
-      ].join(" ");
+      // Apply CSS filters
+      ctx.filter = `
+        brightness(${brightness}%)
+        contrast(${contrast}%)
+        saturate(${saturation}%)
+        hue-rotate(${hue}deg)
+        blur(${blur}px)
+        sepia(${sepia}%)
+        invert(${invert}%)
+        opacity(${opacity}%)
+      `;
 
-      ctx.filter = filters;
-      ctx.drawImage(img, 0, 0);
+      // Calculate dimensions to maintain aspect ratio
+      const maxWidth = canvas.width;
+      const maxHeight = canvas.height;
 
-      // Apply custom effects
-      if (filterSettings.vintage > 0) {
-        applyVintageEffect(ctx, canvas, filterSettings.vintage / 100);
+      let { width, height } = img;
+      const aspectRatio = width / height;
+
+      if (width > maxWidth) {
+        width = maxWidth;
+        height = width / aspectRatio;
       }
 
-      if (filterSettings.dramatic > 0) {
-        applyDramaticEffect(ctx, canvas, filterSettings.dramatic / 100);
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
       }
 
-      // Update the main canvas if provided
-      if (canvas) {
-        const mainCtx = canvas.getContext("2d")!;
-        mainCtx.clearRect(0, 0, canvas.width, canvas.height);
-        mainCtx.drawImage(
-          previewCanvasRef.current,
-          0,
-          0,
-          canvas.width,
-          canvas.height,
-        );
+      // Center the image
+      const x = (canvas.width - width) / 2;
+      const y = (canvas.height - height) / 2;
+
+      // Draw the filtered image
+      ctx.drawImage(img, x, y, width, height);
+
+      // Reset filter for other operations
+      ctx.filter = "none";
+
+      // Add text if in text mode
+      if (textMode && textContent) {
+        ctx.fillStyle = textColor;
+        ctx.font = `${textSize}px Arial`;
+        ctx.textAlign = "center";
+        ctx.fillText(textContent, canvas.width / 2, canvas.height / 2);
       }
 
-      // Notify parent component
-      onImageUpdate(previewCanvasRef.current.toDataURL());
+      // Trigger update callback
+      onImageUpdate({
+        ...selectedImage,
+        processedUrl: canvas.toDataURL(),
+        filters: {
+          brightness,
+          contrast,
+          saturation,
+          hue,
+          blur,
+          sepia,
+          invert,
+          opacity,
+        },
+      });
     };
 
     img.src = selectedImage.url;
   };
 
-  const applyVintageEffect = (
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    intensity: number,
-  ) => {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-      // Vintage color grading
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-
-      // Warm tone shift
-      data[i] = Math.min(255, r + 20 * intensity); // Red boost
-      data[i + 1] = Math.min(255, g + 10 * intensity); // Slight green boost
-      data[i + 2] = Math.max(0, b - 15 * intensity); // Blue reduction
-
-      // Add slight sepia tone
-      const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      data[i] = Math.min(255, gray + 40 * intensity);
-      data[i + 1] = Math.min(255, gray + 20 * intensity);
-      data[i + 2] = Math.max(0, gray - 10 * intensity);
-    }
-
-    ctx.putImageData(imageData, 0, 0);
+  // Apply preset filter
+  const applyPreset = (preset: FilterPreset) => {
+    setBrightness(preset.filters.brightness);
+    setContrast(preset.filters.contrast);
+    setSaturation(preset.filters.saturation);
+    setHue(preset.filters.hue);
+    setBlur(preset.filters.blur);
+    setSepia(preset.filters.sepia);
+    setInvert(preset.filters.invert);
+    setOpacity(preset.filters.opacity);
   };
 
-  const applyDramaticEffect = (
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    intensity: number,
-  ) => {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-      // Increase contrast dramatically
-      const factor =
-        (259 * (255 + 255 * intensity)) / (255 * (259 - 255 * intensity));
-
-      data[i] = Math.max(0, Math.min(255, factor * (data[i] - 128) + 128));
-      data[i + 1] = Math.max(
-        0,
-        Math.min(255, factor * (data[i + 1] - 128) + 128),
-      );
-      data[i + 2] = Math.max(
-        0,
-        Math.min(255, factor * (data[i + 2] - 128) + 128),
-      );
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-  };
-
-  const handleFilterChange = (filter: keyof FilterSettings, value: number) => {
-    setFilterSettings((prev) => ({
-      ...prev,
-      [filter]: value,
-    }));
-  };
-
+  // Reset all filters
   const resetFilters = () => {
-    setFilterSettings({
-      brightness: 100,
-      contrast: 100,
-      saturation: 100,
-      hue: 0,
-      blur: 0,
-      sepia: 0,
-      invert: 0,
-      grayscale: 0,
-      vintage: 0,
-      dramatic: 0,
-    });
+    applyPreset(filterPresets[0]); // Apply original preset
   };
 
-  const applyPreset = (presetName: string) => {
-    const presets: Record<string, Partial<FilterSettings>> = {
-      "Classic B&W": {
-        grayscale: 100,
-        contrast: 120,
-        brightness: 110,
-      },
-      "Vintage Warm": {
-        vintage: 80,
-        sepia: 30,
-        brightness: 105,
-        contrast: 115,
-      },
-      Dramatic: {
-        dramatic: 70,
-        contrast: 140,
-        saturation: 120,
-        brightness: 95,
-      },
-      "Soft Portrait": {
-        brightness: 105,
-        contrast: 95,
-        saturation: 110,
-        blur: 0.5,
-      },
-      "Film Noir": {
-        grayscale: 100,
-        dramatic: 60,
-        contrast: 150,
-        brightness: 85,
-      },
-      "Golden Hour": {
-        brightness: 110,
-        contrast: 105,
-        saturation: 120,
-        hue: 15,
-        vintage: 40,
-      },
-    };
+  // Download processed image
+  const downloadImage = () => {
+    if (!canvasRef.current) return;
 
-    const preset = presets[presetName];
-    if (preset) {
-      setFilterSettings((prev) => ({
-        ...prev,
-        ...preset,
-      }));
-    }
+    const canvas = canvasRef.current;
+    const link = document.createElement("a");
+    link.download = `elysian-edit-${Date.now()}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
   };
 
-  if (!selectedImage) {
-    return (
-      <div className="no-image-selected">
-        <div className="no-image-icon">🖼️</div>
-        <h3>No Image Selected</h3>
-        <p>Upload an image to start editing</p>
-      </div>
-    );
-  }
+  // Apply filters whenever any value changes
+  useEffect(() => {
+    applyFilters();
+  }, [
+    brightness,
+    contrast,
+    saturation,
+    hue,
+    blur,
+    sepia,
+    invert,
+    opacity,
+    textContent,
+    textColor,
+    textSize,
+    selectedImage,
+  ]);
 
   return (
     <div className="image-editing-tools">
-      {/* Preview Section */}
-      <div className="preview-section">
-        <h3>Live Preview</h3>
-        <canvas
-          ref={previewCanvasRef}
-          className="preview-canvas"
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-      </div>
-
       {/* Tool Tabs */}
       <div className="tool-tabs">
         <button
-          onClick={() => setActiveTab("filters")}
-          className={`tab-button ${activeTab === "filters" ? "active" : ""}`}
+          className={`tool-tab ${activeTools === "filters" ? "active" : ""}`}
+          onClick={() => setActiveTools("filters")}
         >
           🎨 Filters
         </button>
         <button
-          onClick={() => setActiveTab("adjustments")}
-          className={`tab-button ${activeTab === "adjustments" ? "active" : ""}`}
+          className={`tool-tab ${activeTools === "adjust" ? "active" : ""}`}
+          onClick={() => setActiveTools("adjust")}
         >
-          ⚙️ Adjustments
+          ⚙️ Adjust
         </button>
         <button
-          onClick={() => setActiveTab("effects")}
-          className={`tab-button ${activeTab === "effects" ? "active" : ""}`}
+          className={`tool-tab ${activeTools === "effects" ? "active" : ""}`}
+          onClick={() => setActiveTools("effects")}
         >
           ✨ Effects
         </button>
         <button
-          onClick={() => setActiveTab("crop")}
-          className={`tab-button ${activeTab === "crop" ? "active" : ""}`}
+          className={`tool-tab ${activeTools === "text" ? "active" : ""}`}
+          onClick={() => setActiveTools("text")}
         >
-          ✂️ Crop
+          📝 Text
         </button>
       </div>
 
-      {/* Tool Content */}
-      <div className="tool-content">
-        {activeTab === "filters" && (
-          <div className="filters-panel">
-            <h4>Quick Presets</h4>
-            <div className="presets-grid">
-              {[
-                "Classic B&W",
-                "Vintage Warm",
-                "Dramatic",
-                "Soft Portrait",
-                "Film Noir",
-                "Golden Hour",
-              ].map((preset) => (
-                <button
-                  key={preset}
-                  onClick={() => applyPreset(preset)}
-                  className="preset-button"
-                >
-                  {preset}
-                </button>
-              ))}
+      {/* Filter Presets */}
+      {activeTools === "filters" && (
+        <div className="filters-section">
+          <h3>🎭 Quick Filters</h3>
+          <div className="preset-grid">
+            {filterPresets.map((preset) => (
+              <button
+                key={preset.id}
+                className="preset-button"
+                onClick={() => applyPreset(preset)}
+              >
+                <span className="preset-icon">{preset.icon}</span>
+                <span className="preset-name">{preset.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Manual Adjustments */}
+      {activeTools === "adjust" && (
+        <div className="adjust-section">
+          <h3>⚙️ Manual Adjustments</h3>
+
+          <div className="control-group">
+            <label>Brightness</label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={brightness}
+              onChange={(e) => setBrightness(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{brightness}%</span>
+          </div>
+
+          <div className="control-group">
+            <label>Contrast</label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={contrast}
+              onChange={(e) => setContrast(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{contrast}%</span>
+          </div>
+
+          <div className="control-group">
+            <label>Saturation</label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={saturation}
+              onChange={(e) => setSaturation(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{saturation}%</span>
+          </div>
+
+          <div className="control-group">
+            <label>Hue</label>
+            <input
+              type="range"
+              min="0"
+              max="360"
+              value={hue}
+              onChange={(e) => setHue(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{hue}°</span>
+          </div>
+        </div>
+      )}
+
+      {/* Effects */}
+      {activeTools === "effects" && (
+        <div className="effects-section">
+          <h3>✨ Special Effects</h3>
+
+          <div className="control-group">
+            <label>Blur</label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="0.1"
+              value={blur}
+              onChange={(e) => setBlur(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{blur}px</span>
+          </div>
+
+          <div className="control-group">
+            <label>Sepia</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={sepia}
+              onChange={(e) => setSepia(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{sepia}%</span>
+          </div>
+
+          <div className="control-group">
+            <label>Invert</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={invert}
+              onChange={(e) => setInvert(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{invert}%</span>
+          </div>
+
+          <div className="control-group">
+            <label>Opacity</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={opacity}
+              onChange={(e) => setOpacity(Number(e.target.value))}
+              className="slider"
+            />
+            <span>{opacity}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Text Tool */}
+      {activeTools === "text" && (
+        <div className="text-section">
+          <h3>📝 Add Text</h3>
+
+          <div className="text-controls">
+            <div className="control-group">
+              <label>Text Content</label>
+              <input
+                type="text"
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+                placeholder="Enter your text..."
+                className="text-input"
+              />
             </div>
 
-            <button onClick={resetFilters} className="reset-button">
-              🔄 Reset All
+            <div className="control-group">
+              <label>Text Color</label>
+              <input
+                type="color"
+                value={textColor}
+                onChange={(e) => setTextColor(e.target.value)}
+                className="color-input"
+              />
+            </div>
+
+            <div className="control-group">
+              <label>Text Size</label>
+              <input
+                type="range"
+                min="12"
+                max="72"
+                value={textSize}
+                onChange={(e) => setTextSize(Number(e.target.value))}
+                className="slider"
+              />
+              <span>{textSize}px</span>
+            </div>
+
+            <button
+              className={`toggle-button ${textMode ? "active" : ""}`}
+              onClick={() => setTextMode(!textMode)}
+            >
+              {textMode ? "Hide Text" : "Show Text"}
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {activeTab === "adjustments" && (
-          <div className="adjustments-panel">
-            <div className="slider-group">
-              <label>Brightness: {filterSettings.brightness}%</label>
-              <input
-                type="range"
-                min="0"
-                max="200"
-                value={filterSettings.brightness}
-                onChange={(e) =>
-                  handleFilterChange("brightness", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Contrast: {filterSettings.contrast}%</label>
-              <input
-                type="range"
-                min="0"
-                max="200"
-                value={filterSettings.contrast}
-                onChange={(e) =>
-                  handleFilterChange("contrast", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Saturation: {filterSettings.saturation}%</label>
-              <input
-                type="range"
-                min="0"
-                max="200"
-                value={filterSettings.saturation}
-                onChange={(e) =>
-                  handleFilterChange("saturation", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Hue: {filterSettings.hue}°</label>
-              <input
-                type="range"
-                min="-180"
-                max="180"
-                value={filterSettings.hue}
-                onChange={(e) =>
-                  handleFilterChange("hue", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-          </div>
-        )}
-
-        {activeTab === "effects" && (
-          <div className="effects-panel">
-            <div className="slider-group">
-              <label>Blur: {filterSettings.blur}px</label>
-              <input
-                type="range"
-                min="0"
-                max="10"
-                step="0.1"
-                value={filterSettings.blur}
-                onChange={(e) =>
-                  handleFilterChange("blur", parseFloat(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Sepia: {filterSettings.sepia}%</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={filterSettings.sepia}
-                onChange={(e) =>
-                  handleFilterChange("sepia", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Grayscale: {filterSettings.grayscale}%</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={filterSettings.grayscale}
-                onChange={(e) =>
-                  handleFilterChange("grayscale", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Vintage: {filterSettings.vintage}%</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={filterSettings.vintage}
-                onChange={(e) =>
-                  handleFilterChange("vintage", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-
-            <div className="slider-group">
-              <label>Dramatic: {filterSettings.dramatic}%</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={filterSettings.dramatic}
-                onChange={(e) =>
-                  handleFilterChange("dramatic", parseInt(e.target.value))
-                }
-                className="adjustment-slider"
-              />
-            </div>
-          </div>
-        )}
-
-        {activeTab === "crop" && (
-          <div className="crop-panel">
-            <h4>Crop & Resize</h4>
-            <p>Crop functionality will be implemented here</p>
-            <button className="feature-coming-soon">🚧 Coming Soon</button>
-          </div>
-        )}
+      {/* Action Buttons */}
+      <div className="action-buttons">
+        <button onClick={resetFilters} className="action-button reset">
+          🔄 Reset All
+        </button>
+        <button onClick={downloadImage} className="action-button download">
+          💾 Download
+        </button>
       </div>
+
+      {/* Canvas for processing */}
+      <canvas
+        ref={canvasRef}
+        width={800}
+        height={600}
+        style={{ display: "none" }}
+      />
 
       <style>{`
         .image-editing-tools {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.02);
           border-radius: 16px;
           padding: 20px;
-          color: white;
-          max-height: 80vh;
-          overflow-y: auto;
-        }
-
-        .no-image-selected {
-          text-align: center;
-          padding: 40px 20px;
-          color: rgba(255, 255, 255, 0.6);
-        }
-
-        .no-image-icon {
-          font-size: 4rem;
-          margin-bottom: 20px;
-        }
-
-        .preview-section {
-          margin-bottom: 20px;
-        }
-
-        .preview-section h3 {
-          margin: 0 0 15px 0;
-          color: #4ecdc4;
-        }
-
-        .preview-canvas {
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 8px;
-          max-width: 100%;
-          height: auto;
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .tool-tabs {
@@ -505,154 +516,205 @@ export const ImageEditingTools: React.FC<ImageEditingToolsProps> = ({
           gap: 4px;
           margin-bottom: 20px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding-bottom: 15px;
         }
 
-        .tab-button {
+        .tool-tab {
           background: rgba(255, 255, 255, 0.05);
-          border: none;
-          border-radius: 8px 8px 0 0;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
           color: rgba(255, 255, 255, 0.7);
-          padding: 10px 16px;
+          padding: 8px 16px;
           cursor: pointer;
           transition: all 0.3s ease;
-          font-size: 0.9rem;
+          font-size: 12px;
+          flex: 1;
+          text-align: center;
         }
 
-        .tab-button.active {
+        .tool-tab.active {
           background: rgba(78, 205, 196, 0.2);
+          border-color: rgba(78, 205, 196, 0.4);
           color: #4ecdc4;
-          border-bottom: 2px solid #4ecdc4;
         }
 
-        .tab-button:hover:not(.active) {
+        .tool-tab:hover:not(.active) {
           background: rgba(255, 255, 255, 0.1);
           color: rgba(255, 255, 255, 0.9);
         }
 
-        .tool-content {
-          min-height: 200px;
+        .filters-section,
+        .adjust-section,
+        .effects-section,
+        .text-section {
+          margin-bottom: 20px;
         }
 
-        .presets-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        .filters-section h3,
+        .adjust-section h3,
+        .effects-section h3,
+        .text-section h3 {
+          color: white;
+          margin: 0 0 15px 0;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
           gap: 8px;
-          margin-bottom: 20px;
+        }
+
+        .preset-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
         }
 
         .preset-button {
-          background: linear-gradient(45deg, #4ecdc4, #44a08d);
-          border: none;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 8px;
           color: white;
-          padding: 8px 12px;
+          padding: 12px 8px;
           cursor: pointer;
           transition: all 0.3s ease;
-          font-size: 0.8rem;
-          font-weight: 500;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
         }
 
         .preset-button:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: #4ecdc4;
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
         }
 
-        .reset-button {
-          background: rgba(255, 107, 107, 0.2);
-          border: 1px solid rgba(255, 107, 107, 0.4);
-          border-radius: 8px;
-          color: #ff6b6b;
-          padding: 10px 20px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          width: 100%;
+        .preset-icon {
+          font-size: 20px;
         }
 
-        .reset-button:hover {
-          background: rgba(255, 107, 107, 0.3);
-        }
-
-        .slider-group {
-          margin-bottom: 20px;
-        }
-
-        .slider-group label {
-          display: block;
-          margin-bottom: 8px;
-          color: rgba(255, 255, 255, 0.9);
+        .preset-name {
+          font-size: 11px;
           font-weight: 500;
         }
 
-        .adjustment-slider {
-          width: 100%;
-          height: 6px;
+        .control-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+
+        .control-group label {
+          color: rgba(255, 255, 255, 0.8);
+          min-width: 70px;
+          font-size: 12px;
+        }
+
+        .slider {
+          flex: 1;
+          height: 4px;
           background: rgba(255, 255, 255, 0.1);
-          border-radius: 3px;
+          border-radius: 2px;
           outline: none;
           -webkit-appearance: none;
         }
 
-        .adjustment-slider::-webkit-slider-thumb {
+        .slider::-webkit-slider-thumb {
           -webkit-appearance: none;
-          appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
+          width: 14px;
+          height: 14px;
           background: #4ecdc4;
-          cursor: pointer;
-          box-shadow: 0 0 8px rgba(78, 205, 196, 0.4);
-        }
-
-        .adjustment-slider::-moz-range-thumb {
-          width: 18px;
-          height: 18px;
           border-radius: 50%;
-          background: #4ecdc4;
           cursor: pointer;
-          border: none;
-          box-shadow: 0 0 8px rgba(78, 205, 196, 0.4);
         }
 
-        .feature-coming-soon {
-          background: rgba(255, 193, 7, 0.2);
-          border: 1px solid rgba(255, 193, 7, 0.4);
-          border-radius: 8px;
-          color: #ffc107;
-          padding: 12px 20px;
-          cursor: not-allowed;
-          width: 100%;
-        }
-
-        .adjustments-panel h4,
-        .effects-panel h4,
-        .filters-panel h4,
-        .crop-panel h4 {
-          margin: 0 0 16px 0;
+        .control-group span {
           color: #4ecdc4;
-          font-size: 1.1rem;
+          min-width: 40px;
+          text-align: right;
+          font-size: 11px;
+          font-weight: 500;
         }
 
-        /* Scrollbar styling */
-        .image-editing-tools::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .image-editing-tools::-webkit-scrollbar-track {
+        .text-input {
+          flex: 1;
           background: rgba(255, 255, 255, 0.05);
-          border-radius: 3px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
+          color: white;
+          padding: 8px 12px;
+          font-size: 12px;
         }
 
-        .image-editing-tools::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 3px;
+        .text-input:focus {
+          outline: none;
+          border-color: #4ecdc4;
         }
 
-        .image-editing-tools::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.3);
+        .color-input {
+          width: 40px;
+          height: 30px;
+          background: none;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .toggle-button {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
+          color: white;
+          padding: 8px 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 12px;
+          margin-top: 10px;
+        }
+
+        .toggle-button.active {
+          background: rgba(78, 205, 196, 0.2);
+          border-color: rgba(78, 205, 196, 0.4);
+          color: #4ecdc4;
+        }
+
+        .toggle-button:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 10px;
+          margin-top: 20px;
+          padding-top: 15px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-button {
+          flex: 1;
+          border: none;
+          border-radius: 8px;
+          color: white;
+          padding: 12px 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 500;
+          font-size: 12px;
+        }
+
+        .action-button.reset {
+          background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .action-button.download {
+          background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .action-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
       `}</style>
     </div>
   );
 };
-
-export default ImageEditingTools;
