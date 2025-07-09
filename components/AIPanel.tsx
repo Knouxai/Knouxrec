@@ -301,6 +301,9 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
       case "analytics":
         return <AnalyticsDashboard />;
 
+      case "privacy":
+        return <PrivacySettings />;
+
       default:
         return null;
     }
