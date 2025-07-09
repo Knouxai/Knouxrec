@@ -40,8 +40,8 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
   };
 
   const navigationItems = [
-    { id: "main", icon: "🏠", label: "Home" },
-    { id: "templates", icon: "📽️", label: "Templates" },
+    { id: "main", icon: "🏠", label: "الرئيسية" },
+    { id: "templates", icon: "📽️", label: "القوالب" },
     { id: "toolbox", icon: "🛠️", label: "Toolbox" },
     { id: "recordings", icon: "🎬", label: "Recordings" },
     { id: "ai", icon: "🧠", label: "AI Tools" },
