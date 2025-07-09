@@ -33,6 +33,14 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
       status: "active",
     },
     {
+      id: "models",
+      name: "إدارة النماذج",
+      icon: "🧠",
+      description: "إدارة وتحسين نماذج الذكاء الاصطناعي المحلية",
+      color: "purple-400",
+      status: "active",
+    },
+    {
       id: "ocr",
       name: "Text Recognition",
       icon: "📝",
