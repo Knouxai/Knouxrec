@@ -128,7 +128,7 @@ export const AdultGateAdvanced: React.FC<AdultGateAdvancedProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .adult-gate-container {
           position: fixed;
           top: 0;
