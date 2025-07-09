@@ -26,6 +26,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
     | "advanced"
     | "batch"
     | "analytics"
+    | "privacy"
   >("transcript");
 
   const aiTools = [
