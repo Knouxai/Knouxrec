@@ -44,7 +44,7 @@ const ToolboxPanel: React.FC = () => {
       await executeToolOperation(tool, file, additionalInput);
     } catch (error) {
       console.error("خطأ في تشغيل الأداة:", error);
-      alert(`خطأ في تشغيل ${tool.name}: ${error}`);
+      alert(`خطأ في تشغ��ل ${tool.name}: ${error}`);
     }
   };
 
@@ -90,7 +90,7 @@ const ToolboxPanel: React.FC = () => {
         // عرض رسالة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
-        // تحميل النتيج�� تلقائياً إذا كانت ملف
+        // تح��يل النتيج�� تلقائياً إذا كانت ملف
         if (result.output && typeof result.output !== "string") {
           downloadFile(result.output, `${tool.name}_result`);
         }
@@ -675,5 +675,7 @@ const ToolboxPanel: React.FC = () => {
     </div>
   );
 };
+
+export default ToolboxPanel;
 
 export default ToolboxPanel;
