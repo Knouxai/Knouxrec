@@ -236,7 +236,7 @@ export class OfflineAI {
     return taskId;
   }
 
-  // بدء معالجة الق��ئمة
+  // بدء ��عالجة الق��ئمة
   private async startProcessingQueue(): Promise<void> {
     setInterval(async () => {
       if (this.isProcessing || this.processingQueue.length === 0) {
@@ -792,6 +792,472 @@ export class OfflineAI {
 
 // إنشاء مثيل مشترك
 export const offlineAI = new OfflineAI();
+
+// واجهة النتائج المتقدمة
+export interface AdvancedAIResult {
+  title: string;
+  summary: string;
+  keywords: string[];
+  confidence: number;
+  language: string;
+  sentiment: "positive" | "negative" | "neutral";
+  processingTime: number;
+  audioAnalysis?: {
+    quality: "excellent" | "good" | "fair" | "poor";
+    speechRatio: number;
+    backgroundNoise: number;
+    clarity: number;
+  };
+  topicAnalysis?: {
+    mainTopic: string;
+    subTopics: string[];
+    categories: string[];
+  };
+  actionItems?: string[];
+  entities?: Array<{
+    name: string;
+    type: "person" | "organization" | "location" | "date" | "other";
+    confidence: number;
+  }>;
+}
+
+// دالة معالجة النصوص المتقدمة
+export async function processAdvancedTranscript(
+  transcript: string,
+  audioBuffer?: AudioBuffer,
+): Promise<AdvancedAIResult> {
+  const startTime = performance.now();
+
+  try {
+    // تحليل النص الأساسي
+    const words = transcript.split(/\s+/).filter((word) => word.length > 0);
+    const wordCount = words.length;
+
+    // تحديد اللغة بناءً على النص
+    const arabicRatio =
+      (transcript.match(/[\u0600-\u06FF]/g) || []).length / transcript.length;
+    const language = arabicRatio > 0.3 ? "ar" : "en";
+
+    // تحليل المشاعر المبسط
+    const positiveWords = [
+      "good",
+      "great",
+      "excellent",
+      "amazing",
+      "perfect",
+      "جيد",
+      "ممتاز",
+      "رائع",
+    ];
+    const negativeWords = [
+      "bad",
+      "terrible",
+      "awful",
+      "horrible",
+      "worst",
+      "سيء",
+      "فظيع",
+      "سيئ",
+    ];
+
+    let sentimentScore = 0;
+    positiveWords.forEach((word) => {
+      sentimentScore += transcript.toLowerCase().split(word).length - 1;
+    });
+    negativeWords.forEach((word) => {
+      sentimentScore -= transcript.toLowerCase().split(word).length - 1;
+    });
+
+    const sentiment: "positive" | "negative" | "neutral" =
+      sentimentScore > 0
+        ? "positive"
+        : sentimentScore < 0
+          ? "negative"
+          : "neutral";
+
+    // استخراج الكلمات المفتاحية
+    const keywords = extractKeywords(transcript, language);
+
+    // إنشاء عنوان ذكي
+    const title = generateSmartTitle(transcript, keywords, language);
+
+    // إنشاء ملخص
+    const summary = generateSummary(transcript, language);
+
+    // تحليل الصوت إذا كان متاحاً
+    let audioAnalysis;
+    if (audioBuffer) {
+      audioAnalysis = analyzeAudioQuality(audioBuffer);
+    }
+
+    // تحليل الموضوع
+    const topicAnalysis = analyzeTopics(transcript, keywords, language);
+
+    // استخراج عناصر العمل
+    const actionItems = extractActionItems(transcript, language);
+
+    // استخراج الكيانات
+    const entities = extractEntities(transcript, language);
+
+    const processingTime = performance.now() - startTime;
+
+    return {
+      title,
+      summary,
+      keywords,
+      confidence: calculateConfidence(wordCount, sentiment, keywords.length),
+      language,
+      sentiment,
+      processingTime,
+      audioAnalysis,
+      topicAnalysis,
+      actionItems,
+      entities,
+    };
+  } catch (error) {
+    console.error("خطأ في معالجة النص المتقدم:", error);
+
+    return {
+      title: "KNOUX Recording",
+      summary: "تم حفظ التسجيل بنجاح",
+      keywords: ["تسجيل", "knoux"],
+      confidence: 0.5,
+      language: "ar",
+      sentiment: "neutral",
+      processingTime: performance.now() - startTime,
+    };
+  }
+}
+
+// دوال مساعدة للمعالجة
+function extractKeywords(text: string, language: string): string[] {
+  const commonStopWords = {
+    en: [
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "but",
+      "in",
+      "on",
+      "at",
+      "to",
+      "for",
+      "of",
+      "with",
+      "by",
+      "this",
+      "that",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "been",
+      "being",
+      "have",
+      "has",
+      "had",
+      "do",
+      "does",
+      "did",
+      "will",
+      "would",
+      "could",
+      "should",
+    ],
+    ar: [
+      "في",
+      "من",
+      "إلى",
+      "على",
+      "عن",
+      "مع",
+      "بعد",
+      "قبل",
+      "حول",
+      "ضد",
+      "بين",
+      "تحت",
+      "فوق",
+      "هذا",
+      "هذه",
+      "ذلك",
+      "تلك",
+      "الذي",
+      "التي",
+      "اللذان",
+      "اللتان",
+      "الذين",
+      "اللاتي",
+      "ما",
+      "ماذا",
+      "متى",
+      "أين",
+      "كيف",
+      "لماذا",
+      "هو",
+      "هي",
+      "هم",
+      "هن",
+      "أنا",
+      "أنت",
+      "نحن",
+    ],
+  };
+
+  const words = text
+    .toLowerCase()
+    .replace(/[^\w\s\u0600-\u06FF]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 2);
+
+  const stopWords =
+    commonStopWords[language as keyof typeof commonStopWords] ||
+    commonStopWords.en;
+
+  const wordFreq: Record<string, number> = {};
+  words.forEach((word) => {
+    if (!stopWords.includes(word)) {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    }
+  });
+
+  return Object.entries(wordFreq)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([word]) => word);
+}
+
+function generateSmartTitle(
+  text: string,
+  keywords: string[],
+  language: string,
+): string {
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 10);
+  const firstSentence = sentences[0]?.trim();
+
+  if (firstSentence && firstSentence.length < 80) {
+    return firstSentence;
+  }
+
+  if (keywords.length > 0) {
+    const topKeywords = keywords.slice(0, 3);
+    return language === "ar"
+      ? `تسجيل حول ${topKeywords.join(" و ")}`
+      : `Recording about ${topKeywords.join(", ")}`;
+  }
+
+  return language === "ar" ? "تسجيل KNOUX" : "KNOUX Recording";
+}
+
+function generateSummary(text: string, language: string): string {
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 20);
+
+  if (sentences.length <= 2) {
+    return text.slice(0, 200) + (text.length > 200 ? "..." : "");
+  }
+
+  // أخذ أول جملتين وآخر جملة
+  const firstTwo = sentences.slice(0, 2);
+  const lastOne = sentences.slice(-1);
+
+  const summary = [...firstTwo, ...lastOne].join(". ") + ".";
+
+  if (summary.length > 300) {
+    return summary.slice(0, 297) + "...";
+  }
+
+  return summary;
+}
+
+function analyzeAudioQuality(
+  audioBuffer: AudioBuffer,
+): AdvancedAIResult["audioAnalysis"] {
+  const channelData = audioBuffer.getChannelData(0);
+
+  // حساب RMS للطاقة
+  let rms = 0;
+  for (let i = 0; i < channelData.length; i++) {
+    rms += channelData[i] * channelData[i];
+  }
+  rms = Math.sqrt(rms / channelData.length);
+
+  // تحليل الضوضاء
+  const threshold = 0.01;
+  let speechSamples = 0;
+  let noiseSamples = 0;
+
+  for (let i = 0; i < channelData.length; i++) {
+    if (Math.abs(channelData[i]) > threshold) {
+      speechSamples++;
+    } else {
+      noiseSamples++;
+    }
+  }
+
+  const speechRatio = (speechSamples / channelData.length) * 100;
+  const clarity = Math.min(rms * 10, 1);
+  const backgroundNoise = (noiseSamples / channelData.length) * 100;
+
+  let quality: "excellent" | "good" | "fair" | "poor";
+  if (speechRatio > 70 && clarity > 0.8) quality = "excellent";
+  else if (speechRatio > 50 && clarity > 0.6) quality = "good";
+  else if (speechRatio > 30 && clarity > 0.4) quality = "fair";
+  else quality = "poor";
+
+  return {
+    quality,
+    speechRatio,
+    backgroundNoise,
+    clarity: clarity * 100,
+  };
+}
+
+function analyzeTopics(
+  text: string,
+  keywords: string[],
+  language: string,
+): AdvancedAIResult["topicAnalysis"] {
+  const businessWords = [
+    "meeting",
+    "project",
+    "business",
+    "company",
+    "اجتماع",
+    "مشروع",
+    "شركة",
+    "عمل",
+  ];
+  const educationWords = [
+    "learn",
+    "study",
+    "education",
+    "lesson",
+    "تعلم",
+    "دراسة",
+    "تعليم",
+    "درس",
+  ];
+  const techWords = [
+    "technology",
+    "software",
+    "computer",
+    "digital",
+    "تقنية",
+    "برنامج",
+    "حاسوب",
+    "رقمي",
+  ];
+
+  let mainTopic = "general";
+  let categories: string[] = [];
+
+  if (businessWords.some((word) => text.toLowerCase().includes(word))) {
+    mainTopic = language === "ar" ? "أعمال" : "business";
+    categories.push("business");
+  } else if (educationWords.some((word) => text.toLowerCase().includes(word))) {
+    mainTopic = language === "ar" ? "تعليم" : "education";
+    categories.push("education");
+  } else if (techWords.some((word) => text.toLowerCase().includes(word))) {
+    mainTopic = language === "ar" ? "تقنية" : "technology";
+    categories.push("technology");
+  }
+
+  const subTopics = keywords.slice(0, 5);
+
+  return {
+    mainTopic,
+    subTopics,
+    categories,
+  };
+}
+
+function extractActionItems(text: string, language: string): string[] {
+  const actionWords = {
+    en: ["need to", "should", "must", "have to", "will", "plan to", "going to"],
+    ar: ["يجب", "ينبغي", "سوف", "لابد", "نحتاج", "سنقوم", "المطلوب"],
+  };
+
+  const words =
+    actionWords[language as keyof typeof actionWords] || actionWords.en;
+  const sentences = text.split(/[.!?]+/);
+
+  const actionItems: string[] = [];
+
+  sentences.forEach((sentence) => {
+    if (words.some((word) => sentence.toLowerCase().includes(word))) {
+      const cleaned = sentence.trim();
+      if (cleaned.length > 10 && cleaned.length < 100) {
+        actionItems.push(cleaned);
+      }
+    }
+  });
+
+  return actionItems.slice(0, 5);
+}
+
+function extractEntities(
+  text: string,
+  language: string,
+): AdvancedAIResult["entities"] {
+  const entities: AdvancedAIResult["entities"] = [];
+
+  // استخراج التواريخ البسيط
+  const datePatterns = [/\d{1,2}\/\d{1,2}\/\d{4}/g, /\d{4}-\d{2}-\d{2}/g];
+
+  datePatterns.forEach((pattern) => {
+    const matches = text.match(pattern);
+    if (matches) {
+      matches.forEach((match) => {
+        entities?.push({
+          name: match,
+          type: "date",
+          confidence: 0.9,
+        });
+      });
+    }
+  });
+
+  // استخراج أسماء بسيط (كلمات تبدأ بحرف كبير)
+  const namePattern = /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g;
+  const names = text.match(namePattern);
+
+  if (names) {
+    names.slice(0, 5).forEach((name) => {
+      if (name.length > 2) {
+        entities?.push({
+          name: name,
+          type: "person",
+          confidence: 0.7,
+        });
+      }
+    });
+  }
+
+  return entities;
+}
+
+function calculateConfidence(
+  wordCount: number,
+  sentiment: string,
+  keywordCount: number,
+): number {
+  let confidence = 0.5; // base confidence
+
+  // زيادة الثقة بناءً على طول النص
+  if (wordCount > 50) confidence += 0.2;
+  if (wordCount > 100) confidence += 0.1;
+
+  // زيادة الثقة بناءً على عدد الكلمات المفتاحية
+  confidence += Math.min(keywordCount * 0.05, 0.2);
+
+  // تعديل بناءً على المشاعر
+  if (sentiment !== "neutral") confidence += 0.1;
+
+  return Math.min(confidence, 1.0);
+}
 
 // تصدير الأنواع
 export type { AIProcessingTask, AIModel, CreditSystem };
