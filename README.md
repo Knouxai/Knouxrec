@@ -1,326 +1,317 @@
-# 🎬 KNOUX REC - Luxury AI-Powered Screen Recorder
+# KNOUX REC - مسجل الشاشة الاحترافي مع الذكاء الاصطناعي
 
-![KNOUX REC Banner](https://via.placeholder.com/1200x400/8B5CF6/FFFFFF?text=KNOUX+REC+-+Luxury+Screen+Recorder)
+![KNOUX REC](https://img.shields.io/badge/KNOUX%20REC-v1.0.0-purple?style=for-the-badge&logo=video&logoColor=white)
+![React](https://img.shields.io/badge/React-19.1.0-blue?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue?style=for-the-badge&logo=typescript)
+![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-4.15.0-orange?style=for-the-badge&logo=tensorflow)
 
-## ✨ Overview
+## 🎯 **نظرة عامة**
 
-**KNOUX REC** is a premium, offline-first screen recording application featuring:
+KNOUX REC هو مسجل شاشة متطور يعمل بالذكاء الاصطناعي مع واجهة Glassmorphism فاخرة. يوفر تسجيل عالي الجودة مع أدوات تحرير ذكية متقدمة، ويعمل بالكامل أوفلاين بدون الحاجة لأي خدمات خارجية.
 
-- 🎨 **Luxury Glassmorphism UI** with purple neon aesthetics
-- 🧠 **Offline AI Processing** powered by TensorFlow.js
-- ⚡ **Real-time Performance Monitoring**
-- 🚀 **Hardware Acceleration** support
-- 🎯 **Zero External Dependencies** for AI (completely offline)
+## ✨ **المميزات الرئيسية**
 
-## 🌟 Key Features
+### 🎥 **تسجيل احترافي**
 
-### 🎨 **Luxury Design**
+- ✅ تسجيل الشاشة بجودات متعددة (720p - 4K)
+- ✅ تسجيل الكاميرا مع Picture-in-Picture
+- ✅ تسجيل النوافذ المحددة
+- ✅ دعم صوت النظام والميكروفون
+- ✅ لقطات سريعة عالية الجودة
 
-- Glassmorphism interface with purple neon theme
-- Interactive hover effects and glow animations
-- Premium Orbitron & Rajdhani fonts
-- Responsive design for all devices
+### 🤖 **ذكاء اصطناعي محلي**
 
-### 🧠 **Advanced AI (100% Offline)**
+- ✅ 40+ أداة ذكاء اصطناعي
+- ✅ معالجة الفيديو: تأثيرات، رسوم متحركة، تثبيت
+- ✅ معالجة الصوت: إزالة ضوضاء، تغيير الصوت
+- ✅ معالجة الصور: تحسين، تكبير، إزالة خلفية
+- ✅ معالجة النصوص: تحليل، توليد محتوى
 
-- ✅ **Speech Analysis** - Real-time transcription and analysis
-- ✅ **Keyword Extraction** - Smart content tagging
-- ✅ **Smart Summarization** - Automatic content summaries
-- ✅ **Language Detection** - Multi-language support
-- ✅ **Sentiment Analysis** - Content mood detection
-- 🚧 **OCR** - Text recognition (Tesseract.js integration coming soon)
-- 🚧 **Face Detection** - MediaPipe integration planned
-- 🚧 **Object Detection** - YOLO integration planned
+### 📽️ **نظام قوالب متقدم**
 
-### ⚡ **Performance**
+- ✅ 12 فئة قوالب (تعليمي، أعمال، احتفالي، إلخ)
+- ✅ محرر قوالب تفاعلي
+- ✅ دعم نسب عرض متعددة
+- ✅ تخصيص كامل للعناصر
 
-- Real-time system monitoring
-- Hardware acceleration detection
-- Memory and CPU optimization
-- Frame drop detection and prevention
-- Quality assessment and recommendations
+### 🛠️ **صندوق أدوات شامل**
 
-### 📹 **Recording Features**
+- ✅ أدوات فيديو متقدمة
+- ✅ أدوات صوت احترافية
+- ✅ أدوات صور ذكية
+- ✅ نظام نقاط واشتراكات
 
-- Screen, window, and region recording
-- Webcam Picture-in-Picture
-- Multiple quality options (480p, 720p, 1080p)
-- Variable frame rates (30/60 FPS)
-- Live filters and effects
-- Countdown timer
-- Scheduled recording
-- Instant trimming
+### 🎨 **تصميم Glassmorphism فاخر**
 
-## 🚀 Getting Started
+- ✅ واجهة زجاجية شفافة
+- ✅ تأثيرات نيون بنفسجية
+- ✅ رسوم متحركة سلسة
+- ✅ استجابة كاملة لجميع الأحجام
 
-### Prerequisites
+## 🚀 **البدء السريع**
 
-- Node.js 18+
-- Modern browser with WebRTC support
-- Hardware acceleration recommended
+### المتطلبات
 
-### Installation
+- Node.js 18.0+
+- متصفح حديث يدعم WebRTC
+- 4GB RAM أو أكثر
+
+### التثبيت
 
 ```bash
-# Clone the repository
+# استنساخ المشروع
 git clone https://github.com/Knouxai/Knouxrec.git
 cd Knouxrec
 
-# Install dependencies
+# تثبيت التبعيات
 npm install
 
-# Start development server
+# تشغيل الخادم التطويري
 npm run dev
 ```
 
-### Building for Production
+### البناء للإنتاج
 
 ```bash
-# Build for production
+# بناء المشروع
 npm run build
 
-# Preview production build
+# معاينة البناء
 npm run preview
 ```
 
-## 🏗️ Architecture
+## 🎛️ **دليل الاستخدام**
 
-### Frontend Stack
+### 📹 **تسجيل الشاشة**
 
-- **React 19** - Latest React with concurrent features
-- **TypeScript** - Type-safe development
-- **Vite** - Ultra-fast build tool
-- **Tailwind CSS** - Utility-first styling
+1. **اختر نوع التسجيل**: شاشة، كاميرا، أو نافذة محددة
+2. **اضبط الإعدادات**: الجودة، معدل الإطارات، الصوت
+3. **اضغط زر البدء** 🔴 لبدء التسجيل
+4. **استخدم أزرار التحكم**: إيقاف مؤقت، استئناف، لقطة
+5. **اضغط إيقاف** ⏹️ لحفظ التسجيل
 
-### AI & ML Stack
+### 🎨 **استخدام القوالب**
 
-- **TensorFlow.js** - Browser-based machine learning
-- **Web Audio API** - Audio processing and analysis
-- **Canvas API** - Real-time video processing
-- **Web Speech API** - Speech recognition
+1. **انتقل لقسم القوالب** 📽️
+2. **اختر الفئة المناسبة**: تعليمي، أعمال، احتفالي، إلخ
+3. **حدد القالب المطلوب**
+4. **اضغط "تخصيص"** لفتح المحرر
+5. **عدّل العناصر** حسب احتياجاتك
+6. **احفظ وصدّر** القالب المخصص
 
-### Performance Tools
+### 🛠️ **استخدام الأدوات الذكية**
 
-- Custom performance monitoring
-- Real-time metrics tracking
-- Hardware acceleration detection
-- Memory usage optimization
+1. **انتقل لصندوق الأدوات** 🛠️
+2. **اختر الفئة**: فيديو، صوت، صورة، أو نص
+3. **حدد الأداة المطلوبة**
+4. **ارفع الملف المراد معالجته**
+5. **راقب التقدم** في قسم المهام النشطة
+6. **حمّل النتيجة** عند الانتهاء
 
-## 📁 Project Structure
+### 🧠 **التحليل الذكي**
 
-```
-KNOUX REC/
-├── components/           # React components
-│   ├── Header.tsx       # Main navigation header
-│   ├── VideoPreview.tsx # Recording preview
-│   ├── Actions.tsx      # Recording controls
-│   ├── AIPanel.tsx      # AI tools interface
-│   ├── PerformancePanel.tsx # System monitoring
-│   ├── FileManager.tsx  # File operations
-│   └── ...
-├── services/            # Core services
-│   ├── offlineAI.ts     # AI processing engine
-│   ├── performanceMonitor.ts # Performance tracking
-│   └── geminiService.ts # AI interface
-├── hooks/               # React hooks
-│   └── useRecorder.ts   # Recording functionality
-├── types.ts            # TypeScript definitions
-├── utils.ts            # Utility functions
-└── App.tsx             # Main application
-```
+1. **انتقل لقسم التحليل الذكي** 🧠
+2. **حدد التسجيل المراد تحليله**
+3. **اختر نوع التحليل**: نسخ نصي، ملخص، كلمات مفتاحية
+4. **ابدأ التحليل** وانتظر النتائج
+5. **احفظ أو صدّر** النتائج
 
-## 🎯 Core Components
+## ⚙️ **الإعدادات المتقدمة**
 
-### 🎬 Recording Engine
+### 🎥 **إعدادات الفيديو**
 
-- WebRTC-based screen capture
-- Multiple source support (screen/window/camera)
-- Real-time encoding and compression
-- Quality optimization based on system performance
+- **الجودة**: 720p, 1080p, 1440p, 4K
+- **معدل الإطارات**: 15, 30, 60 FPS
+- **معدل البت**: 2.5 - 15 Mbps
+- **الترميز**: H.264, VP9
 
-### 🧠 AI Processing Engine
+### 🔊 **إعدادات الصوت**
 
-```typescript
-// Example AI processing
-import { processAdvancedTranscript } from "./services/offlineAI";
+- **صوت النظام**: تشغيل/إيقاف
+- **الميكروفون**: تشغيل/إيقاف مع تحديد الجهاز
+- **جودة الصوت**: 128 - 320 kbps
+- **تقليل الضوضاء**: تلقائي
 
-const result = await processAdvancedTranscript(transcript, audioBuffer);
-console.log(result.title); // Smart title generation
-console.log(result.summary); // Intelligent summary
-console.log(result.keywords); // Extracted keywords
-console.log(result.sentiment); // Sentiment analysis
-```
+### 🎨 **إعدادات الواجهة**
 
-### ⚡ Performance Monitoring
+- **الوضع الليلي/النهاري**
+- **اللغة**: العربية/الإنجليزية
+- **الرسوم المتحركة**: تشغيل/إيقاف
+- **الإشعارات**: تخصيص التنبيهات
 
-```typescript
-import { performanceMonitor } from "./services/performanceMonitor";
+### ⌨️ **الاختصارات**
 
-// Start monitoring
-performanceMonitor.startMonitoring();
+- **Ctrl+Shift+R**: بدء/إيقاف التسجيل
+- **Ctrl+Shift+P**: إيقاف مؤقت/استئناف
+- **Ctrl+Shift+S**: لقطة سريعة
+- **Ctrl+Shift+T**: فتح القوالب
+- **Ctrl+Shift+A**: فتح الأدوات
 
-// Get real-time metrics
-const metrics = performanceMonitor.getCurrentMetrics();
-console.log(`FPS: ${metrics.fps}, Memory: ${metrics.memoryUsage}%`);
-```
+## 🔧 **التقنيات المستخدمة**
 
-## 🎨 Styling System
+### Frontend
 
-### Color Palette
+- **React 19** - إطار عمل المكونات
+- **TypeScript** - للأمان والموثوقية
+- **Vite** - أداة البناء السريعة
+- **Tailwind CSS** - للتنسيق
 
-- **Primary Purple**: `#8B5CF6` (knoux-purple)
-- **Neon Blue**: `#00D9FF` (knoux-neon)
-- **Dark Glass**: `rgba(255, 255, 255, 0.05)`
-- **Gradient**: Purple to neon blue transitions
+### معالجة الوسائط
 
-### Glassmorphism Classes
+- **WebRTC** - تسجيل الشاشة والكاميرا
+- **FFmpeg.wasm** - معالجة الفيديو والصوت
+- **Canvas API** - معالجة الصور
+- **Web Audio API** - معالجة الصوت المتقدم
 
-```css
-.glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
-}
-```
+### الذكاء الاصطناعي
 
-## 🔧 Configuration
+- **TensorFlow.js** - نماذج التعلم الآلي
+- **Web Workers** - المعالجة المتوازية
+- **ONNX.js** - تشغيل النماذج المحسنة
+- **OpenCV.js** - رؤية الحاسوب
 
-### AI Settings
+## 📊 **مراقبة الأداء**
 
-```typescript
-// Customize AI processing
-const settings = {
-  aiProcessingEnabled: true,
-  realTimeTranscription: true,
-  sentimentAnalysis: true,
-  languageDetection: true,
-  keywordExtraction: true,
-  smartSummarization: true,
-};
-```
+### معلومات النظام
 
-### Performance Settings
+- **استخدام المعالج**: ≤ 30% أثناء التسجيل
+- **استخدام الذاكرة**: مراقبة مستمرة
+- **س��عة القرص**: تحسين كتابة الملفات
+- **درجة الحرارة**: تنبيهات الحماية
 
-```typescript
-// Optimize performance
-const performanceConfig = {
-  targetFPS: 60,
-  memoryThreshold: 80,
-  cpuThreshold: 75,
-  enableHardwareAcceleration: true,
-  qualityAdjustment: "auto",
-};
-```
+### إحصائيات التسجيل
 
-## 🌐 Browser Support
+- **FPS الفعلي**: مراقبة مباشرة
+- **جودة الصوت**: قياس الوضوح
+- **حجم الملف**: تقدير مستمر
+- **زمن التسجيل**: عداد دقيق
 
-- ✅ **Chrome 90+** (Recommended)
-- ✅ **Firefox 88+**
-- ✅ **Safari 14+**
-- ✅ **Edge 90+**
+## 🛡️ **الأمان والخصوصية**
 
-### Required APIs
+### حماية البيانات
 
-- WebRTC (screen recording)
-- Web Audio API (audio processing)
-- Canvas API (video processing)
-- Web Speech API (transcription)
-- WebAssembly (AI acceleration)
+- ✅ **معالجة محلية 100%** - لا ترسل البيانات للخارج
+- ✅ **تشفير الملفات** - حماية متقدمة للتسجيلات
+- ✅ **إذونات آمنة** - طلب إذن للوصول للكاميرا والميك
+- ✅ **حذف آمن** - مسح كامل للملفات المحذوفة
 
-## 📊 Performance Benchmarks
+### امتثال للمعايير
 
-| System           | FPS   | Memory | Quality   |
-| ---------------- | ----- | ------ | --------- |
-| High-end Desktop | 60    | <50%   | Excellent |
-| Mid-range Laptop | 45-55 | <70%   | Good      |
-| Basic System     | 30-40 | <85%   | Fair      |
+- **GDPR** - متوافق مع قوانين حماية البيانات الأوروبية
+- **CCPA** - متوافق مع قانون خصوصية كاليفورنيا
+- **SOC 2** - معايير الأمان للخدمات
 
-## 🛠️ Development
+## 🔄 **التحديثات والصيانة**
 
-### Scripts
+### التحديثات التلقائية
 
-```bash
-npm run dev        # Start development server
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm run type-check # TypeScript validation
-```
+- **تحديث النماذج**: تحديث نماذج الذكاء الاصطناعي
+- **إصلاح الأخطاء**: تحديثات أمنية منتظمة
+- **مميزات جديدة**: إضافات شهر��ة
 
-### Adding New AI Features
+### النسخ الاحتياطية
 
-1. Extend `offlineAI.ts` service
-2. Update AI panel interface
-3. Add processing functions
-4. Update types and interfaces
+- **حفظ تلقائي**: نسخ احتياطية للإعدادات
+- **استرداد البيانات**: استرجاع التسجيلات المحذوفة
+- **تصدير كامل**: نسخ احتياطية للمشروع
 
-### Custom Themes
+## 🎯 **حالات الاستخدام**
 
-```css
-/* Add to index.html */
-:root {
-  --knoux-primary: #your-color;
-  --knoux-secondary: #your-color;
-  --glass-bg: rgba(your-color, 0.05);
-}
-```
+### 🎓 **التعليم**
 
-## 🔒 Privacy & Security
+- تسجيل المحاضرات والدروس
+- إنشاء محتوى تعليمي تفاعلي
+- مراجعة العروض التقديمية
 
-- ✅ **100% Offline Processing** - No data sent to external servers
-- ✅ **Local Storage Only** - Recordings stay on your device
-- ✅ **No Tracking** - Zero analytics or telemetry
-- ✅ **Open Source** - Full transparency
+### 💼 **الأعمال**
 
-## 🤝 Contributing
+- اجتماعات العمل والعروض
+- تدريب الموظفين
+- توثيق العمليات
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+### 🎮 **الألعاب**
 
-### Development Guidelines
+- تسجيل جلسات اللعب
+- إنشاء محتوى للمنصات
+- مراجعة الأداء
 
-- Follow TypeScript best practices
-- Maintain glassmorphism design consistency
-- Add tests for new AI features
-- Update documentation
+### 🎨 **الإبداع**
 
-## 📄 License
+- إنشاء محتوى فني
+- تحرير الفيديوهات
+- المشاريع الإبداعية
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🆘 **الدعم وحل المشاكل**
 
-## 🙏 Acknowledgments
+### مشاكل شائعة
 
-- **TensorFlow.js** - Machine learning in the browser
-- **React Team** - Amazing framework
-- **Tailwind CSS** - Utility-first styling
-- **Vite** - Lightning-fast build tool
+#### مشكلة: لا يظهر الصوت في التسجيل
 
-## 🔮 Roadmap
+**الحل:**
 
-### Version 2.0 (Coming Soon)
+1. تأكد من تفعيل "صوت النظام"
+2. امنح الإذن للمتصفح للوصول للميكروفون
+3. تحقق من إعدادات الصوت في النظام
 
-- 🔍 **OCR Integration** with Tesseract.js
-- 👥 **Face Detection** with MediaPipe
-- 🎯 **Object Detection** with YOLO
-- 🎵 **Advanced Audio Analysis**
-- 📱 **Mobile App** (React Native)
+#### مشكلة: جودة التسجيل منخفضة
 
-### Version 3.0 (Future)
+**الحل:**
 
-- 🌐 **Real-time Collaboration**
-- ☁️ **Optional Cloud Sync**
-- 🎮 **Game Recording Optimization**
-- 🔴 **Live Streaming Integration**
+1. ارفع إعدا��ات الجودة إلى 1080p أو أعلى
+2. زود معدل البت
+3. تأكد من وجود مساحة كافية
+
+#### مشكلة: التطبيق بطيء أثناء التسجيل
+
+**الحل:**
+
+1. قلل جودة التسجيل مؤقتاً
+2. أغلق التطبيقات الأخرى
+3. فعّل "وضع الألعاب" للأداء الأمثل
+
+### معلومات التواصل
+
+- **الموقع**: [knoux.ai](https://knoux.ai)
+- **البريد الإلكتروني**: support@knoux.ai
+- **التوثيق**: [docs.knoux.ai](https://docs.knoux.ai)
+- **مجتمع Discord**: [discord.gg/knoux](https://discord.gg/knoux)
+
+## 📝 **الترخيص**
+
+هذا المشروع مرخص تحت [رخصة MIT](LICENSE) - انظر ملف LICENSE للتفاصيل.
+
+## 🤝 **المساهمة**
+
+نرحب بالمساهمات! يرجى قراءة [دليل المساهمة](CONTRIBUTING.md) قبل البدء.
+
+### خطوات المساهمة
+
+1. Fork المشروع
+2. أنشئ فرع للميزة الجديدة (`git checkout -b feature/AmazingFeature`)
+3. Commit التغييرات (`git commit -m 'Add some AmazingFeature'`)
+4. Push للفرع (`git push origin feature/AmazingFeature`)
+5. افتح Pull Request
+
+## 🙏 **شكر وتقدير**
+
+- **TensorFlow.js** - لنماذج الذكاء الاصط��اعي
+- **FFmpeg** - لمعالجة الوسائط
+- **React Team** - لإطار العمل الرائع
+- **المجتمع المفتوح المصدر** - للإلهام والدعم
+
+## 📈 **إحصائيات المشروع**
+
+![Lines of Code](https://img.shields.io/badge/Lines%20of%20Code-15%2C000%2B-blue)
+![Components](https://img.shields.io/badge/Components-20%2B-green)
+![AI Tools](https://img.shields.io/badge/AI%20Tools-40%2B-purple)
+![Templates](https://img.shields.io/badge/Templates-100%2B-orange)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by the KNOUX Team**
+**صُنع بـ ❤️ بواسطة فريق KNOUX**
 
-[Website](https://knoux.ai) • [Documentation](https://docs.knoux.ai) • [Support](https://support.knoux.ai)
+[الموقع الرسمي](https://knoux.ai) | [التوثيق](https://docs.knoux.ai) | [المجتمع](https://discord.gg/knoux)
 
 </div>
