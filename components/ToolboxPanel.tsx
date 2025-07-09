@@ -43,7 +43,7 @@ const ToolboxPanel: React.FC = () => {
 
       await executeToolOperation(tool, file, additionalInput);
     } catch (error) {
-      console.error("خطأ في تش��يل الأداة:", error);
+      console.error("خطأ في تشغيل الأداة:", error);
       alert(`خطأ في تشغ��ل ${tool.name}: ${error}`);
     }
   };
@@ -532,7 +532,7 @@ const ToolboxPanel: React.FC = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search tools..."
+              placeholder="ابحث عن الأدوات..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-64 px-4 py-2 pl-10 bg-black/30 border border-knoux-purple/30 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-knoux-purple focus:border-knoux-purple"
