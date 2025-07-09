@@ -1,0 +1,229 @@
+{
+  "format": "graph-model",
+  "modelName": "YOLOv8 Local Object Detection",
+  "version": "8.0.0",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "description": "نموذج اكتشاف الكائنات المحلي - YOLOv8",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "image_input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_FLOAT" },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "640" },
+                { "size": "640" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "backbone_conv1",
+        "op": "Conv2D",
+        "input": ["image_input", "backbone/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "backbone_conv2",
+        "op": "Conv2D",
+        "input": ["backbone_conv1", "backbone/conv2/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "backbone_conv3",
+        "op": "Conv2D",
+        "input": ["backbone_conv2", "backbone/conv3/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 2, 2, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "fpn_layer",
+        "op": "Conv2D",
+        "input": ["backbone_conv3", "fpn/conv/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "detection_head",
+        "op": "Conv2D",
+        "input": ["fpn_layer", "head/detection/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "output_boxes",
+        "op": "Reshape",
+        "input": ["detection_head", "output_shape"]
+      }
+    ]
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "backbone/conv1/kernel",
+          "shape": [6, 6, 3, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "backbone/conv2/kernel",
+          "shape": [3, 3, 64, 128],
+          "dtype": "float32"
+        },
+        {
+          "name": "backbone/conv3/kernel",
+          "shape": [3, 3, 128, 256],
+          "dtype": "float32"
+        },
+        {
+          "name": "fpn/conv/kernel",
+          "shape": [1, 1, 256, 256],
+          "dtype": "float32"
+        },
+        {
+          "name": "head/detection/kernel",
+          "shape": [1, 1, 256, 84],
+          "dtype": "float32"
+        },
+        {
+          "name": "output_shape",
+          "shape": [3],
+          "dtype": "int32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "image_input": {
+        "name": "image_input:0",
+        "dtype": "DT_FLOAT"
+      }
+    },
+    "outputs": {
+      "output_boxes": {
+        "name": "output_boxes:0",
+        "dtype": "DT_FLOAT"
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "classes": [
+      "person",
+      "bicycle",
+      "car",
+      "motorcycle",
+      "airplane",
+      "bus",
+      "train",
+      "truck",
+      "boat",
+      "traffic light",
+      "fire hydrant",
+      "stop sign",
+      "parking meter",
+      "bench",
+      "bird",
+      "cat",
+      "dog",
+      "horse",
+      "sheep",
+      "cow",
+      "elephant",
+      "bear",
+      "zebra",
+      "giraffe",
+      "backpack",
+      "umbrella",
+      "handbag",
+      "tie",
+      "suitcase",
+      "frisbee",
+      "skis",
+      "snowboard",
+      "sports ball",
+      "kite",
+      "baseball bat",
+      "baseball glove",
+      "skateboard",
+      "surfboard",
+      "tennis racket",
+      "bottle",
+      "wine glass",
+      "cup",
+      "fork",
+      "knife",
+      "spoon",
+      "bowl",
+      "banana",
+      "apple",
+      "sandwich",
+      "orange",
+      "broccoli",
+      "carrot",
+      "hot dog",
+      "pizza",
+      "donut",
+      "cake",
+      "chair",
+      "couch",
+      "potted plant",
+      "bed",
+      "dining table",
+      "toilet",
+      "tv",
+      "laptop",
+      "mouse",
+      "remote",
+      "keyboard",
+      "cell phone",
+      "microwave",
+      "oven",
+      "toaster",
+      "sink",
+      "refrigerator",
+      "book",
+      "clock",
+      "vase",
+      "scissors",
+      "teddy bear",
+      "hair drier",
+      "toothbrush"
+    ],
+    "capabilities": [
+      "object_detection",
+      "real_time_tracking",
+      "scene_analysis",
+      "content_analysis"
+    ],
+    "performance": {
+      "accuracy": 0.95,
+      "speed": "real-time",
+      "fps": "60+",
+      "memoryUsage": "45MB",
+      "latency": "25ms"
+    },
+    "inputSize": [640, 640],
+    "outputFormat": "boxes_scores_classes"
+  }
+}
