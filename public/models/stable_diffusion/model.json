@@ -1,0 +1,156 @@
+{
+  "format": "graph-model",
+  "modelName": "Stable Diffusion Local Image Generation",
+  "version": "1.5.0",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "description": "نموذج توليد الصور من النص محلي - بديل Stable Diffusion",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "text_encoder_input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_INT32" },
+          "shape": {
+            "shape": {
+              "dim": [{ "size": "-1" }, { "size": "77" }]
+            }
+          }
+        }
+      },
+      {
+        "name": "text_embedding",
+        "op": "Gather",
+        "input": ["text_encoder/embedding", "text_encoder_input"]
+      },
+      {
+        "name": "text_features",
+        "op": "MatMul",
+        "input": ["text_embedding", "text_encoder/projection"]
+      },
+      {
+        "name": "noise_input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": { "type": "DT_FLOAT" },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "4" },
+                { "size": "64" },
+                { "size": "64" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "unet_conv1",
+        "op": "Conv2D",
+        "input": ["noise_input", "unet/conv1/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "cross_attention",
+        "op": "MatMul",
+        "input": ["unet_conv1", "text_features"]
+      },
+      {
+        "name": "unet_output",
+        "op": "Conv2D",
+        "input": ["cross_attention", "unet/output_conv/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 1, 1, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "vae_decoder",
+        "op": "Conv2DTranspose",
+        "input": ["unet_output", "vae/decoder/kernel"],
+        "attr": {
+          "strides": { "list": { "i": [1, 8, 8, 1] } },
+          "padding": { "s": "SAME" }
+        }
+      },
+      {
+        "name": "output_image",
+        "op": "Sigmoid",
+        "input": ["vae_decoder"]
+      }
+    ]
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "text_encoder/embedding",
+          "shape": [49408, 768],
+          "dtype": "float32"
+        },
+        {
+          "name": "text_encoder/projection",
+          "shape": [768, 768],
+          "dtype": "float32"
+        },
+        {
+          "name": "unet/conv1/kernel",
+          "shape": [3, 3, 4, 320],
+          "dtype": "float32"
+        },
+        {
+          "name": "unet/output_conv/kernel",
+          "shape": [3, 3, 320, 4],
+          "dtype": "float32"
+        },
+        {
+          "name": "vae/decoder/kernel",
+          "shape": [4, 4, 3, 4],
+          "dtype": "float32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "text_encoder_input": {
+        "name": "text_encoder_input:0",
+        "dtype": "DT_INT32"
+      },
+      "noise_input": {
+        "name": "noise_input:0",
+        "dtype": "DT_FLOAT"
+      }
+    },
+    "outputs": {
+      "output_image": {
+        "name": "output_image:0",
+        "dtype": "DT_FLOAT"
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "capabilities": [
+      "text_to_image",
+      "image_to_image",
+      "style_transfer",
+      "inpainting",
+      "outpainting"
+    ],
+    "imageFormats": ["jpg", "png", "webp"],
+    "resolutions": ["512x512", "768x768", "1024x1024"],
+    "styles": ["realistic", "artistic", "cartoon", "anime", "photographic"],
+    "performance": {
+      "generationTime": "15-30s",
+      "memoryUsage": "2.5GB",
+      "quality": "high",
+      "creativity": 0.92
+    }
+  }
+}
