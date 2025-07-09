@@ -245,38 +245,10 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
 
       <div className="canvas-content">
         {activeView === "gallery" && (
-          <div className="gallery-view">
-            <div className="gallery-header">
-              <h2>Select an Artistic Template</h2>
-              <p>
-                Each template represents a different aesthetic approach to
-                sophisticated artistic expression.
-              </p>
-            </div>
-
-            <div className="templates-grid">
-              {templates.map((template) => (
-                <div
-                  key={template.id}
-                  className="template-card"
-                  onClick={() => handleTemplateSelect(template)}
-                >
-                  <div className="template-preview">
-                    <div className="preview-placeholder">
-                      {template.name.charAt(0)}
-                    </div>
-                  </div>
-                  <div className="template-info">
-                    <h3 className="template-name">{template.name}</h3>
-                    <p className="template-category">{template.category}</p>
-                    <p className="template-description">
-                      {template.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <EnhancedGallery
+            onTemplateSelect={handleTemplateSelect}
+            onImageUpload={handleImageUpload}
+          />
         )}
 
         {activeView === "editor" && selectedTemplate && (
