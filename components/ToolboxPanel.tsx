@@ -43,19 +43,19 @@ const ToolboxPanel: React.FC = () => {
 
       await executeToolOperation(tool, file, additionalInput);
     } catch (error) {
-      console.error("خطأ ف�� تشغيل الأداة:", error);
-      alert(`خطأ في تشغ��ل ${tool.name}: ${error}`);
+      console.error("خطأ في تشغيل الأداة:", error);
+      alert(`خطأ في تشغيل ${tool.name}: ${error}`);
     }
   };
 
-  // تنفيذ عملية ال��داة
+  // تنفيذ عملية الأداة
   const executeToolOperation = async (
     tool: AITool,
     file?: File,
     additionalInput?: string,
   ) => {
     try {
-      // التحقق من النق��ط المطلوبة
+      // التحقق من النقاط المطلوبة
       if (tool.credits_cost > userCredits.remaining) {
         throw new Error("نقاط غير كافية لتنفيذ هذه الأداة");
       }
@@ -90,7 +90,7 @@ const ToolboxPanel: React.FC = () => {
         // عرض رسالة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
-        // تح��يل النتيج�� ��لقائياً إذا كانت ملف
+        // تحميل النتيجة تلقائياً إذا كانت ملف
         if (result.output && typeof result.output !== "string") {
           downloadFile(result.output, `${tool.name}_result`);
         }
@@ -119,6 +119,7 @@ const ToolboxPanel: React.FC = () => {
       video: "video/*",
       audio: "audio/*",
       image: "image/*",
+      text: "text/*",
       file: "*/*",
     };
 
@@ -133,231 +134,572 @@ const ToolboxPanel: React.FC = () => {
     { id: "text", name: "النصوص", icon: "📝", color: "purple-400" },
     {
       id: "ai-tools",
-      name: "أدوات الذكاء الاص��ناعي",
+      name: "أدوات الذكاء الاصطناعي",
       icon: "🤖",
       color: "knoux-neon",
     },
   ] as const;
 
-  // Mock AI tools data
+  // جميع أدوات Toolbox - مطابقة للمتطلبات الكاملة
   useEffect(() => {
-    const mockTools: AITool[] = [
-      // AI Video Tools
+    const comprehensiveTools: AITool[] = [
+      // ========== أدوات الفيديو (Video Tools) ==========
       {
-        id: "ai-video-generator",
-        name: "مولد الفيديو بالذكاء الاصطناعي",
-        description: "حول النصوص إلى فيديوهات مذهلة مع التعليق الصوتي الذكي",
-        category: "ai-tools",
-        icon: "🎬",
+        id: "ai-effects",
+        name: "التأثيرات الذكية",
+        description: "تأثيرات ذكية على الفيديو مع تتبع الحركة وفلاتر متقدمة",
+        category: "video",
+        icon: "🎨",
         ai_powered: true,
-        credits_cost: 50,
-        processing_time: "slow",
-        input_types: ["text"],
+        credits_cost: 25,
+        processing_time: "medium",
+        input_types: ["video"],
         output_types: ["video"],
-        features: ["Multi-language TTS", "Stock footage", "Custom voiceovers"],
+        features: ["تتبع الحركة", "فلاتر ذكية", "خلفيات ديناميكية"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "ai-animation",
+        name: "الرسوم المتحركة الذكية",
+        description:
+          "توليد رسوم متحركة من صور أو نصوص بتقنيات الذكاء الاصطناعي",
+        category: "video",
+        icon: "🎞️",
+        ai_powered: true,
+        credits_cost: 40,
+        processing_time: "slow",
+        input_types: ["image", "text"],
+        output_types: ["video"],
+        features: ["توليد حركة", "أنماط متعددة", "تحكم بالمدة"],
         premium: true,
         popular: true,
         beta: false,
       },
       {
-        id: "ai-background-remover",
-        name: "مزيل الخلفية الذكي",
-        description: "إزالة الخلفيات من الفيديوهات والصور تلقائياً",
-        category: "ai-tools",
-        icon: "🎭",
+        id: "ai-transition",
+        name: "الانتقالات الذكية",
+        description: "انتقالات سلسة ومبتكرة بين مقاطع الفيديو تلقائياً",
+        category: "video",
+        icon: "🔀",
+        ai_powered: true,
+        credits_cost: 15,
+        processing_time: "fast",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["انتقالات تلقائية", "تحليل المشاهد", "مدة قابلة للتعديل"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "image-to-video",
+        name: "الصورة إلى فيديو",
+        description: "تحويل مجموعة صور إلى فيديو مع حركة كاميرا احترافية",
+        category: "video",
+        icon: "🖼️➡️🎬",
+        ai_powered: true,
+        credits_cost: 30,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["video"],
+        features: ["حركة كاميرا", "مؤثرات بصرية", "موسيقى تلقائية"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "text-to-video",
+        name: "النص إلى فيديو",
+        description: "إنشاء فيديو كامل من أوصاف نصية فقط",
+        category: "video",
+        icon: "📝➡️🎞️",
+        ai_powered: true,
+        credits_cost: 60,
+        processing_time: "slow",
+        input_types: ["text"],
+        output_types: ["video"],
+        features: ["توليد مشاهد", "تحكم بالأسلوب", "سرد صوتي"],
+        premium: true,
+        popular: true,
+        beta: true,
+      },
+      {
+        id: "screen-recorder",
+        name: "مسجل الشاشة",
+        description: "تسجيل شاشة النظام مع صوت عالي الجودة",
+        category: "video",
+        icon: "🎥",
+        ai_powered: false,
+        credits_cost: 5,
+        processing_time: "fast",
+        input_types: ["screen"],
+        output_types: ["video"],
+        features: ["تسجيل كامل", "تسجيل جزئي", "صوت النظام"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "video-downloader",
+        name: "محمل الفيديو",
+        description: "تحميل فيديوهات من منصات متعددة بجودة عالية",
+        category: "video",
+        icon: "⬇️🎞️",
+        ai_powered: false,
+        credits_cost: 2,
+        processing_time: "fast",
+        input_types: ["url"],
+        output_types: ["video"],
+        features: ["منصات متعددة", "جودة متنوعة", "تحميل سريع"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "ai-video-generator",
+        name: "مولد الفيديو الذكي",
+        description: "توليد فيديوهات كاملة تلقائياً من نصوص أو صور",
+        category: "video",
+        icon: "🧠🎬",
+        ai_powered: true,
+        credits_cost: 80,
+        processing_time: "slow",
+        input_types: ["text", "image"],
+        output_types: ["video"],
+        features: ["توليد كامل", "سرد متقدم", "مؤثرات شاملة"],
+        premium: true,
+        popular: true,
+        beta: true,
+      },
+      {
+        id: "video-stabilization",
+        name: "مثبت الفيديو",
+        description: "تثبيت الفيديو لتقليل الاهتزاز والحركة غير المرغوبة",
+        category: "video",
+        icon: "🛡️",
         ai_powered: true,
         credits_cost: 20,
+        processing_time: "medium",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["تحليل الحركة", "تثبيت متقدم", "حفظ الجودة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "auto-bg-removal",
+        name: "إزالة الخلفية التلقائية",
+        description: "إزالة خلفية الفيديو تلقائياً بدقة عالية",
+        category: "video",
+        icon: "🎭",
+        ai_powered: true,
+        credits_cost: 35,
+        processing_time: "medium",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["فصل دقيق", "حواف ناعمة", "معالجة متقدمة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "blur-background",
+        name: "تمويه الخلفية",
+        description: "تمويه خلفية الفيديو مع إبراز الموضوع الرئيسي",
+        category: "video",
+        icon: "🖼️〰️",
+        ai_powered: true,
+        credits_cost: 15,
         processing_time: "fast",
-        input_types: ["image", "video"],
-        output_types: ["image", "video"],
-        features: [
-          "Precision masking",
-          "Green screen alternative",
-          "Batch processing",
-        ],
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["تحديد ذكي", "تمويه متدرج", "تحكم بالشدة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "video-translator",
+        name: "مترجم الفيديو",
+        description: "ترجمة الفيديو صوتياً ونصياً لعدة لغات",
+        category: "video",
+        icon: "🌍💬",
+        ai_powered: true,
+        credits_cost: 45,
+        processing_time: "slow",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["ترجمة صوتية", "ترجمة نصية", "لغات متعددة"],
+        premium: true,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "ai-shorts",
+        name: "المقاطع القصيرة الذكية",
+        description: "إنشاء مقاطع قصيرة مثيرة للاهتمام من فيديوهات طويلة",
+        category: "video",
+        icon: "📱🎬",
+        ai_powered: true,
+        credits_cost: 30,
+        processing_time: "medium",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["اختيار ذكي", "تنسيق تلقائي", "تحسين للمنصات"],
+        premium: true,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "face-swap",
+        name: "تبديل الوجوه",
+        description: "تبديل الوجوه في الصور والفيديو بواقعية عالية",
+        category: "video",
+        icon: "🧑↔️🧑",
+        ai_powered: true,
+        credits_cost: 50,
+        processing_time: "slow",
+        input_types: ["video", "image"],
+        output_types: ["video"],
+        features: ["واقعية عالية", "مزامنة التعابير", "إضاءة طبيعية"],
+        premium: true,
+        popular: false,
+        beta: true,
+      },
+      {
+        id: "ai-text-editing",
+        name: "التحرير النصي الذكي",
+        description: "تحرير الفيديو عبر التفاعل مع النص المنسوخ",
+        category: "video",
+        icon: "📝▶️",
+        ai_powered: true,
+        credits_cost: 25,
+        processing_time: "medium",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["تحرير نصي", "قص ذكي", "تزامن دقيق"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "video-trimmer",
+        name: "قص الفيديو",
+        description: "قص وتقطيع الفيديوهات بدقة عالية",
+        category: "video",
+        icon: "✂️",
+        ai_powered: false,
+        credits_cost: 3,
+        processing_time: "fast",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["قص دقيق", "معاينة فورية", "تنسيقات متعددة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+
+      // ========== أدوات الصوت (Audio Tools) ==========
+      {
+        id: "vocal-remover",
+        name: "مزيل الأصوات",
+        description: "فصل الغناء عن الموسيقى وإنشاء نسخ كاريوكي",
+        category: "audio",
+        icon: "🎤🚫",
+        ai_powered: true,
+        credits_cost: 20,
+        processing_time: "medium",
+        input_types: ["audio", "video"],
+        output_types: ["audio"],
+        features: ["فصل دقيق", "نسخ كاريوكي", "جودة عالية"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "audio-downloader",
+        name: "محمل الصوت",
+        description: "تحميل ملفات صوتية من منصات متعددة",
+        category: "audio",
+        icon: "⬇️🎶",
+        ai_powered: false,
+        credits_cost: 2,
+        processing_time: "fast",
+        input_types: ["url"],
+        output_types: ["audio"],
+        features: ["منصات متعددة", "جودة عالية", "تنسيقات متنوعة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "extract-audio",
+        name: "استخراج الصوت",
+        description: "استخراج الصوت من مقاطع الفيديو",
+        category: "audio",
+        icon: "🎞️➡️🎵",
+        ai_powered: false,
+        credits_cost: 2,
+        processing_time: "fast",
+        input_types: ["video"],
+        output_types: ["audio"],
+        features: ["استخراج سريع", "جودة أصلية", "تنسيقات متعددة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "voice-change",
+        name: "تغيير الصوت",
+        description: "تغيير نغمة وطابع الصوت بتأثيرات متنوعة",
+        category: "audio",
+        icon: "🎙️❤️",
+        ai_powered: true,
+        credits_cost: 15,
+        processing_time: "fast",
+        input_types: ["audio"],
+        output_types: ["audio"],
+        features: ["تأثيرات متعددة", "تحكم بالنغمة", "جودة طبيعية"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "noise-reduction",
+        name: "تقليل الضوضاء",
+        description: "إزالة ضوضاء الخلفية من التسجيلات الصوتية",
+        category: "audio",
+        icon: "🔇✋",
+        ai_powered: true,
+        credits_cost: 10,
+        processing_time: "fast",
+        input_types: ["audio"],
+        output_types: ["audio"],
+        features: ["إزالة ذكية", "حفظ الكلام", "تحسين الوضوح"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "beat-detection",
+        name: "كشف الإيقاع",
+        description: "تحليل الإيقاع الموسيقي لمزامنة الفيديو مع الموسيقى",
+        category: "audio",
+        icon: "🎶⏱️",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "fast",
+        input_types: ["audio"],
+        output_types: ["data"],
+        features: ["تحليل الإيقاع", "مزامنة تلقائية", "دقة عالية"],
+        premium: false,
+        popular: false,
+        beta: false,
+      },
+
+      // ========== أدوات الصور (Image Tools) ==========
+      {
+        id: "photo-enhancer",
+        name: "محسن الصور",
+        description: "تحسين جودة الصور ووضوحها وألوانها تل��ائياً",
+        category: "image",
+        icon: "✨",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "fast",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["تحسين تلقائي", "تصحيح الألوان", "إزالة التشويش"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "image-bg-removal",
+        name: "إزالة خلفية الصور",
+        description: "إزالة الخلفية من الصور بدقة احترافية",
+        category: "image",
+        icon: "🖼️🚫🌫️",
+        ai_powered: true,
+        credits_cost: 5,
+        processing_time: "fast",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["فصل دقيق", "حواف ناعمة", "صور شفافة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "custom-cutout",
+        name: "القص المخصص",
+        description: "قص مخصص لعناصر محددة من الصور بدقة عالية",
+        category: "image",
+        icon: "✂️🖼️",
+        ai_powered: true,
+        credits_cost: 10,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["تحديد ذكي", "قص دقيق", "تحسين الحواف"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "text-to-image",
+        name: "النص إلى صورة",
+        description: "توليد صور مذهلة من أوصاف نصية",
+        category: "image",
+        icon: "📝➡️🖼️",
+        ai_powered: true,
+        credits_cost: 25,
+        processing_time: "medium",
+        input_types: ["text"],
+        output_types: ["image"],
+        features: ["توليد إبداعي", "أنماط متعددة", "دقة عالية"],
+        premium: true,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "reference-image",
+        name: "الصورة المرجعية",
+        description: "استخدام صورة مرجعية لتوليد أو تعديل صور جديدة",
+        category: "image",
+        icon: "🖼️🔗",
+        ai_powered: true,
+        credits_cost: 20,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["مرجع أسلوب", "تحويل إبداعي", "حفظ ا��هوية"],
+        premium: true,
+        popular: false,
+        beta: false,
+      },
+      {
+        id: "image-upscaler",
+        name: "مكبر الصور",
+        description: "تكبير الصور وتحسين دقتها حتى 8K",
+        category: "image",
+        icon: "🖼️↔️",
+        ai_powered: true,
+        credits_cost: 12,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["تكبير ذكي", "دقة 8K", "حفظ التفاصيل"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+
+      // ========== أدوات النصوص (Text Tools) ==========
+      {
+        id: "ai-copywriting",
+        name: "الكتابة الإعلانية الذكية",
+        description: "توليد نصوص تسويقية وإعلانية احترافية",
+        category: "text",
+        icon: "✍️✨",
+        ai_powered: true,
+        credits_cost: 15,
+        processing_time: "fast",
+        input_types: ["text"],
+        output_types: ["text"],
+        features: ["نصوص تسويقية", "أنماط متعددة", "تحسين SEO"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "text-to-speech",
+        name: "النص إلى كلام",
+        description: "تحويل النصوص إلى كلام طبيعي بأصوات متنوعة",
+        category: "text",
+        icon: "📢",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "fast",
+        input_types: ["text"],
+        output_types: ["audio"],
+        features: ["أصوات متعددة", "تحكم بالسرعة", "لغات متنوعة"],
         premium: false,
         popular: true,
         beta: false,
       },
       {
         id: "speech-to-text",
-        name: "تحويل الكلام إلى نص",
-        description: "إنشاء ترجمات دقيقة تلقائياً",
-        category: "ai-tools",
-        icon: "🗣️",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "medium",
-        input_types: ["video", "audio"],
-        output_types: ["text"],
-        features: ["Multi-language support", "Timestamp sync", "SRT export"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "ai-voice-clone",
-        name: "استنساخ الصوت الذكي",
-        description: "استنسخ أي صوت من عينة قصيرة",
-        category: "ai-tools",
-        icon: "🎤",
-        ai_powered: true,
-        credits_cost: 40,
-        processing_time: "medium",
-        input_types: ["audio"],
-        output_types: ["audio"],
-        features: ["Voice synthesis", "Custom speech", "Emotion control"],
-        premium: true,
-        popular: false,
-        beta: true,
-      },
-      {
-        id: "ai-animation",
-        name: "الرسوم المتحركة الذكية",
-        description: "حرك الصور الثابتة بالحركة الذكية",
-        category: "ai-tools",
-        icon: "🎨",
-        ai_powered: true,
-        credits_cost: 35,
-        processing_time: "slow",
-        input_types: ["image"],
-        output_types: ["video"],
-        features: ["Character animation", "Object motion", "Scene dynamics"],
-        premium: true,
-        popular: false,
-        beta: true,
-      },
-      {
-        id: "ai-upscaler",
-        name: "محسن جودة الصور",
-        description: "حسن جودة الصور حتى دقة 8K",
-        category: "ai-tools",
-        icon: "📈",
+        name: "الكلام إلى نص",
+        description: "تحويل التسجيلات الصوتية إلى نصوص دقيقة",
+        category: "text",
+        icon: "🎤📝",
         ai_powered: true,
         credits_cost: 10,
-        processing_time: "fast",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["8K upscaling", "Noise reduction", "Detail enhancement"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-
-      // Traditional Video Tools
-      {
-        id: "video-trimmer",
-        name: "Video Trimmer",
-        description: "Cut and trim videos with precision",
-        category: "video",
-        icon: "✂️",
-        ai_powered: false,
-        credits_cost: 2,
-        processing_time: "fast",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: [
-          "Frame-perfect cuts",
-          "Multiple formats",
-          "Batch processing",
-        ],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "video-merger",
-        name: "Video Merger",
-        description: "Combine multiple videos seamlessly",
-        category: "video",
-        icon: "🔗",
-        ai_powered: false,
-        credits_cost: 5,
         processing_time: "medium",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["Smooth transitions", "Audio sync", "Quality preservation"],
-        premium: false,
-        popular: false,
-        beta: false,
-      },
-
-      // Audio Tools
-      {
-        id: "noise-remover",
-        name: "Noise Remover",
-        description: "Remove background noise from audio",
-        category: "audio",
-        icon: "🔇",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["audio"],
-        output_types: ["audio"],
-        features: [
-          "Adaptive filtering",
-          "Preserve vocals",
-          "Real-time preview",
-        ],
+        input_types: ["audio", "video"],
+        output_types: ["text"],
+        features: ["دقة عالية", "لهجات متعددة", "ترميز زمني"],
         premium: false,
         popular: true,
         beta: false,
       },
       {
-        id: "vocal-remover",
-        name: "Vocal Remover",
-        description: "Extract instrumentals from songs",
-        category: "audio",
-        icon: "🎼",
-        ai_powered: true,
-        credits_cost: 12,
-        processing_time: "medium",
-        input_types: ["audio"],
-        output_types: ["audio"],
-        features: ["AI separation", "Karaoke mode", "Stems isolation"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-
-      // Image Tools
-      {
-        id: "photo-enhancer",
-        name: "Photo Enhancer",
-        description: "Enhance photos with AI-powered adjustments",
-        category: "image",
-        icon: "✨",
-        ai_powered: true,
-        credits_cost: 6,
-        processing_time: "fast",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["Auto enhance", "Color correction", "Lighting fix"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-
-      // Text Tools
-      {
-        id: "text-to-speech",
-        name: "Text to Speech",
-        description: "Convert text to natural-sounding speech",
+        id: "split-subtitles",
+        name: "تقسيم الترجمات",
+        description: "تقسيم النصوص الطويلة لترجمات مناسبة للعرض",
         category: "text",
-        icon: "📢",
+        icon: "📝✂️",
         ai_powered: true,
         credits_cost: 5,
         processing_time: "fast",
         input_types: ["text"],
-        output_types: ["audio"],
-        features: ["50+ voices", "Emotion control", "SSML support"],
+        output_types: ["text"],
+        features: ["تقسيم ذكي", "توقيت مناسب", "تنسيق احترافي"],
         premium: false,
         popular: true,
         beta: false,
       },
+      {
+        id: "subtitle-maker",
+        name: "صانع الترجمات",
+        description: "إنشاء ملفات ترجمة احترافية تلقائياً",
+        category: "text",
+        icon: "🎬💬",
+        ai_powered: true,
+        credits_cost: 12,
+        processing_time: "medium",
+        input_types: ["video", "audio"],
+        output_types: ["text"],
+        features: ["ترجمة تلقائية", "تنسيقات متعددة", "مزامنة دقيقة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+
+      // ========== أدوات الذكاء الاصطناعي المتقدمة ==========
+      {
+        id: "ai-avatar",
+        name: "الصورة الرمزية الذكية",
+        description: "توليد صور رمزية متحركة قادرة على الكلام والغناء",
+        category: "ai-tools",
+        icon: "👤🎤",
+        ai_powered: true,
+        credits_cost: 40,
+        processing_time: "slow",
+        input_types: ["image", "audio"],
+        output_types: ["video"],
+        features: ["تحريك الوجه", "مزامنة الشفاه", "تعابير طبيعية"],
+        premium: true,
+        popular: true,
+        beta: true,
+      },
     ];
 
-    setTools(mockTools);
+    setTools(comprehensiveTools);
   }, []);
 
   const filteredTools = tools.filter((tool) => {
@@ -373,7 +715,7 @@ const ToolboxPanel: React.FC = () => {
 
   const handleToolSelect = (tool: AITool) => {
     if (tool.credits_cost > userCredits.remaining) {
-      alert("نقاط ��ير كافية! يرجى ترقية الخطة.");
+      alert("نقاط غير كافية! يرجى ترقية الخطة.");
       return;
     }
 
@@ -418,7 +760,7 @@ const ToolboxPanel: React.FC = () => {
               )}
               {tool.popular && (
                 <span className="px-2 py-0.5 bg-green-500/80 rounded text-xs font-bold text-white">
-                  🔥 Popular
+                  🔥 شائع
                 </span>
               )}
             </div>
@@ -430,7 +772,7 @@ const ToolboxPanel: React.FC = () => {
           <div className="text-lg font-bold text-knoux-neon">
             {tool.credits_cost}
           </div>
-          <div className="text-xs text-white/60">credits</div>
+          <div className="text-xs text-white/60">نقاط</div>
         </div>
       </div>
 
@@ -466,7 +808,11 @@ const ToolboxPanel: React.FC = () => {
             }`}
           ></span>
           <span className="text-xs text-white/60 capitalize">
-            {tool.processing_time} processing
+            {tool.processing_time === "fast"
+              ? "سريع"
+              : tool.processing_time === "medium"
+                ? "متوسط"
+                : "بطيء"}
           </span>
         </div>
 
@@ -479,7 +825,11 @@ const ToolboxPanel: React.FC = () => {
                   ? "🖼️"
                   : type === "video"
                     ? "🎥"
-                    : "🎵"}
+                    : type === "audio"
+                      ? "🎵"
+                      : type === "url"
+                        ? "🔗"
+                        : "📄"}
             </span>
           ))}
           <span className="text-white/30">→</span>
@@ -490,8 +840,10 @@ const ToolboxPanel: React.FC = () => {
                 : type === "image"
                   ? "🖼️"
                   : type === "video"
-                    ? "����"
-                    : "🎵"}
+                    ? "🎞️"
+                    : type === "audio"
+                      ? "🎵"
+                      : "📄"}
             </span>
           ))}
         </div>
@@ -521,10 +873,10 @@ const ToolboxPanel: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
-              🛠️ AI Toolbox
+              🛠️ صندوق الأدوات الاحترافي
             </h2>
             <p className="text-white/70 mt-1">
-              Powerful AI tools to enhance your content
+              أدوات الذكاء الاصطناعي المتقدمة لتحرير المحتوى
             </p>
           </div>
 
@@ -636,7 +988,7 @@ const ToolboxPanel: React.FC = () => {
             {categories.find((c) => c.id === selectedCategory)?.icon}{" "}
             {categories.find((c) => c.id === selectedCategory)?.name}
           </h3>
-          <span className="text-white/70">{filteredTools.length} tools</span>
+          <span className="text-white/70">{filteredTools.length} أداة</span>
         </div>
 
         {filteredTools.length === 0 ? (
@@ -666,8 +1018,8 @@ const ToolboxPanel: React.FC = () => {
                 ترقية إلى الاحترافي
               </h3>
               <p className="text-white/70">
-                احصل على نقاط غير محد��دة وإمكانية الوصول لأدوات الذكاء
-                الاصطناعي المتقدمة
+                احصل على نقاط غير محدودة وإمكانية الوصول لأدوات الذكاء الاصطناعي
+                المتقدمة
               </p>
             </div>
             <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl font-bold text-black hover:scale-105 transition-transform">
