@@ -131,7 +131,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         <div className="max-h-96 overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="text-4xl mb-3">🔕</div>
+              <div className="text-4xl mb-3">���</div>
               <h4 className="font-rajdhani font-bold text-white mb-1">
                 All Clear!
               </h4>
@@ -235,7 +235,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes slideIn {
           from {
             transform: translateX(100%);
