@@ -81,67 +81,63 @@ const ToolboxPanel: React.FC = () => {
     file?: File,
     additionalInput?: string,
   ) => {
-    const input = file || additionalInput || "";
+    try {
+      // التحقق من النق��ط المطلوبة
+      if (tool.credits_cost > userCredits.remaining) {
+        throw new Error("نقاط غير كافية لتنفيذ هذه الأداة");
+      }
 
-    // تحديد نوع المهمة ونوع العملية
-    let taskType: "video" | "audio" | "image" | "text";
-    let operation: string;
+      // إعداد المدخلات
+      const input = file ? file : additionalInput || "";
 
-    switch (tool.id) {
-      case "ai-video-generator":
-        taskType = "text";
-        operation = "text_to_video";
-        break;
-      case "ai-background-remover":
-        taskType = file?.type.startsWith("video/") ? "video" : "image";
-        operation = "background_removal";
-        break;
-      case "ai-speech-to-text":
-        taskType = "audio";
-        operation = "speech_to_text";
-        break;
-      case "ai-voice-cloning":
-        taskType = "audio";
-        operation = "voice_change";
-        break;
-      case "ai-animation":
-        taskType = "video";
-        operation = "ai_animation";
-        break;
-      case "ai-image-upscaler":
-        taskType = "image";
-        operation = "image_upscaler";
-        break;
-      case "video-trimmer":
-        taskType = "video";
-        operation = "trim_video";
-        break;
-      case "video-merger":
-        taskType = "video";
-        operation = "merge_video";
-        break;
-      case "noise-remover":
-        taskType = "audio";
-        operation = "noise_reduction";
-        break;
-      case "vocal-remover":
-        taskType = "audio";
-        operation = "vocal_remover";
-        break;
-      default:
-        throw new Error(`أداة غير مدعومة: ${tool.id}`);
+      // تنفيذ العملية باستخدام toolboxService
+      const result: ToolExecutionResult = await toolboxService.executeTool(
+        tool.id,
+        {
+          input,
+          file,
+          options: {
+            quality: "high",
+            format: "auto",
+          },
+        },
+      );
+
+      // معالجة النتيجة
+      if (result.success) {
+        console.log(`✅ نجح تنفيذ ${tool.name}:`, result);
+
+        // تحديث النقاط
+        setUserCredits((prev) => ({
+          ...prev,
+          remaining: prev.remaining - tool.credits_cost,
+          used: prev.used + tool.credits_cost,
+        }));
+
+        // عرض رسالة نجاح
+        alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
+
+        // تحميل النتيجة تلقائياً إذا كانت ملف
+        if (result.output && typeof result.output !== "string") {
+          downloadFile(result.output, `${tool.name}_result`);
+        }
+      } else {
+        throw new Error(result.error || "فشل في تنفيذ العملية");
+      }
+    } catch (error) {
+      console.error(`❌ خطأ في تنفيذ ${tool.name}:`, error);
+      alert(`خطأ في ${tool.name}: ${error}`);
     }
+  };
 
-    // إضافة المهمة إلى نظام الذكاء الاصطناعي
-    const taskId = await offlineAI.addTask({
-      type: taskType,
-      operation,
-      input,
-      credits: tool.credits_cost,
-      estimatedTime: getEstimatedTime(tool.processing_time),
-    });
-
-    console.log(`تم إضافة مهمة ${tool.name} بمعرف: ${taskId}`);
+  // تحميل الملفات
+  const downloadFile = (blob: Blob, name: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // الحصول على أنواع الملفات المقبولة
