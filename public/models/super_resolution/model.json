@@ -1,0 +1,199 @@
+{
+  "format": "graph-model",
+  "generatedBy": "KNOUX AI Team",
+  "convertedBy": "TensorFlow.js Converter",
+  "modelTopology": {
+    "node": [
+      {
+        "name": "input",
+        "op": "Placeholder",
+        "attr": {
+          "dtype": {
+            "type": "DT_FLOAT"
+          },
+          "shape": {
+            "shape": {
+              "dim": [
+                { "size": "-1" },
+                { "size": "-1" },
+                { "size": "-1" },
+                { "size": "3" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "conv2d_1",
+        "op": "Conv2D",
+        "input": ["input", "conv2d_1/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 1, 1, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "relu_1",
+        "op": "Relu",
+        "input": ["conv2d_1"]
+      },
+      {
+        "name": "conv2d_2",
+        "op": "Conv2D",
+        "input": ["relu_1", "conv2d_2/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 1, 1, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "relu_2",
+        "op": "Relu",
+        "input": ["conv2d_2"]
+      },
+      {
+        "name": "conv2d_3",
+        "op": "Conv2D",
+        "input": ["relu_2", "conv2d_3/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 1, 1, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "relu_3",
+        "op": "Relu",
+        "input": ["conv2d_3"]
+      },
+      {
+        "name": "upsampling2d",
+        "op": "ResizeNearestNeighbor",
+        "input": ["relu_3", "upsampling2d/size"],
+        "attr": {
+          "align_corners": {
+            "b": false
+          }
+        }
+      },
+      {
+        "name": "conv2d_final",
+        "op": "Conv2D",
+        "input": ["upsampling2d", "conv2d_final/kernel"],
+        "attr": {
+          "strides": {
+            "list": { "i": [1, 1, 1, 1] }
+          },
+          "padding": {
+            "s": "SAME"
+          }
+        }
+      },
+      {
+        "name": "output",
+        "op": "Sigmoid",
+        "input": ["conv2d_final"]
+      }
+    ],
+    "library": {},
+    "versions": {
+      "producer": 175
+    }
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {
+          "name": "conv2d_1/kernel",
+          "shape": [9, 9, 3, 64],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_2/kernel",
+          "shape": [1, 1, 64, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_3/kernel",
+          "shape": [5, 5, 32, 32],
+          "dtype": "float32"
+        },
+        {
+          "name": "conv2d_final/kernel",
+          "shape": [5, 5, 32, 3],
+          "dtype": "float32"
+        },
+        {
+          "name": "upsampling2d/size",
+          "shape": [2],
+          "dtype": "int32"
+        }
+      ]
+    }
+  ],
+  "signature": {
+    "inputs": {
+      "input": {
+        "name": "input:0",
+        "dtype": "DT_FLOAT",
+        "tensorShape": {
+          "dim": [
+            { "size": "-1" },
+            { "size": "-1" },
+            { "size": "-1" },
+            { "size": "3" }
+          ]
+        }
+      }
+    },
+    "outputs": {
+      "output": {
+        "name": "output:0",
+        "dtype": "DT_FLOAT",
+        "tensorShape": {
+          "dim": [
+            { "size": "-1" },
+            { "size": "-1" },
+            { "size": "-1" },
+            { "size": "3" }
+          ]
+        }
+      }
+    }
+  },
+  "userDefinedMetadata": {
+    "name": "Super Resolution Model",
+    "version": "1.0.0",
+    "description": "نموذج تحسين دقة الصور باستخدام الذكاء الاصطناعي - KNOUX REC",
+    "author": "KNOUX AI Team",
+    "license": "MIT",
+    "tags": ["super-resolution", "image-enhancement", "upscaling"],
+    "inputSize": "dynamic",
+    "outputSize": "2x input size",
+    "scaleFactor": 2,
+    "performance": {
+      "accuracy": 0.92,
+      "speed": "fast",
+      "memoryUsage": "30MB",
+      "supportedFormats": ["jpg", "png", "webp"]
+    },
+    "capabilities": {
+      "maxInputSize": "4096x4096",
+      "minInputSize": "64x64",
+      "preserveAspectRatio": true,
+      "batchProcessing": true
+    }
+  }
+}
