@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRecorder } from "../hooks/useRecorder";
 import { formatTime } from "../utils";
-import { ToggleSwitch } from "./ToggleSwitch";
+import ToggleSwitch from "./ToggleSwitch";
 import { ScreenIcon, MicIcon, SystemAudioIcon, CameraIcon } from "./icons";
 
 const ControlCard = ({
@@ -278,7 +278,7 @@ export function Controls() {
         <ControlCard
           icon={<SystemAudioIcon />}
           label="صوت النظام"
-          description="تسجيل صوت الكمبيوتر والتطبيقات"
+          description="تسجيل صوت الك��بيوتر والتطبيقات"
           enabled={state.includeAudio}
           onToggle={actions.setIncludeAudio}
           disabled={state.isRecording}
