@@ -145,8 +145,8 @@ const ToolboxPanel: React.FC = () => {
       // AI Video Tools
       {
         id: "ai-video-generator",
-        name: "AI Video Generator",
-        description: "Transform text into stunning videos with AI narration",
+        name: "مولد الفيديو بالذكاء الاصطناعي",
+        description: "حول النصوص إلى فيديوهات مذهلة مع التعليق الصوتي الذكي",
         category: "ai-tools",
         icon: "🎬",
         ai_powered: true,
@@ -373,7 +373,7 @@ const ToolboxPanel: React.FC = () => {
 
   const handleToolSelect = (tool: AITool) => {
     if (tool.credits_cost > userCredits.remaining) {
-      alert("نقاط ��ير كافية! يرجى ترقية الخطة.");
+      alert("نقاط ��ير كافية! يرجى تر��ية الخطة.");
       return;
     }
 
