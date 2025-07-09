@@ -1260,4 +1260,4 @@ function calculateConfidence(
 }
 
 // تصدير الأنواع
-export type { AIProcessingTask, AIModel, CreditSystem };
+export type { AIProcessingTask, AIModel, CreditSystem, AdvancedAIResult };
