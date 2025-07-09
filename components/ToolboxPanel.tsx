@@ -87,7 +87,7 @@ const ToolboxPanel: React.FC = () => {
           used: prev.used + tool.credits_cost,
         }));
 
-        // عرض رس��لة نجاح
+        // عرض رسالة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
         // تح��يل النتيج�� ��لقائياً إذا كانت ملف
@@ -197,8 +197,8 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "ai-voice-clone",
-        name: "AI Voice Cloning",
-        description: "Clone any voice from a short sample",
+        name: "استنساخ الصوت الذكي",
+        description: "استنسخ أي صوت من عينة قصيرة",
         category: "ai-tools",
         icon: "🎤",
         ai_powered: true,
@@ -373,7 +373,7 @@ const ToolboxPanel: React.FC = () => {
 
   const handleToolSelect = (tool: AITool) => {
     if (tool.credits_cost > userCredits.remaining) {
-      alert("نقاط ��ير كافية! يرجى ترقية الخطة.");
+      alert("نق��ط ��ير كافية! يرجى ترقية الخطة.");
       return;
     }
 
@@ -559,7 +559,7 @@ const ToolboxPanel: React.FC = () => {
             <div className="text-2xl font-bold text-knoux-purple">
               {userCredits.remaining}
             </div>
-            <div className="text-sm text-white/70">النقاط المتبقية</div>
+            <div className="text-sm text-white/70">��لنقاط المتبقية</div>
           </div>
           <div className="text-center p-3 bg-knoux-neon/10 rounded-lg">
             <div className="text-2xl font-bold text-knoux-neon">
