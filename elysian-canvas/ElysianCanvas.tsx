@@ -124,9 +124,28 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
     }
   }, [isVerified]);
 
-  const handleTemplateSelect = (template: Template) => {
+  const handleTemplateSelect = (template: any) => {
     setSelectedTemplate(template);
     setActiveView("editor");
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const uploadedImage = await imageUploadService.uploadImage(file);
+      setUploadedImages((prev) => [uploadedImage, ...prev]);
+      setSelectedImage(uploadedImage);
+
+      // If we have a canvas, apply the image to it
+      if (canvasRef.current && uploadedImage) {
+        await imageUploadService.convertImageToCanvas(
+          uploadedImage.id,
+          canvasRef.current,
+        );
+      }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      // You could add a notification here
+    }
   };
 
   const handleSliderChange = (id: string, value: number) => {
