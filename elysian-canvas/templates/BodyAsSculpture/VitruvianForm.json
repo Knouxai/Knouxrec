@@ -1,0 +1,135 @@
+{
+  "id": "vitruvian-form",
+  "name": "Vitruvian Form",
+  "category": "BodyAsSculpture",
+  "description": "Perfect geometric proportions inspired by Leonardo da Vinci's studies of human anatomy. Emphasizes classical beauty and mathematical harmony.",
+  "maturityLevel": "artistic",
+  "aestheticProfile": "classical-sculpture",
+  "tags": ["classical", "geometry", "proportions", "renaissance", "sculpture"],
+  "composition": {
+    "aspectRatio": "1:1",
+    "rule": "golden",
+    "focusPoint": { "x": 0.5, "y": 0.618 },
+    "guidingLines": ["golden-spiral", "rule-of-thirds"]
+  },
+  "lighting": {
+    "scheme": "dramatic",
+    "keyLight": {
+      "position": { "x": 0.3, "y": 0.2, "z": 1 },
+      "intensity": 0.9,
+      "color": "#ffffff",
+      "softness": 0.3
+    },
+    "fillLight": {
+      "position": { "x": 0.7, "y": 0.8, "z": 0.5 },
+      "intensity": 0.4,
+      "color": "#f8f8ff"
+    },
+    "rimLight": {
+      "position": { "x": 0.9, "y": 0.3, "z": 0.8 },
+      "intensity": 0.6,
+      "color": "#fff8dc"
+    },
+    "shadows": {
+      "enabled": true,
+      "sharpness": 0.8,
+      "opacity": 0.7
+    }
+  },
+  "colorPalette": {
+    "primary": "#f5f5dc",
+    "secondary": "#daa520",
+    "accent": "#ffffff",
+    "shadows": "#8b7355",
+    "highlights": "#fffaf0",
+    "background": ["#2f2f2f", "#1a1a1a"],
+    "temperature": "neutral",
+    "saturation": 0.6
+  },
+  "geometry": {
+    "proportions": {
+      "goldenRatio": true,
+      "vitruvianCircle": true,
+      "vitruvianSquare": true
+    },
+    "guides": {
+      "visible": false,
+      "anatomicalMarkers": true,
+      "proportionLines": true
+    }
+  },
+  "materialProperties": {
+    "skinTone": {
+      "baseColor": "#f5deb3",
+      "undertones": "#daa520",
+      "smoothness": 0.9,
+      "luminosity": 0.7,
+      "subsurface": 0.8
+    },
+    "surface": {
+      "roughness": 0.1,
+      "metallic": 0.0,
+      "specular": 0.3
+    },
+    "emulation": {
+      "type": "marble",
+      "intensity": 0.4,
+      "veining": 0.2
+    }
+  },
+  "atmosphere": {
+    "fog": {
+      "density": 0.1,
+      "color": "#f5f5dc",
+      "distribution": "uniform"
+    },
+    "particles": {
+      "type": "dust",
+      "density": 0.2,
+      "motion": "static",
+      "size": "fine"
+    }
+  },
+  "pose": {
+    "type": "standing",
+    "armPosition": "spread",
+    "legPosition": "spread",
+    "headTilt": 0,
+    "bodyTilt": 0,
+    "weight": "centered",
+    "expression": "serene"
+  },
+  "postProcessing": {
+    "contrast": 0.8,
+    "brightness": 0.6,
+    "saturation": 0.7,
+    "sharpness": 0.9,
+    "vignette": {
+      "enabled": true,
+      "intensity": 0.3,
+      "feather": 0.8
+    },
+    "filters": [
+      {
+        "type": "unsharp-mask",
+        "intensity": 0.5
+      },
+      {
+        "type": "edge-enhance",
+        "intensity": 0.3
+      }
+    ]
+  },
+  "artisticNotes": [
+    "Focus on mathematical perfection in proportions",
+    "Emphasize the geometric relationship between circle and square",
+    "Highlight anatomical accuracy and classical beauty",
+    "Use dramatic lighting to create sculptural depth"
+  ],
+  "inspirations": [
+    "Leonardo da Vinci - Vitruvian Man",
+    "Classical Greek sculpture proportions",
+    "Renaissance anatomical studies",
+    "Michelangelo's David"
+  ]
+}
