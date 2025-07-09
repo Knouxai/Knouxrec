@@ -674,58 +674,6 @@ const ToolboxPanel: React.FC = () => {
       )}
     </div>
   );
-
-  // تحميل النتيجة
-  function downloadResult(task: AIProcessingTask) {
-    if (!task.output) return;
-
-    if (typeof task.output === "string") {
-      // نص - إنشاء ملف نصي
-      const blob = new Blob([task.output], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${task.operation}_result.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      // ملف - تحميل مباشر
-      const url = URL.createObjectURL(task.output);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${task.operation}_result.${getFileExtension(task.type)}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  }
-
-  // معاينة النتيجة
-  function previewResult(task: AIProcessingTask) {
-    if (!task.output) return;
-
-    if (typeof task.output === "string") {
-      // عرض ��لنص في نافذة منبثقة
-      alert(`نتيجة ${task.operation}:\n\n${task.output}`);
-    } else {
-      // فتح الملف في نافذة جديدة
-      const url = URL.createObjectURL(task.output);
-      window.open(url, "_blank");
-    }
-  }
-
-  // الحصول على امتداد الملف
-  function getFileExtension(type: string): string {
-    switch (type) {
-      case "video":
-        return "mp4";
-      case "audio":
-        return "mp3";
-      case "image":
-        return "png";
-      default:
-        return "bin";
-    }
-  }
 };
 
 export default ToolboxPanel;
