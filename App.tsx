@@ -413,7 +413,7 @@ const App = () => {
         />
 
         {/* Quick Access Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <button
             onClick={() => setCurrentView("templates")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-purple/20 transition-all duration-300"
