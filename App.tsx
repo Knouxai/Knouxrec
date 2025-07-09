@@ -20,6 +20,7 @@ import { offlineAI } from "./services/offlineAI";
 import { videoProcessor } from "./services/videoProcessor";
 import { audioProcessor } from "./services/audioProcessor";
 import { imageProcessor } from "./services/imageProcessor";
+import { feedbackService } from "./services/feedbackService";
 import { generateFileName } from "./utils";
 
 const App = () => {
@@ -72,7 +73,7 @@ const App = () => {
     null,
   );
 
-  const addNotification = useCallback(
+    const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
       const newNotification: Notification = {
         id: `notif-${Date.now()}`,
@@ -80,6 +81,21 @@ const App = () => {
         type,
       };
       setNotifications((prev) => [newNotification, ...prev].slice(0, 10));
+
+      // استخدام نظام الإشعارات المتقدم
+      switch (type) {
+        case 'success':
+          feedbackService.success(message);
+          break;
+        case 'error':
+          feedbackService.error(message);
+          break;
+        case 'warning':
+          feedbackService.warning(message);
+          break;
+        default:
+          feedbackService.info(message);
+      }
     },
     [],
   );
@@ -106,6 +122,10 @@ const App = () => {
       }
 
       try {
+                const loadingId = feedbackService.loading(
+          `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
+          0
+        );
         addNotification(
           `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
           "info",
@@ -139,6 +159,7 @@ const App = () => {
                     : r,
                 ),
               );
+                            feedbackService.dismiss(loadingId);
               addNotification(
                 `اكتمل التحليل الذكي لـ "${recording.name}"`,
                 "success",
@@ -155,6 +176,7 @@ const App = () => {
                     : r,
                 ),
               );
+                            feedbackService.dismiss(loadingId);
               addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
             } else if (task.status === "processing") {
               // استمرار المراقبة
@@ -167,6 +189,9 @@ const App = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
+                if (typeof loadingId !== 'undefined') {
+          feedbackService.dismiss(loadingId);
+        }
         addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
@@ -203,7 +228,16 @@ const App = () => {
         setPendingRecording(newRecording);
       } else {
         setRecordings((prev) => [newRecording, ...prev]);
-        addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
+                addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
+        feedbackService.success(`تم حفظ التسجيل بنجاح! 🎬`, {
+          actions: [
+            {
+              label: 'عرض',
+              action: () => setCurrentView('recordings'),
+              style: 'primary'
+            }
+          ]
+        });
 
         // بدء المعالجة الذكية التلقائية إذا كانت مفعلة
         if (newRecording.isProcessing && transcript) {
@@ -213,6 +247,7 @@ const App = () => {
         // استخراج الصوت تلقائياً إذا لم يكن هناك نسخ نصي
         if (!transcript && settings.aiProcessingEnabled) {
           try {
+                        const audioLoadingId = feedbackService.loading("جار استخراج الصوت وتحويله لنص...", 0);
             addNotification("جار استخراج الصوت وتحويله لنص...", "info");
             const audioBlob = await audioProcessor.extractAudioFromVideo(blob);
             const extractedText = await audioProcessor.speechToText(
@@ -230,8 +265,11 @@ const App = () => {
               ),
             );
 
+                        feedbackService.dismiss(audioLoadingId);
             if (extractedText.trim().length > 10) {
               runAiProcessing(updatedRecording);
+            } else {
+              feedbackService.warning('لم يتم اكتشاف نص واضح في التسجيل الصوتي');
             }
           } catch (error) {
             console.warn("فشل في استخراج النص من الصوت:", error);
@@ -254,9 +292,10 @@ const App = () => {
     setSettings(newSettings);
   };
 
-  const onSettingsSave = (newSettings: RecordingSettings) => {
+    const onSettingsSave = (newSettings: RecordingSettings) => {
     handleSettingsChange(newSettings);
     addNotification("Settings saved!", "success");
+    feedbackService.success('تم حفظ الإعدادات بنجاح! ⚙️');
   };
 
   const handleDeleteRecording = (id: string) => {
@@ -272,7 +311,43 @@ const App = () => {
         return true;
       }),
     );
-    addNotification("Recording deleted.", "info");
+        addNotification("Recording deleted.", "info");
+    feedbackService.warning('تم حذف التسجيل');
+  };
+
+  // معالج لقطة الشاشة المحدث
+  const handleScreenshot = useCallback(async () => {
+    try {
+      const loadingId = feedbackService.loading('جار التقاط لقطة الشاشة...', 0);
+
+      const result = await recorderActions.takeScreenshot();
+
+      feedbackService.dismiss(loadingId);
+
+      if (result.success) {
+        feedbackService.success(`تم التقاط لقطة الشاشة بنجاح! 📸`, {
+          message: `الملف: ${result.filename}`,
+          actions: [
+            {
+              label: 'فتح',
+              action: () => {
+                if (result.dataUrl) {
+                  window.open(result.dataUrl, '_blank');
+                }
+              },
+              style: 'primary'
+            }
+          ]
+        });
+      } else {
+        feedbackService.error(`فشل في التقاط لقطة الشاشة: ${result.error}`);
+      }
+    } catch (error) {
+      feedbackService.error(
+        `خطأ في التقاط لقطة الشاشة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
+      );
+    }
+  }, [recorderActions]);
   };
 
   const handleUpdateRecording = (updatedRecording: Recording) => {
@@ -391,7 +466,7 @@ const App = () => {
           onStop={recorderActions.stopRecording}
           onPause={recorderActions.pauseRecording}
           onResume={recorderActions.resumeRecording}
-          onScreenshot={recorderActions.takeScreenshot}
+                    onScreenshot={handleScreenshot}
           disabled={false}
           timer={recorderState.recordingTime}
           fps={recorderState.frameRate}
@@ -571,13 +646,15 @@ const App = () => {
         <TrimModal
           recording={pendingRecording}
           onSave={(rec, trimData) => {
-            addNotification("تم قص الفيديو بنجاح! ✂️", "success");
+                        addNotification("تم قص الفيديو بنجاح! ✂️", "success");
+            feedbackService.success('تم قص الفيديو بنجاح! ✂️');
             setRecordings((prev) => [{ ...rec, trim: trimData }, ...prev]);
             setPendingRecording(null);
           }}
           onSaveFull={(rec) => {
             setRecordings((prev) => [rec, ...prev]);
-            addNotification(`Recording "${rec.name}" saved.`, "success");
+                        addNotification(`Recording "${rec.name}" saved.`, "success");
+            feedbackService.success('تم حفظ التسجيل كاملاً! 🎬');
             if (rec.isProcessing) runAiProcessing(rec);
             setPendingRecording(null);
           }}
