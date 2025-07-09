@@ -518,6 +518,8 @@ const App = () => {
             />
           </div>
         );
+      case "elysian":
+        return <ElysianCanvas onClose={() => setCurrentView("main")} />;
       default:
         return renderMainView();
     }
