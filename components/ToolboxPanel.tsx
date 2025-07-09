@@ -87,7 +87,7 @@ const ToolboxPanel: React.FC = () => {
           used: prev.used + tool.credits_cost,
         }));
 
-        // عرض رسالة نجاح
+        // عرض رس��لة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
         // تح��يل النتيج�� ��لقائياً إذا كانت ملف
@@ -181,8 +181,8 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "speech-to-text",
-        name: "AI Speech-to-Text",
-        description: "Generate accurate subtitles automatically",
+        name: "تحويل الكلام إلى نص",
+        description: "إنشاء ترجمات دقيقة تلقائياً",
         category: "ai-tools",
         icon: "🗣️",
         ai_powered: true,
@@ -377,7 +377,7 @@ const ToolboxPanel: React.FC = () => {
       return;
     }
 
-    // استخدام الأداة مبا��رة
+    // استخدام الأداة مباشرة
     handleToolUse(tool);
   };
 
