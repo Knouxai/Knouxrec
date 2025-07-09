@@ -149,7 +149,7 @@ export function Controls() {
       {/* Recording Mode Selection */}
       <div className="glass-card p-4 rounded-xl border border-knoux-purple/20">
         <h4 className="font-orbitron font-bold text-white mb-4">
-          📹 نوع التسجيل
+          📹 نوع التسج��ل
         </h4>
         <div className="grid grid-cols-3 gap-3">
           <button
@@ -226,7 +226,7 @@ export function Controls() {
                 ⏹️ إيقاف
               </button>
               <button
-                onClick={actions.takeScreenshot}
+                onClick={() => actions.takeScreenshot()}
                 className="glass-button-accent px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transform transition-all duration-200"
               >
                 📸 لقطة
