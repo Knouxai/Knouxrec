@@ -7,6 +7,7 @@ import SystemStats from "./SystemStats";
 import AdvancedFeatures from "./AdvancedFeatures";
 import BatchProcessor from "./BatchProcessor";
 import AnalyticsDashboard from "./AnalyticsDashboard";
+import PrivacySettings from "./PrivacySettings";
 
 interface AIPanelProps {
   recordings: Recording[];
