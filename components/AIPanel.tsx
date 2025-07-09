@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Recording } from "../types";
-import { processTranscript, getAIStatus } from "../services/geminiService";
+import { processAdvancedTranscript } from "../services/offlineAI";
 import PerformancePanel from "./PerformancePanel";
 
 interface AIPanelProps {
