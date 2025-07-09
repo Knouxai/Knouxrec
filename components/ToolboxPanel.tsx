@@ -534,6 +534,7 @@ const ToolboxPanel: React.FC = () => {
 
       {/* Action Button */}
       <button
+        onClick={() => handleToolUse(tool)}
         className={`w-full py-2 rounded-lg font-medium transition-all ${
           tool.credits_cost > userCredits.remaining
             ? "bg-gray-500/20 text-gray-500 cursor-not-allowed"
@@ -542,8 +543,8 @@ const ToolboxPanel: React.FC = () => {
         disabled={tool.credits_cost > userCredits.remaining}
       >
         {tool.credits_cost > userCredits.remaining
-          ? "Insufficient Credits"
-          : "Use Tool"}
+          ? "نقاط غير كافية"
+          : "استخدام الأداة"}
       </button>
     </div>
   );
