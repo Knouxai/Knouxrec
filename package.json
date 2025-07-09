@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "knoux-rec",
   "private": false,
@@ -85,4 +86,27 @@
     "Safari >= 14",
     "Edge >= 90"
   ]
+=======
+﻿{
+    "name":  "copy-of-copy-of-knoux-rec",
+    "private":  true,
+    "version":  "0.0.0",
+    "type":  "module",
+    "scripts":  {
+                    "preview":  "vite preview",
+                    "build":  "vite build",
+                    "dev":  "vite",
+                    "start":  "vite --host"
+                },
+    "dependencies":  {
+                         "react":  "^19.1.0",
+                         "react-dom":  "^19.1.0",
+                         "@google/genai":  "^1.8.0"
+                     },
+    "devDependencies":  {
+                            "@types/node":  "^22.14.0",
+                            "typescript":  "~5.7.2",
+                            "vite":  "^6.2.0"
+                        }
+>>>>>>> origin/main
 }
