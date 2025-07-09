@@ -664,6 +664,83 @@ const ToolboxPanel: React.FC = () => {
         </div>
       </div>
 
+      {/* Active Tasks */}
+      {processingTasks.size > 0 && (
+        <div className="glass-card p-6 rounded-2xl border border-knoux-purple/30">
+          <h3 className="text-xl font-orbitron font-bold text-white mb-4">
+            ⚡ المهام النشطة
+          </h3>
+          <div className="space-y-3">
+            {Array.from(processingTasks.values()).map((task) => (
+              <div
+                key={task.id}
+                className="glass-card p-4 rounded-xl border border-knoux-purple/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        task.status === "processing"
+                          ? "bg-yellow-400 animate-pulse"
+                          : task.status === "completed"
+                            ? "bg-green-400"
+                            : task.status === "error"
+                              ? "bg-red-400"
+                              : "bg-gray-400"
+                      }`}
+                    ></div>
+                    <span className="text-white font-medium">
+                      {task.operation}
+                    </span>
+                  </div>
+                  <span className="text-knoux-purple text-sm">
+                    {task.credits} نقاط
+                  </span>
+                </div>
+
+                {task.status === "processing" && (
+                  <div className="mt-2">
+                    <div className="flex justify-between text-sm text-white/70 mb-1">
+                      <span>التقدم</span>
+                      <span>{task.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-knoux-purple to-knoux-neon h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${task.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {task.status === "completed" && task.output && (
+                  <div className="mt-2 flex space-x-2">
+                    <button
+                      onClick={() => downloadResult(task)}
+                      className="px-3 py-1 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30 transition-all"
+                    >
+                      💾 تحميل
+                    </button>
+                    <button
+                      onClick={() => previewResult(task)}
+                      className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-all"
+                    >
+                      👁️ معاينة
+                    </button>
+                  </div>
+                )}
+
+                {task.status === "error" && (
+                  <div className="mt-2 text-red-400 text-sm">
+                    ❌ {task.error}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Tools Grid */}
       <div className="glass-card p-6 rounded-2xl border border-knoux-purple/20">
         <div className="flex items-center justify-between mb-6">
