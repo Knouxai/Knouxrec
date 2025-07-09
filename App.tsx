@@ -645,15 +645,15 @@ const App = () => {
       {pendingRecording && (
         <TrimModal
           recording={pendingRecording}
-          onSave={(rec, trimData) => {
-                        addNotification("تم قص الفيديو بنجاح! ✂️", "success");
+                    onSave={(rec, trimData) => {
+            addNotification("تم قص الفيديو بنجاح! ✂️", "success");
             feedbackService.success('تم قص الفيديو بنجاح! ✂️');
             setRecordings((prev) => [{ ...rec, trim: trimData }, ...prev]);
             setPendingRecording(null);
           }}
           onSaveFull={(rec) => {
             setRecordings((prev) => [rec, ...prev]);
-                        addNotification(`Recording "${rec.name}" saved.`, "success");
+            addNotification(`Recording "${rec.name}" saved.`, "success");
             feedbackService.success('تم حفظ التسجيل كاملاً! 🎬');
             if (rec.isProcessing) runAiProcessing(rec);
             setPendingRecording(null);
