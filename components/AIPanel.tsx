@@ -13,7 +13,7 @@ interface AIPanelProps {
 const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
   const [processing, setProcessing] = useState<string | null>(null);
   const [selectedTool, setSelectedTool] = useState<
-    "transcript" | "ocr" | "face" | "audio" | "models"
+    "transcript" | "ocr" | "face" | "audio" | "models" | "stats"
   >("transcript");
 
   const aiTools = [
