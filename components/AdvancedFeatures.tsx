@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import QuickControls from "./QuickControls";
 
 interface Workspace {
   id: string;
@@ -440,7 +441,7 @@ const AdvancedFeatures: React.FC = () => {
                     </select>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-white/70">شفافية الخلفي��</span>
+                    <span className="text-white/70">شفافية الخلفية</span>
                     <input
                       type="range"
                       min="0"
