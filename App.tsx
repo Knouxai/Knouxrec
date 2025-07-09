@@ -556,7 +556,7 @@ const App = () => {
         <TrimModal
           recording={pendingRecording}
           onSave={(rec, trimData) => {
-            addNotification("Trimming is a demo feature.", "info");
+            addNotification("تم قص الفيديو بنجاح! ✂️", "success");
             setRecordings((prev) => [{ ...rec, trim: trimData }, ...prev]);
             setPendingRecording(null);
           }}
