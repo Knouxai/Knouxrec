@@ -133,7 +133,7 @@ const ToolboxPanel: React.FC = () => {
     { id: "text", name: "النصوص", icon: "📝", color: "purple-400" },
     {
       id: "ai-tools",
-      name: "أدوات الذكاء الاصطناعي",
+      name: "أدوات الذكاء الاص��ناعي",
       icon: "🤖",
       color: "knoux-neon",
     },
@@ -663,14 +663,15 @@ const ToolboxPanel: React.FC = () => {
             <div className="text-4xl">⭐</div>
             <div className="flex-grow">
               <h3 className="text-xl font-orbitron font-bold text-yellow-400 mb-1">
-                Upgrade to Pro
+                ترقية إلى الاحترافي
               </h3>
               <p className="text-white/70">
-                Get unlimited credits and access to premium AI tools
+                احصل على نقاط غير محد��دة وإمكانية الوصول لأدوات الذكاء
+                الاصطناعي المتقدمة
               </p>
             </div>
             <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl font-bold text-black hover:scale-105 transition-transform">
-              Upgrade Now
+              ترقية الآن
             </button>
           </div>
         </div>
