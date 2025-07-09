@@ -282,6 +282,15 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
       case "stats":
         return <SystemStats />;
 
+      case "advanced":
+        return <AdvancedFeatures />;
+
+      case "batch":
+        return <BatchProcessor />;
+
+      case "analytics":
+        return <AnalyticsDashboard />;
+
       default:
         return null;
     }
