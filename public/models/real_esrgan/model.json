@@ -147,17 +147,75 @@
       "detail_enhancement",
       "noise_reduction",
       "artifact_removal",
-      "color_correction"
+      "color_correction",
+      "batch_processing",
+      "smart_enhancement",
+      "adaptive_scaling"
     ],
     "scalingFactors": [2, 4, 8],
     "supportedFormats": ["jpg", "png", "webp", "bmp"],
     "maxInputSize": "2048x2048",
     "outputQuality": "photorealistic",
+    "enhancementSettings": {
+      "mode": {
+        "options": ["photo", "anime", "sharp", "balanced"],
+        "default": "photo",
+        "description": "Enhancement style preference"
+      },
+      "resolutionLimit": {
+        "max": "4096x4096",
+        "adaptive": true,
+        "memoryBased": true
+      },
+      "qualityControl": {
+        "noiseReduction": {
+          "level": [0, 100],
+          "default": 50
+        },
+        "sharpness": {
+          "level": [0, 100],
+          "default": 75
+        },
+        "colorSaturation": {
+          "level": [0, 150],
+          "default": 100
+        }
+      }
+    },
+    "batchSupport": {
+      "enabled": true,
+      "maxBatchSize": 8,
+      "parallelProcessing": true,
+      "queueManagement": true,
+      "progressTracking": true
+    },
+    "inputFormats": {
+      "images": ["png", "jpg", "jpeg", "bmp", "webp", "tiff"],
+      "maxFileSize": "50MB",
+      "colorSpaces": ["RGB", "RGBA", "Grayscale"]
+    },
+    "outputSettings": {
+      "format": "png",
+      "quality": [70, 100],
+      "compression": "lossless",
+      "metadataPreservation": true
+    },
     "performance": {
       "processingTime": "2-5s per image",
       "memoryUsage": "150MB",
       "quality": "excellent",
       "psnr": "28-35 dB"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "تحسين جودة الصور",
+      "en": "Image Quality Enhancement"
+    },
+    "benchmarkStats": {
+      "loadTime": "2.2s",
+      "averageProcessingTime": "3.5s",
+      "memoryEfficiency": 0.88
     }
   }
 }

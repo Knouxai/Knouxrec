@@ -214,8 +214,74 @@
       "object_detection",
       "real_time_tracking",
       "scene_analysis",
-      "content_analysis"
+      "content_analysis",
+      "custom_thresholds",
+      "drawing_overlays",
+      "label_mapping"
     ],
+    "detectionSettings": {
+      "confidenceThreshold": {
+        "range": [0.1, 0.9],
+        "default": 0.5,
+        "description": "Minimum confidence for detection"
+      },
+      "iouThreshold": {
+        "range": [0.1, 0.8],
+        "default": 0.4,
+        "description": "Intersection over Union threshold"
+      },
+      "maxDetections": {
+        "range": [1, 100],
+        "default": 50,
+        "description": "Maximum detections per image"
+      },
+      "drawOptions": {
+        "showLabels": {
+          "enabled": true,
+          "fontSize": ["small", "medium", "large"],
+          "position": ["top", "bottom", "center"]
+        },
+        "boxColor": {
+          "mode": "auto",
+          "customColors": true,
+          "classColors": true
+        },
+        "fontSize": {
+          "options": ["small", "medium", "large"],
+          "default": "medium"
+        },
+        "lineWidth": {
+          "range": [1, 5],
+          "default": 2
+        }
+      }
+    },
+    "labelMapping": {
+      "source": "coco.names",
+      "customLabels": true,
+      "localization": {
+        "ar": {
+          "person": "شخص",
+          "car": "سيارة",
+          "cat": "قطة",
+          "dog": "كلب",
+          "bottle": "زجاجة"
+        },
+        "en": {
+          "person": "Person",
+          "car": "Car",
+          "cat": "Cat",
+          "dog": "Dog",
+          "bottle": "Bottle"
+        }
+      }
+    },
+    "tracking": {
+      "enabled": true,
+      "trackingAlgorithm": "DeepSORT",
+      "maxTrackedObjects": 20,
+      "trackingMemory": "30 frames"
+    },
     "performance": {
       "accuracy": 0.95,
       "speed": "real-time",
@@ -224,6 +290,17 @@
       "latency": "25ms"
     },
     "inputSize": [640, 640],
-    "outputFormat": "boxes_scores_classes"
+    "outputFormat": "boxes_scores_classes",
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "اكتشاف الكائنات الذكي",
+      "en": "Smart Object Detection"
+    },
+    "benchmarkStats": {
+      "loadTime": "950ms",
+      "averageDetectionTime": "25ms",
+      "memoryEfficiency": 0.96
+    }
   }
 }

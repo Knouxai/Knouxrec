@@ -136,7 +136,10 @@
       "voice_cloning",
       "emotional_speech",
       "multilingual_tts",
-      "prosody_control"
+      "prosody_control",
+      "voice_profile_selection",
+      "tone_control",
+      "sentence_timing"
     ],
     "voices": [
       "narrator",
@@ -172,11 +175,65 @@
     ],
     "audioFormats": ["wav", "mp3"],
     "sampleRates": [22050, 24000],
+    "voiceSettings": {
+      "speakerId": {
+        "range": [0, 9],
+        "default": 0,
+        "genderOptions": ["male", "female", "neutral"]
+      },
+      "pitchControl": {
+        "enabled": true,
+        "range": [-12, 12],
+        "unit": "semitones"
+      },
+      "speedControl": {
+        "enabled": true,
+        "range": [0.5, 2.0],
+        "default": 1.0
+      },
+      "emotionStyle": {
+        "options": ["neutral", "happy", "sad", "angry", "excited", "calm"],
+        "intensity": [0.1, 1.0]
+      },
+      "prosodyControl": {
+        "emphasis": true,
+        "pauses": true,
+        "intonation": true
+      }
+    },
+    "outputOptions": {
+      "subtitles": {
+        "enabled": true,
+        "formats": ["srt", "vtt"],
+        "wordLevel": true
+      },
+      "timestamps": {
+        "enabled": true,
+        "precision": "word",
+        "includePhonemes": false
+      },
+      "audioSegmentation": {
+        "bysentence": true,
+        "byPhrase": true,
+        "customMarkers": true
+      }
+    },
     "performance": {
       "generationSpeed": "2x real-time",
       "memoryUsage": "180MB",
       "quality": "natural",
       "latency": "300ms"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "تحويل النص إلى كلام",
+      "en": "Text to Speech Synthesis"
+    },
+    "benchmarkStats": {
+      "loadTime": "2.8s",
+      "averageGenerationTime": "1.5s",
+      "memoryEfficiency": 0.89
     }
   }
 }

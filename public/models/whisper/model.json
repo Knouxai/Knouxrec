@@ -118,7 +118,10 @@
       "speech_to_text",
       "multilingual_transcription",
       "real_time_processing",
-      "noise_robustness"
+      "noise_robustness",
+      "punctuation_restoration",
+      "sentence_segmentation",
+      "timestamp_generation"
     ],
     "languages": [
       "ar",
@@ -135,11 +138,42 @@
     ],
     "audioFormats": ["wav", "mp3", "flac", "ogg"],
     "sampleRates": [16000, 22050, 44100, 48000],
+    "postProcessing": {
+      "punctuation": true,
+      "sentenceSegmentation": true,
+      "timestampSupport": true,
+      "confidenceScoring": true,
+      "speakerDiarization": false,
+      "noiseFiltering": true
+    },
+    "contextSupport": {
+      "maxAudioWindow": "30s",
+      "overlappingWindows": true,
+      "contextCarryover": true,
+      "adaptiveSegmentation": true
+    },
+    "outputFormats": {
+      "plainText": true,
+      "subtitles": ["srt", "vtt", "ass"],
+      "jsonWithTimestamps": true,
+      "wordLevelTimestamps": true
+    },
     "performance": {
       "accuracy": 0.96,
       "speed": "real-time",
       "memoryUsage": "85MB",
       "latency": "150ms"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "تحويل الكلام إلى نص",
+      "en": "Speech to Text Recognition"
+    },
+    "benchmarkStats": {
+      "loadTime": "1.2s",
+      "averageProcessingTime": "0.15s",
+      "memoryEfficiency": 0.94
     }
   }
 }

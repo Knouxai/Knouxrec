@@ -154,17 +154,56 @@
       "identity_preservation",
       "attribute_transfer",
       "expression_control",
-      "lighting_preservation"
+      "lighting_preservation",
+      "face_landmarks_alignment",
+      "transparent_output",
+      "batch_processing"
     ],
     "inputSize": [512, 512],
     "outputSize": [512, 512],
     "faceAlignment": "automatic",
     "qualityModes": ["fast", "balanced", "high_quality"],
+    "facePreprocessing": {
+      "faceAlignment": true,
+      "alignmentMethod": "mediapipe",
+      "landmarkDetection": true,
+      "poseCorrection": true,
+      "lightingNormalization": true
+    },
+    "outputOptions": {
+      "includeAlpha": true,
+      "exportFormat": ["jpeg", "png", "webp"],
+      "transparentBackground": true,
+      "alphaMaskGeneration": true
+    },
+    "runtime": {
+      "batchSupport": true,
+      "maxBatchSize": 4,
+      "videoFrameSupport": true,
+      "sequentialProcessing": true
+    },
+    "qualitySettings": {
+      "controlMode": "balanced",
+      "enhancementPipeline": "optional",
+      "faceBlending": "seamless",
+      "colorMatching": true
+    },
     "performance": {
       "processingTime": "3-8s per face",
       "memoryUsage": "320MB",
       "accuracy": 0.92,
       "preservation": "high"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "تبديل الوجوه الذكي",
+      "en": "Smart Face Swapping"
+    },
+    "benchmarkStats": {
+      "loadTime": "2.1s",
+      "averageProcessingTime": "5.5s",
+      "memoryEfficiency": 0.87
     }
   }
 }

@@ -141,16 +141,94 @@
       "image_to_image",
       "style_transfer",
       "inpainting",
-      "outpainting"
+      "outpainting",
+      "conditioning_control",
+      "seed_management",
+      "batch_generation"
     ],
     "imageFormats": ["jpg", "png", "webp"],
     "resolutions": ["512x512", "768x768", "1024x1024"],
     "styles": ["realistic", "artistic", "cartoon", "anime", "photographic"],
+    "generationModes": {
+      "text2image": {
+        "enabled": true,
+        "maxPromptLength": 77,
+        "negativePrompts": true
+      },
+      "image2image": {
+        "enabled": true,
+        "strengthControl": [0.1, 1.0],
+        "preservationModes": ["structure", "content", "style"]
+      },
+      "controlNet": {
+        "enabled": true,
+        "types": ["canny", "depth", "pose", "scribble"]
+      }
+    },
+    "parameters": {
+      "guidanceScale": {
+        "range": [1, 20],
+        "default": 7.5,
+        "description": "Controls adherence to prompt"
+      },
+      "seed": {
+        "range": [0, 4294967295],
+        "random": true,
+        "reproducible": true
+      },
+      "steps": {
+        "range": [10, 100],
+        "default": 50,
+        "qualityImpact": "high"
+      },
+      "resolutionControl": {
+        "adaptive": true,
+        "aspectRatios": ["1:1", "4:3", "16:9", "9:16"]
+      }
+    },
+    "stylePresets": {
+      "realistic": {
+        "prompts": [
+          "photorealistic",
+          "high detail",
+          "professional photography"
+        ],
+        "negativePrompts": ["cartoon", "anime", "painting"]
+      },
+      "anime": {
+        "prompts": ["anime style", "manga", "cel shading"],
+        "negativePrompts": ["realistic", "photograph"]
+      },
+      "cyberpunk": {
+        "prompts": [
+          "cyberpunk",
+          "neon lights",
+          "futuristic",
+          "dark atmosphere"
+        ],
+        "negativePrompts": ["medieval", "nature"]
+      },
+      "artistic": {
+        "prompts": ["digital art", "concept art", "detailed painting"],
+        "negativePrompts": ["photograph", "low quality"]
+      }
+    },
     "performance": {
       "generationTime": "15-30s",
       "memoryUsage": "2.5GB",
       "quality": "high",
       "creativity": 0.92
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "توليد الصور من النص",
+      "en": "AI Image Generation"
+    },
+    "benchmarkStats": {
+      "loadTime": "8.5s",
+      "averageGenerationTime": "22s",
+      "memoryEfficiency": 0.78
     }
   }
 }

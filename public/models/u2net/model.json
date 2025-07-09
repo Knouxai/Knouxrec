@@ -165,16 +165,49 @@
       "automatic_background_removal",
       "salient_object_detection",
       "portrait_segmentation",
-      "fine_edge_detection"
+      "fine_edge_detection",
+      "transparent_image_export",
+      "smart_filtering",
+      "dynamic_resizing"
     ],
     "inputSize": [320, 320],
     "outputFormat": "alpha_mask",
     "accuracy": 0.94,
+    "postProcessing": {
+      "applySoftEdges": true,
+      "blurMask": "3px",
+      "feathering": "adaptive",
+      "autoResize": true,
+      "exportTransparentImage": true,
+      "smartFilters": {
+        "blur": { "enabled": true, "range": [0, 10] },
+        "feather": { "enabled": true, "range": [0, 20] },
+        "softEdges": { "enabled": true, "range": [0, 15] }
+      }
+    },
+    "exportOptions": {
+      "format": "png",
+      "includeBackground": false,
+      "transparencyMode": "auto",
+      "resolutionMaintenance": true,
+      "centerCrop": "auto"
+    },
     "performance": {
       "processingTime": "200-500ms",
       "memoryUsage": "95MB",
       "edgeQuality": "high",
       "hairDetail": "excellent"
+    },
+    "loadOnDemand": true,
+    "quantizationSupport": true,
+    "metadataLocalization": {
+      "ar": "إزالة الخلفية الذكية",
+      "en": "Smart Background Removal"
+    },
+    "benchmarkStats": {
+      "loadTime": "800ms",
+      "averageProcessingTime": "350ms",
+      "memoryEfficiency": 0.92
     }
   }
 }
