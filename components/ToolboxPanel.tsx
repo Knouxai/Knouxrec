@@ -26,25 +26,7 @@ const ToolboxPanel: React.FC = () => {
   >(new Map());
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // مراقبة حالة المهام
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const tasks = offlineAI.getAllTasks();
-      const taskMap = new Map();
-      tasks.forEach((task) => taskMap.set(task.id, task));
-      setProcessingTasks(taskMap);
-
-      // تحديث النقاط
-      const credits = offlineAI.getCreditSystem();
-      setUserCredits((prev) => ({
-        ...prev,
-        remaining: credits.current,
-        used: credits[credits.tier] - credits.current,
-      }));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // Note: Task monitoring removed since toolboxService handles operations directly
 
   // معالجة الأدوات
   const handleToolUse = async (
@@ -117,7 +99,7 @@ const ToolboxPanel: React.FC = () => {
         // عرض رسالة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
-        // تحميل النتيجة تلقائياً إذا كانت ملف
+        // تحميل النتيج�� تلقائياً إذا كانت ملف
         if (result.output && typeof result.output !== "string") {
           downloadFile(result.output, `${tool.name}_result`);
         }
