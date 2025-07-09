@@ -1,65 +1,70 @@
-// Advanced Offline AI Service - KNOUX REC
+// KNOUX REC - Local AI Service (No External APIs)
+// 100% Offline AI Processing System
+
 import { processAdvancedTranscript, AdvancedAIResult } from "./offlineAI";
 
 // Legacy interface for backward compatibility
-interface AIProcessingResult {
+export interface AIProcessingResult {
   title: string;
   summary: string;
   keywords: string[];
 }
 
-// Main processing function with enhanced capabilities
+/**
+ * معالجة النصوص بالذكاء الاصطناعي المحلي
+ * لا يستخدم أي API خارجي - يعمل بالكامل أوفلاين
+ */
 export async function processTranscript(
   transcript: string,
   audioBuffer?: AudioBuffer,
 ): Promise<AIProcessingResult> {
   try {
-    console.log("🧠 KNOUX AI: Starting advanced transcript processing...");
+    console.log("🧠 KNOUX AI: بدء المعالجة المحلية للنص...");
 
+    // استخدام نظام الذكاء الاصطناعي المحلي بدلاً من Gemini
     const result: AdvancedAIResult = await processAdvancedTranscript(
       transcript,
       audioBuffer,
     );
 
     console.log(
-      `🧠 KNOUX AI: Processing complete in ${result.processingTime.toFixed(2)}ms`,
+      `🧠 KNOUX AI: اكتملت المعالجة في ${result.processingTime.toFixed(2)}ms`,
     );
     console.log(
-      `🧠 KNOUX AI: Confidence: ${(result.confidence * 100).toFixed(1)}%`,
+      `🧠 KNOUX AI: مستوى الثقة: ${(result.confidence * 100).toFixed(1)}%`,
     );
     console.log(
-      `🧠 KNOUX AI: Language: ${result.language}, Sentiment: ${result.sentiment}`,
+      `🧠 KNOUX AI: اللغة: ${result.language}، المشاعر: ${result.sentiment}`,
     );
 
     if (result.audioAnalysis) {
+      console.log(`🧠 KNOUX AI: جودة الصوت: ${result.audioAnalysis.quality}`);
       console.log(
-        `🧠 KNOUX AI: Audio quality: ${result.audioAnalysis.quality}`,
-      );
-      console.log(
-        `🧠 KNOUX AI: Speech ratio: ${result.audioAnalysis.speechRatio.toFixed(1)}%`,
+        `🧠 KNOUX AI: نسبة الكلام: ${result.audioAnalysis.speechRatio.toFixed(1)}%`,
       );
     }
 
-    // Return legacy format for compatibility
+    // إرجاع التنسيق المتوافق مع النظام القديم
     return {
       title: result.title,
       summary: result.summary,
       keywords: result.keywords,
     };
   } catch (error) {
-    console.error("🧠 KNOUX AI: Processing failed:", error);
+    console.error("🧠 KNOUX AI: فشلت المعالجة:", error);
 
-    // Fallback to basic processing
+    // نظام احتياطي محلي
     return {
-      title: "KNOUX Recording",
-      summary:
-        "AI processing encountered an error, but your recording is safe.",
-      keywords: ["recording", "knoux"],
+      title: "تسجيل KNOUX",
+      summary: "واجهت المعالجة الذكية خطأ، لكن تسجيلك آمن ومحفوظ.",
+      keywords: ["تسجيل", "knoux"],
     };
   }
 }
 
-// Enhanced processing function for advanced features
+/**
+ * معالجة متقدمة للنصوص مع تحليل شامل
+ */
 export async function processTranscriptAdvanced(
   transcript: string,
   audioBuffer?: AudioBuffer,
@@ -67,7 +72,9 @@ export async function processTranscriptAdvanced(
   return processAdvancedTranscript(transcript, audioBuffer);
 }
 
-// Batch processing for multiple recordings
+/**
+ * معالجة مجمعة لعدة تسجيلات
+ */
 export async function batchProcessTranscripts(
   transcripts: Array<{
     id: string;
@@ -76,7 +83,7 @@ export async function batchProcessTranscripts(
   }>,
 ): Promise<Array<{ id: string; result: AIProcessingResult }>> {
   console.log(
-    `🧠 KNOUX AI: Starting batch processing of ${transcripts.length} recordings...`,
+    `🧠 KNOUX AI: بدء المعالجة المجمعة لـ ${transcripts.length} تسجيل...`,
   );
 
   const results = [];
@@ -86,30 +93,32 @@ export async function batchProcessTranscripts(
       const result = await processTranscript(item.transcript, item.audioBuffer);
       results.push({ id: item.id, result });
 
-      // Small delay between processing to avoid blocking UI
+      // تأخير صغير بين المعالجات لتجنب تجميد الواجهة
       await new Promise((resolve) => setTimeout(resolve, 100));
     } catch (error) {
-      console.error(`🧠 KNOUX AI: Failed to process ${item.id}:`, error);
+      console.error(`🧠 KNOUX AI: فشل في معالجة ${item.id}:`, error);
       results.push({
         id: item.id,
         result: {
-          title: "Processing Failed",
-          summary: "Could not process this recording.",
-          keywords: ["error"],
+          title: "فشلت المعالجة",
+          summary: "تعذر معالجة هذا التسجيل.",
+          keywords: ["خطأ"],
         },
       });
     }
   }
 
-  console.log(`🧠 KNOUX AI: Batch processing complete`);
+  console.log(`🧠 KNOUX AI: اكتملت المعالجة المجمعة`);
   return results;
 }
 
-// Real-time transcript analysis (for live processing)
+/**
+ * معالج النصوص المباشر (للمعالجة الحية)
+ */
 export class LiveTranscriptProcessor {
   private buffer: string = "";
   private lastProcessTime: number = 0;
-  private readonly PROCESS_INTERVAL = 5000; // Process every 5 seconds
+  private readonly PROCESS_INTERVAL = 5000; // معالجة كل 5 ثواني
 
   addText(text: string): void {
     this.buffer += " " + text;
@@ -126,16 +135,16 @@ export class LiveTranscriptProcessor {
 
     try {
       const result = await processTranscript(this.buffer.trim());
-      console.log("🧠 KNOUX AI: Live processing result:", result.title);
+      console.log("🧠 KNOUX AI: نتيجة المعالجة المباشرة:", result.title);
 
-      // Emit event for live updates
+      // إرسال حدث للتحديثات المباشرة
       window.dispatchEvent(
         new CustomEvent("liveTranscriptProcessed", {
           detail: result,
         }),
       );
     } catch (error) {
-      console.error("🧠 KNOUX AI: Live processing error:", error);
+      console.error("🧠 KNOUX AI: خطأ في المعالجة المباشرة:", error);
     }
   }
 
@@ -154,26 +163,43 @@ export class LiveTranscriptProcessor {
   }
 }
 
-// Export convenience functions
+// دوال الراحة
 export const createLiveProcessor = () => new LiveTranscriptProcessor();
 
-// AI Model Status
+/**
+ * حالة نظام الذكاء الاصطناعي المحلي
+ */
 export function getAIStatus(): {
   ready: boolean;
   features: string[];
   performance: "high" | "medium" | "low";
+  localModels: string[];
 } {
   return {
     ready: true,
     features: [
-      "Speech Analysis",
-      "Keyword Extraction",
-      "Smart Summarization",
-      "Language Detection",
-      "Sentiment Analysis",
-      "Audio Quality Analysis",
-      "Real-time Processing",
+      "تحليل الكلام المحلي",
+      "استخراج الكلمات المفتاحية",
+      "تلخيص ذكي",
+      "اكتشاف اللغة",
+      "تحليل المشاعر",
+      "تحليل جودة الصوت",
+      "المعالجة المباشرة",
+      "معالجة مجمعة",
+      "استخراج الكيانات",
+      "تحليل الموضوعات",
     ],
     performance: "high",
+    localModels: [
+      "TensorFlow.js Language Model",
+      "Local Speech Analysis",
+      "Keyword Extraction Algorithm",
+      "Sentiment Analysis Model",
+      "Topic Classification Model",
+      "Entity Recognition Model",
+    ],
   };
 }
+
+// تصدير جميع الواجهات والفئات
+export { AdvancedAIResult };
