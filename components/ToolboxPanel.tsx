@@ -16,10 +16,6 @@ const ToolboxPanel: React.FC = () => {
     renewal_date: "2024-02-15",
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [processingTasks, setProcessingTasks] = useState<
-    Map<string, AIProcessingTask>
-  >(new Map());
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Note: Task monitoring removed since toolboxService handles operations directly
 
@@ -61,7 +57,7 @@ const ToolboxPanel: React.FC = () => {
     try {
       // التحقق من النق��ط المطلوبة
       if (tool.credits_cost > userCredits.remaining) {
-        throw new Error("نقاط غير كافية لتن��يذ هذه الأداة");
+        throw new Error("نقاط غير كافية لتنفيذ هذه الأداة");
       }
 
       // إعداد المدخلات
