@@ -16,6 +16,154 @@ const ToolboxPanel: React.FC = () => {
     renewal_date: "2024-02-15",
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const [processingTasks, setProcessingTasks] = useState<
+    Map<string, AIProcessingTask>
+  >(new Map());
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // مراقبة حالة المهام
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const tasks = offlineAI.getAllTasks();
+      const taskMap = new Map();
+      tasks.forEach((task) => taskMap.set(task.id, task));
+      setProcessingTasks(taskMap);
+
+      // تحديث النقاط
+      const credits = offlineAI.getCreditSystem();
+      setUserCredits((prev) => ({
+        ...prev,
+        remaining: credits.current,
+        used: credits[credits.tier] - credits.current,
+      }));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // معالجة الأدوات
+  const handleToolUse = async (
+    tool: AITool,
+    file?: File,
+    additionalInput?: string,
+  ) => {
+    try {
+      if (!file && tool.input_types.includes("file")) {
+        // فتح منتقي الملفات
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = getAcceptedFileTypes(tool.input_types);
+        input.onchange = (e) => {
+          const selectedFile = (e.target as HTMLInputElement).files?.[0];
+          if (selectedFile) {
+            executeToolOperation(tool, selectedFile, additionalInput);
+          }
+        };
+        input.click();
+        return;
+      }
+
+      await executeToolOperation(tool, file, additionalInput);
+    } catch (error) {
+      console.error("خطأ في تشغيل الأداة:", error);
+      alert(`خطأ في تشغيل ${tool.name}: ${error}`);
+    }
+  };
+
+  // تنفيذ عملية الأداة
+  const executeToolOperation = async (
+    tool: AITool,
+    file?: File,
+    additionalInput?: string,
+  ) => {
+    const input = file || additionalInput || "";
+
+    // تحديد نوع المهمة ونوع العملية
+    let taskType: "video" | "audio" | "image" | "text";
+    let operation: string;
+
+    switch (tool.id) {
+      case "ai-video-generator":
+        taskType = "text";
+        operation = "text_to_video";
+        break;
+      case "ai-background-remover":
+        taskType = file?.type.startsWith("video/") ? "video" : "image";
+        operation = "background_removal";
+        break;
+      case "ai-speech-to-text":
+        taskType = "audio";
+        operation = "speech_to_text";
+        break;
+      case "ai-voice-cloning":
+        taskType = "audio";
+        operation = "voice_change";
+        break;
+      case "ai-animation":
+        taskType = "video";
+        operation = "ai_animation";
+        break;
+      case "ai-image-upscaler":
+        taskType = "image";
+        operation = "image_upscaler";
+        break;
+      case "video-trimmer":
+        taskType = "video";
+        operation = "trim_video";
+        break;
+      case "video-merger":
+        taskType = "video";
+        operation = "merge_video";
+        break;
+      case "noise-remover":
+        taskType = "audio";
+        operation = "noise_reduction";
+        break;
+      case "vocal-remover":
+        taskType = "audio";
+        operation = "vocal_remover";
+        break;
+      default:
+        throw new Error(`أداة غير مدعومة: ${tool.id}`);
+    }
+
+    // إضافة المهمة إلى نظام الذكاء الاصطناعي
+    const taskId = await offlineAI.addTask({
+      type: taskType,
+      operation,
+      input,
+      credits: tool.credits_cost,
+      estimatedTime: getEstimatedTime(tool.processing_time),
+    });
+
+    console.log(`تم إضافة مهمة ${tool.name} بمعرف: ${taskId}`);
+  };
+
+  // الحصول على أنواع الملفات المقبولة
+  const getAcceptedFileTypes = (inputTypes: string[]): string => {
+    const typeMapping: Record<string, string> = {
+      video: "video/*",
+      audio: "audio/*",
+      image: "image/*",
+      file: "*/*",
+    };
+
+    return inputTypes.map((type) => typeMapping[type] || "*/*").join(",");
+  };
+
+  // الحصول على الوقت المقدر
+  const getEstimatedTime = (processingTime: string): number => {
+    switch (processingTime) {
+      case "fast":
+        return 30;
+      case "medium":
+        return 120;
+      case "slow":
+        return 300;
+      default:
+        return 60;
+    }
+  };
 
   const categories = [
     { id: "all", name: "All Tools", icon: "🛠️", color: "knoux-purple" },
