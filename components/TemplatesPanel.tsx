@@ -100,8 +100,14 @@ const TemplatesPanel: React.FC = () => {
   });
 
   const handleTemplateSelect = (template: VideoTemplate) => {
-    // TODO: Open template editor
-    console.log("Selected template:", template);
+    // إنشاء إشعار عن اختيار القالب
+    alert(`تم اختيار قالب: ${template.name}`);
+
+    // تسجيل للمطورين
+    console.log("تم اختيار القالب:", template);
+
+    // يمكن إضافة منطق لفتح محرر القالب هنا
+    // مثل: navigate to template editor with template data
   };
 
   const TemplateCard = ({ template }: { template: VideoTemplate }) => (
