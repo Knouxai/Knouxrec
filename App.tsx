@@ -183,7 +183,7 @@ const App = () => {
   );
 
   const onRecordingComplete = useCallback(
-    (blob: Blob, transcript: string) => {
+    async (blob: Blob, transcript: string = "") => {
       const newRecording: Recording = {
         id: `rec-${Date.now()}`,
         name: generateFileName(settings.fileNamePattern, "webm"),
@@ -201,16 +201,47 @@ const App = () => {
         setPendingRecording(newRecording);
       } else {
         setRecordings((prev) => [newRecording, ...prev]);
-        addNotification(`Recording "${newRecording.name}" saved.`, "success");
-        if (newRecording.isProcessing) {
+        addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
+
+        // بدء المعالجة الذكية التلقائية إذا كانت مفعلة
+        if (newRecording.isProcessing && transcript) {
           runAiProcessing(newRecording);
+        }
+
+        // استخراج الصوت تلقائياً إذا لم يكن هناك نسخ نصي
+        if (!transcript && settings.aiProcessingEnabled) {
+          try {
+            addNotification("جار استخراج الصوت وتحويله لنص...", "info");
+            const audioBlob = await audioProcessor.extractAudioFromVideo(blob);
+            const extractedText = await audioProcessor.speechToText(
+              audioBlob,
+              "ar-SA",
+            );
+
+            const updatedRecording = {
+              ...newRecording,
+              transcript: extractedText,
+            };
+            setRecordings((prev) =>
+              prev.map((r) =>
+                r.id === newRecording.id ? updatedRecording : r,
+              ),
+            );
+
+            if (extractedText.trim().length > 10) {
+              runAiProcessing(updatedRecording);
+            }
+          } catch (error) {
+            console.warn("فشل في استخراج النص من الصوت:", error);
+          }
         }
       }
     },
     [settings, addNotification, runAiProcessing],
   );
 
-  const recorder = useRecorder(settings, onRecordingComplete, addNotification);
+  // استخدام النظام الجديد
+  const { state: recorderState, actions: recorderActions } = useRecorder();
 
   useEffect(() => {
     document.documentElement.classList.remove("light", "dark");
