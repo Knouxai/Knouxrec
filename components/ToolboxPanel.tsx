@@ -44,7 +44,7 @@ const ToolboxPanel: React.FC = () => {
       await executeToolOperation(tool, file, additionalInput);
     } catch (error) {
       console.error("خطأ في تشغيل الأداة:", error);
-      alert(`خطأ في تشغ��ل ${tool.name}: ${error}`);
+      alert(`خط�� في تشغ��ل ${tool.name}: ${error}`);
     }
   };
 
@@ -130,7 +130,7 @@ const ToolboxPanel: React.FC = () => {
     { id: "video", name: "الفيديو", icon: "🎥", color: "blue-400" },
     { id: "audio", name: "الصوت", icon: "🎵", color: "green-400" },
     { id: "image", name: "الصور", icon: "🖼️", color: "yellow-400" },
-    { id: "text", name: "Text", icon: "📝", color: "purple-400" },
+    { id: "text", name: "النصوص", icon: "📝", color: "purple-400" },
     { id: "ai-tools", name: "AI Tools", icon: "🤖", color: "knoux-neon" },
   ] as const;
 
