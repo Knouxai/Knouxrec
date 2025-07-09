@@ -58,6 +58,158 @@ export class OfflineAI {
   // تهيئة النماذج
   private async initializeModels(): Promise<void> {
     const modelDefinitions = [
+      // نماذج أساسية
+      {
+        name: "gpt4all",
+        type: "generation" as const,
+        size: 120,
+        version: "1.0.0",
+        url: "/models/gpt4all/model.json",
+      },
+      {
+        name: "llama2",
+        type: "generation" as const,
+        size: 3584, // 3.5GB
+        version: "7B-Chat",
+        url: "/models/llama2/model.json",
+      },
+      {
+        name: "whisper",
+        type: "analysis" as const,
+        size: 85,
+        version: "1.0.0",
+        url: "/models/whisper/model.json",
+      },
+      // نماذج الصور والرسوم
+      {
+        name: "stable_diffusion",
+        type: "generation" as const,
+        size: 2560, // 2.5GB
+        version: "1.5.0",
+        url: "/models/stable_diffusion/model.json",
+      },
+      {
+        name: "real_esrgan",
+        type: "enhancement" as const,
+        size: 150,
+        version: "2.0.0",
+        url: "/models/real_esrgan/model.json",
+      },
+      {
+        name: "u2net",
+        type: "segmentation" as const,
+        size: 95,
+        version: "1.0.0",
+        url: "/models/u2net/model.json",
+      },
+      {
+        name: "modnet",
+        type: "segmentation" as const,
+        size: 180,
+        version: "1.0.0",
+        url: "/models/modnet/model.json",
+      },
+      {
+        name: "sam",
+        type: "segmentation" as const,
+        size: 650,
+        version: "1.0.0",
+        url: "/models/sam/model.json",
+      },
+      // نماذج الفيديو والحركة
+      {
+        name: "videocrafter",
+        type: "generation" as const,
+        size: 4300, // 4.2GB
+        version: "1.0.0",
+        url: "/models/videocrafter/model.json",
+      },
+      {
+        name: "animatediff",
+        type: "generation" as const,
+        size: 2867, // 2.8GB
+        version: "1.0.0",
+        url: "/models/animatediff/model.json",
+      },
+      {
+        name: "simswap",
+        type: "generation" as const,
+        size: 320,
+        version: "1.0.0",
+        url: "/models/simswap/model.json",
+      },
+      {
+        name: "yolo",
+        type: "detection" as const,
+        size: 45,
+        version: "8.0.0",
+        url: "/models/yolo/model.json",
+      },
+      {
+        name: "scenecut",
+        type: "analysis" as const,
+        size: 50,
+        version: "1.0.0",
+        url: "/models/scenecut/model.json",
+      },
+      // نماذج الصوت
+      {
+        name: "bark_tts",
+        type: "generation" as const,
+        size: 180,
+        version: "1.0.0",
+        url: "/models/bark_tts/model.json",
+      },
+      {
+        name: "spleeter",
+        type: "analysis" as const,
+        size: 150,
+        version: "2-stems",
+        url: "/models/spleeter/model.json",
+      },
+      {
+        name: "sovits",
+        type: "generation" as const,
+        size: 220,
+        version: "4.0",
+        url: "/models/sovits/model.json",
+      },
+      {
+        name: "sadtalker",
+        type: "generation" as const,
+        size: 580,
+        version: "1.0.0",
+        url: "/models/sadtalker/model.json",
+      },
+      {
+        name: "rnnoise",
+        type: "enhancement" as const,
+        size: 15,
+        version: "1.0.0",
+        url: "/models/rnnoise/model.json",
+      },
+      {
+        name: "beat_detector",
+        type: "analysis" as const,
+        size: 25,
+        version: "1.0.0",
+        url: "/models/beat_detector/model.json",
+      },
+      {
+        name: "wav2lip",
+        type: "generation" as const,
+        size: 280,
+        version: "1.0.0",
+        url: "/models/wav2lip/model.json",
+      },
+      {
+        name: "m2m100",
+        type: "generation" as const,
+        size: 420,
+        version: "418M",
+        url: "/models/m2m100/model.json",
+      },
+      // نماذج قديمة للتوافق
       {
         name: "selfie_segmentation",
         type: "segmentation" as const,
@@ -71,48 +223,6 @@ export class OfflineAI {
         size: 10,
         version: "1.0.0",
         url: "/models/face_detection/model.json",
-      },
-      {
-        name: "object_detection",
-        type: "detection" as const,
-        size: 25,
-        version: "1.0.0",
-        url: "/models/object_detection/model.json",
-      },
-      {
-        name: "pose_estimation",
-        type: "detection" as const,
-        size: 20,
-        version: "1.0.0",
-        url: "/models/pose_estimation/model.json",
-      },
-      {
-        name: "style_transfer",
-        type: "generation" as const,
-        size: 50,
-        version: "1.0.0",
-        url: "/models/style_transfer/model.json",
-      },
-      {
-        name: "super_resolution",
-        type: "enhancement" as const,
-        size: 30,
-        version: "1.0.0",
-        url: "/models/super_resolution/model.json",
-      },
-      {
-        name: "text_generation",
-        type: "generation" as const,
-        size: 100,
-        version: "1.0.0",
-        url: "/models/text_generation/model.json",
-      },
-      {
-        name: "sentiment_analysis",
-        type: "analysis" as const,
-        size: 40,
-        version: "1.0.0",
-        url: "/models/sentiment_analysis/model.json",
       },
     ];
 
