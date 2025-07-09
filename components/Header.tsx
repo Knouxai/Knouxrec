@@ -27,11 +27,16 @@ const Header: React.FC<HeaderProps> = ({
   onViewChange,
 }) => {
   const quickActions = [
-    { id: "templates", icon: "📽️", label: "Templates", color: "knoux-purple" },
-    { id: "toolbox", icon: "🛠️", label: "Toolbox", color: "knoux-neon" },
-    { id: "recordings", icon: "🎬", label: "Library", color: "green-400" },
-    { id: "ai", icon: "🧠", label: "AI Tools", color: "yellow-400" },
-    { id: "files", icon: "📁", label: "Files", color: "blue-400" },
+    { id: "templates", icon: "📽️", label: "القوالب", color: "knoux-purple" },
+    { id: "toolbox", icon: "🛠️", label: "الأدوات", color: "knoux-neon" },
+    { id: "recordings", icon: "🎬", label: "المكتبة", color: "green-400" },
+    {
+      id: "ai",
+      icon: "🧠",
+      label: "أدوات الذكاء الاصطناعي",
+      color: "yellow-400",
+    },
+    { id: "files", icon: "📁", label: "الملفات", color: "blue-400" },
   ];
 
   return (
