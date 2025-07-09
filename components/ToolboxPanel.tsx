@@ -43,7 +43,7 @@ const ToolboxPanel: React.FC = () => {
 
       await executeToolOperation(tool, file, additionalInput);
     } catch (error) {
-      console.error("خطأ في تشغيل الأداة:", error);
+      console.error("خطأ ف�� تشغيل الأداة:", error);
       alert(`خطأ في تشغ��ل ${tool.name}: ${error}`);
     }
   };
@@ -87,7 +87,7 @@ const ToolboxPanel: React.FC = () => {
           used: prev.used + tool.credits_cost,
         }));
 
-        // عرض ر��الة نجاح
+        // عرض رسالة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
         // تح��يل النتيج�� ��لقائياً إذا كانت ملف
@@ -126,7 +126,7 @@ const ToolboxPanel: React.FC = () => {
   };
 
   const categories = [
-    { id: "all", name: "جميع الأدوات", icon: "🛠���", color: "knoux-purple" },
+    { id: "all", name: "جميع الأدوات", icon: "🛠️", color: "knoux-purple" },
     { id: "video", name: "الفيديو", icon: "🎥", color: "blue-400" },
     { id: "audio", name: "الصوت", icon: "🎵", color: "green-400" },
     { id: "image", name: "الصور", icon: "🖼️", color: "yellow-400" },
@@ -229,8 +229,8 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "ai-upscaler",
-        name: "AI Image Upscaler",
-        description: "Enhance image quality up to 8K resolution",
+        name: "محسن جودة الصور",
+        description: "حسن جودة الصور حتى دقة 8K",
         category: "ai-tools",
         icon: "📈",
         ai_powered: true,
