@@ -35,3 +35,4 @@ const ToggleSwitch = ({
 };
 
 export default ToggleSwitch;
+export { ToggleSwitch };
