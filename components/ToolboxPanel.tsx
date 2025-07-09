@@ -90,7 +90,7 @@ const ToolboxPanel: React.FC = () => {
         // عرض رسالة نجاح
         alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
 
-        // تح��يل النتيج�� تلقائياً إذا كانت ملف
+        // تح��يل النتيج�� ��لقائياً إذا كانت ملف
         if (result.output && typeof result.output !== "string") {
           downloadFile(result.output, `${tool.name}_result`);
         }
@@ -675,7 +675,5 @@ const ToolboxPanel: React.FC = () => {
     </div>
   );
 };
-
-export default ToolboxPanel;
 
 export default ToolboxPanel;
