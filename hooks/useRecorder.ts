@@ -1,5 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import RecordRTC, { StereoAudioRecorder, MediaStreamRecorder } from "recordrtc";
+import {
+  screenshotService,
+  ScreenshotOptions,
+  ScreenshotResult,
+} from "../services/screenshotService";
 
 export interface RecorderState {
   isRecording: boolean;
@@ -31,7 +36,7 @@ export interface RecorderActions {
   setBitRate: (bitrate: number) => void;
   downloadRecording: () => void;
   clearRecording: () => void;
-  takeScreenshot: () => Promise<Blob | null>;
+  takeScreenshot: (options?: ScreenshotOptions) => Promise<ScreenshotResult>;
   startWebcamRecording: () => Promise<void>;
   recordSpecificWindow: () => Promise<void>;
   recordSelectedArea: (
@@ -342,38 +347,64 @@ export function useRecorder(): UseRecorderReturn {
     }));
   }, []);
 
-  // أخذ لقطة شاشة
-  const takeScreenshot = useCallback(async (): Promise<Blob | null> => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-      });
+  // أخذ لقطة شاشة باستخدام الخدمة المتقدمة
+  const takeScreenshot = useCallback(
+    async (options?: ScreenshotOptions): Promise<ScreenshotResult> => {
+      console.log("📸 Taking advanced screenshot...");
 
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      video.play();
+      try {
+        // إعداد خيارات Screenshot الافتراضية
+        const screenshotOptions: ScreenshotOptions = {
+          format: "png",
+          quality: 0.95,
+          captureMode: "screen",
+          timestamp: true,
+          watermark: true,
+          ...options,
+        };
 
-      return new Promise((resolve) => {
-        video.addEventListener("loadedmetadata", () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d")!;
+        // التقاط لقطة الشاشة
+        const result =
+          await screenshotService.captureScreenshot(screenshotOptions);
 
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
+        if (result.success) {
+          console.log("✅ Screenshot captured successfully:", result.filename);
 
-          ctx.drawImage(video, 0, 0);
+          // تحميل لقطة الشاشة تلقائياً
+          const downloaded = await screenshotService.downloadScreenshot(result);
 
-          canvas.toBlob((blob) => {
-            stream.getTracks().forEach((track) => track.stop());
-            resolve(blob);
-          }, "image/png");
-        });
-      });
-    } catch (error) {
-      console.error("خطأ في أخذ لقطة الشاشة:", error);
-      return null;
-    }
-  }, []);
+          if (downloaded) {
+            console.log("📥 Screenshot downloaded successfully");
+
+            // محاولة نسخ لقطة الشاشة للحافظة أيضاً
+            try {
+              await screenshotService.copyToClipboard(result);
+              console.log("📋 Screenshot copied to clipboard");
+            } catch (error) {
+              console.warn("Failed to copy to clipboard:", error);
+            }
+          } else {
+            console.error("❌ Failed to download screenshot");
+          }
+
+          return result;
+        } else {
+          console.error("❌ Screenshot capture failed:", result.error);
+          return result;
+        }
+      } catch (error) {
+        console.error("Screenshot error:", error);
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "فشل في التقاط لقطة الشاشة",
+        };
+      }
+    },
+    [],
+  );
 
   // تسجيل الكاميرا
   const startWebcamRecording = useCallback(async () => {
@@ -500,6 +531,8 @@ export function useRecorder(): UseRecorderReturn {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
+      // تنظيف خدمة Screenshot
+      screenshotService.cleanup();
     };
   }, []);
 

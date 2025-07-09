@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { AITool, ToolCategory, UserCredits } from "../types/templates";
 import {
-  toolboxService,
+  enhancedToolboxService as toolboxService,
   ToolExecutionResult,
-} from "../services/toolboxService";
+} from "../services/toolboxService_enhanced";
+import ImageToolInterface from "./tools/ImageToolInterface";
+import VideoToolInterface from "./tools/VideoToolInterface";
+import AudioToolInterface from "./tools/AudioToolInterface";
+import TextToolInterface from "./tools/TextToolInterface";
 
 const ToolboxPanel: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>("all");
@@ -16,8 +20,8 @@ const ToolboxPanel: React.FC = () => {
     renewal_date: "2024-02-15",
   });
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Note: Task monitoring removed since toolboxService handles operations directly
+  const [selectedTool, setSelectedTool] = useState<AITool | null>(null);
+  const [showToolInterface, setShowToolInterface] = useState(false);
 
   // معالجة الأدوات
   const handleToolUse = async (
@@ -617,7 +621,7 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "text-to-speech",
-        name: "النص إلى كلام",
+        name: "النص إلى كل��م",
         description: "تحويل النصوص إلى كلام طبيعي بأصوات متنوعة",
         category: "text",
         icon: "📢",
@@ -719,8 +723,82 @@ const ToolboxPanel: React.FC = () => {
       return;
     }
 
-    // استخدام الأداة مباشرة
-    handleToolUse(tool);
+    // فتح الواجهة المخصصة للأداة
+    setSelectedTool(tool);
+    setShowToolInterface(true);
+  };
+
+  const handleToolSuccess = (result: ToolExecutionResult) => {
+    console.log("✅ نجح تنفيذ الأداة:", result);
+
+    // تحديث النقاط
+    if (selectedTool) {
+      setUserCredits((prev) => ({
+        ...prev,
+        remaining: prev.remaining - selectedTool.credits_cost,
+        used: prev.used + selectedTool.credits_cost,
+      }));
+    }
+
+    // عرض رسالة نجاح
+    alert(`تم إنجاز ${selectedTool?.name} بنجاح! ✨`);
+
+    // تحميل النتيجة تلقائياً إذا كانت ملف
+    if (result.output && typeof result.output !== "string") {
+      const blob = result.output as Blob;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selectedTool?.name}_result`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleToolError = (error: string) => {
+    console.error("❌ خطأ في تنفيذ الأداة:", error);
+    alert(`خطأ في ${selectedTool?.name}: ${error}`);
+  };
+
+  const closeToolInterface = () => {
+    setShowToolInterface(false);
+    setSelectedTool(null);
+  };
+
+  const renderToolInterface = () => {
+    if (!selectedTool || !showToolInterface) return null;
+
+    const props = {
+      tool: selectedTool,
+      onClose: closeToolInterface,
+      onSuccess: handleToolSuccess,
+      onError: handleToolError,
+    };
+
+    // اختيار الواجهة المناسبة حسب نوع الأداة
+    switch (selectedTool.category) {
+      case "image":
+        return <ImageToolInterface {...props} />;
+      case "video":
+        return <VideoToolInterface {...props} />;
+      case "audio":
+        return <AudioToolInterface {...props} />;
+      case "text":
+        return <TextToolInterface {...props} />;
+      case "ai-tools":
+        // الأدوات المتقدمة - اختيار الواجهة حسب نوع المدخلات
+        if (selectedTool.input_types.includes("image")) {
+          return <ImageToolInterface {...props} />;
+        } else if (selectedTool.input_types.includes("video")) {
+          return <VideoToolInterface {...props} />;
+        } else if (selectedTool.input_types.includes("audio")) {
+          return <AudioToolInterface {...props} />;
+        } else {
+          return <TextToolInterface {...props} />;
+        }
+      default:
+        return <ImageToolInterface {...props} />;
+    }
   };
 
   const ToolCard = ({ tool }: { tool: AITool }) => (
@@ -851,7 +929,7 @@ const ToolboxPanel: React.FC = () => {
 
       {/* Action Button */}
       <button
-        onClick={() => handleToolUse(tool)}
+        onClick={() => handleToolSelect(tool)}
         className={`w-full py-2 rounded-lg font-medium transition-all ${
           tool.credits_cost > userCredits.remaining
             ? "bg-gray-500/20 text-gray-500 cursor-not-allowed"
@@ -861,174 +939,180 @@ const ToolboxPanel: React.FC = () => {
       >
         {tool.credits_cost > userCredits.remaining
           ? "نقاط غير كافية"
-          : "استخدام الأداة"}
+          : "فتح الأداة"}
       </button>
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="glass-card p-6 rounded-2xl border border-knoux-purple/30">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
-              🛠️ صندوق الأدوات الاحترافي
-            </h2>
-            <p className="text-white/70 mt-1">
-              أدوات الذكاء الاصطناعي المتقدمة لتحرير المحتوى
-            </p>
-          </div>
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="glass-card p-6 rounded-2xl border border-knoux-purple/30">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
+                🛠️ صندوق الأدوات الاحترافي
+              </h2>
+              <p className="text-white/70 mt-1">
+                أدوات الذكاء الاصطناعي المتقدمة لتحرير المحتوى
+              </p>
+            </div>
 
-          {/* Search */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="ابحث عن الأدوات..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 px-4 py-2 pl-10 bg-black/30 border border-knoux-purple/30 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-knoux-purple focus:border-knoux-purple"
-            />
-            <svg
-              className="w-5 h-5 text-white/50 absolute left-3 top-2.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            {/* Search */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="ابحث عن الأدوات..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64 px-4 py-2 pl-10 bg-black/30 border border-knoux-purple/30 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-knoux-purple focus:border-knoux-purple"
               />
-            </svg>
+              <svg
+                className="w-5 h-5 text-white/50 absolute left-3 top-2.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
           </div>
-        </div>
 
-        {/* Credits Info */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-knoux-purple/10 rounded-lg">
-            <div className="text-2xl font-bold text-knoux-purple">
-              {userCredits.remaining}
+          {/* Credits Info */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="text-center p-3 bg-knoux-purple/10 rounded-lg">
+              <div className="text-2xl font-bold text-knoux-purple">
+                {userCredits.remaining}
+              </div>
+              <div className="text-sm text-white/70">النقاط المتبقية</div>
             </div>
-            <div className="text-sm text-white/70">النقاط المتبقية</div>
-          </div>
-          <div className="text-center p-3 bg-knoux-neon/10 rounded-lg">
-            <div className="text-2xl font-bold text-knoux-neon">
-              {tools.filter((t) => t.ai_powered).length}
+            <div className="text-center p-3 bg-knoux-neon/10 rounded-lg">
+              <div className="text-2xl font-bold text-knoux-neon">
+                {tools.filter((t) => t.ai_powered).length}
+              </div>
+              <div className="text-sm text-white/70">أدوات ذكية</div>
             </div>
-            <div className="text-sm text-white/70">أدوات ذكية</div>
-          </div>
-          <div className="text-center p-3 bg-green-400/10 rounded-lg">
-            <div className="text-2xl font-bold text-green-400">
-              {tools.filter((t) => t.popular).length}
+            <div className="text-center p-3 bg-green-400/10 rounded-lg">
+              <div className="text-2xl font-bold text-green-400">
+                {tools.filter((t) => t.popular).length}
+              </div>
+              <div className="text-sm text-white/70">شائعة</div>
             </div>
-            <div className="text-sm text-white/70">شائعة</div>
-          </div>
-          <div className="text-center p-3 bg-yellow-400/10 rounded-lg">
-            <div className="text-2xl font-bold text-yellow-400 capitalize">
-              {userCredits.subscription_tier}
+            <div className="text-center p-3 bg-yellow-400/10 rounded-lg">
+              <div className="text-2xl font-bold text-yellow-400 capitalize">
+                {userCredits.subscription_tier}
+              </div>
+              <div className="text-sm text-white/70">الخطة</div>
             </div>
-            <div className="text-sm text-white/70">الخطة</div>
           </div>
-        </div>
 
-        {/* Credits Progress */}
-        <div className="mt-4 p-4 bg-black/20 rounded-lg">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-white font-medium">استخدام النقاط</span>
-            <span className="text-knoux-neon">
-              {userCredits.used}/{userCredits.total}
-            </span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-knoux-purple to-knoux-neon h-2 rounded-full transition-all duration-300"
-              style={{
-                width: `${(userCredits.used / userCredits.total) * 100}%`,
-              }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Categories */}
-      <div className="glass-card p-4 rounded-2xl border border-knoux-purple/20">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id as ToolCategory)}
-              className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
-                selectedCategory === category.id
-                  ? `bg-${category.color}/30 border border-${category.color} text-${category.color}`
-                  : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-transparent"
-              }`}
-            >
-              <span>{category.icon}</span>
-              <span>{category.name}</span>
-              <span className="text-xs opacity-75">
-                (
-                {
-                  tools.filter(
-                    (t) => category.id === "all" || t.category === category.id,
-                  ).length
-                }
-                )
+          {/* Credits Progress */}
+          <div className="mt-4 p-4 bg-black/20 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white font-medium">استخدام النقاط</span>
+              <span className="text-knoux-neon">
+                {userCredits.used}/{userCredits.total}
               </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tools Grid */}
-      <div className="glass-card p-6 rounded-2xl border border-knoux-purple/20">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-orbitron font-bold text-white">
-            {categories.find((c) => c.id === selectedCategory)?.icon}{" "}
-            {categories.find((c) => c.id === selectedCategory)?.name}
-          </h3>
-          <span className="text-white/70">{filteredTools.length} أداة</span>
-        </div>
-
-        {filteredTools.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-orbitron font-bold text-white mb-2">
-              لم يتم العثور على أدوات
-            </h3>
-            <p className="text-white/70">جرب تعديل البحث أو تغيير الفئة</p>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-knoux-purple to-knoux-neon h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: `${(userCredits.used / userCredits.total) * 100}%`,
+                }}
+              ></div>
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTools.map((tool) => (
-              <ToolCard key={tool.id} tool={tool} />
+        </div>
+
+        {/* Categories */}
+        <div className="glass-card p-4 rounded-2xl border border-knoux-purple/20">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id as ToolCategory)}
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
+                  selectedCategory === category.id
+                    ? `bg-${category.color}/30 border border-${category.color} text-${category.color}`
+                    : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-transparent"
+                }`}
+              >
+                <span>{category.icon}</span>
+                <span>{category.name}</span>
+                <span className="text-xs opacity-75">
+                  (
+                  {
+                    tools.filter(
+                      (t) =>
+                        category.id === "all" || t.category === category.id,
+                    ).length
+                  }
+                  )
+                </span>
+              </button>
             ))}
+          </div>
+        </div>
+
+        {/* Tools Grid */}
+        <div className="glass-card p-6 rounded-2xl border border-knoux-purple/20">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-orbitron font-bold text-white">
+              {categories.find((c) => c.id === selectedCategory)?.icon}{" "}
+              {categories.find((c) => c.id === selectedCategory)?.name}
+            </h3>
+            <span className="text-white/70">{filteredTools.length} أداة</span>
+          </div>
+
+          {filteredTools.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-orbitron font-bold text-white mb-2">
+                لم يتم العثور على أدوات
+              </h3>
+              <p className="text-white/70">جرب تعديل البحث أو تغيير الفئة</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTools.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Upgrade Notice */}
+        {userCredits.subscription_tier === "free" && (
+          <div className="glass-card p-6 rounded-2xl border border-yellow-400/30 bg-yellow-400/5">
+            <div className="flex items-center space-x-4">
+              <div className="text-4xl">⭐</div>
+              <div className="flex-grow">
+                <h3 className="text-xl font-orbitron font-bold text-yellow-400 mb-1">
+                  ترقية إلى الاحترافي
+                </h3>
+                <p className="text-white/70">
+                  احصل على نقاط غير محدودة وإمكانية الوصول لأدوات الذكاء
+                  الاصطناعي المتقدمة
+                </p>
+              </div>
+              <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl font-bold text-black hover:scale-105 transition-transform">
+                ترقية الآن
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Upgrade Notice */}
-      {userCredits.subscription_tier === "free" && (
-        <div className="glass-card p-6 rounded-2xl border border-yellow-400/30 bg-yellow-400/5">
-          <div className="flex items-center space-x-4">
-            <div className="text-4xl">⭐</div>
-            <div className="flex-grow">
-              <h3 className="text-xl font-orbitron font-bold text-yellow-400 mb-1">
-                ترقية إلى الاحترافي
-              </h3>
-              <p className="text-white/70">
-                احصل على نقاط غير محدودة وإمكانية الوصول لأدوات الذكاء الاصطناعي
-                المتقدمة
-              </p>
-            </div>
-            <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl font-bold text-black hover:scale-105 transition-transform">
-              ترقية الآن
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Tool Interface Modal */}
+      {renderToolInterface()}
+    </>
   );
 };
 

@@ -258,14 +258,6 @@ export const toolboxAIMapping: ToolboxAIMapping = {
     category: "video",
   },
 
-  "ai-shorts": {
-    primaryModel: "yolo",
-    supportingModels: ["whisper", "gpt4all"],
-    processingTime: "5-15s",
-    memoryUsage: "210MB",
-    category: "video",
-  },
-
   "text-based-editing": {
     primaryModel: "whisper",
     supportingModels: ["gpt4all"],
