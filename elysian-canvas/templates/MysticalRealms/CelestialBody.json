@@ -1,0 +1,228 @@
+{
+  "id": "celestial-body",
+  "name": "Celestial Body",
+  "category": "MysticalRealms",
+  "description": "Transform the human form into a cosmic entity, incorporating stellar elements, galactic dust, and ethereal lighting to create an otherworldly artistic vision.",
+  "maturityLevel": "ethereal",
+  "aestheticProfile": "celestial-body",
+  "tags": ["cosmic", "ethereal", "stars", "mystical", "transcendent"],
+  "composition": {
+    "aspectRatio": "2:3",
+    "rule": "golden",
+    "focusPoint": { "x": 0.5, "y": 0.382 },
+    "guidingLines": ["spiral", "radial"]
+  },
+  "lighting": {
+    "scheme": "ethereal",
+    "keyLight": {
+      "position": { "x": 0.5, "y": 0.1, "z": 2 },
+      "intensity": 0.6,
+      "color": "#e6e6fa",
+      "softness": 0.9,
+      "type": "celestial"
+    },
+    "rimLight": {
+      "position": { "x": 0.8, "y": 0.2, "z": 1.5 },
+      "intensity": 0.8,
+      "color": "#ffd700",
+      "halo": true
+    },
+    "ambientLight": {
+      "intensity": 0.4,
+      "color": "#4b0082",
+      "cosmic": true
+    },
+    "starLight": {
+      "enabled": true,
+      "density": 0.7,
+      "twinkle": true,
+      "colors": ["#ffffff", "#ffd700", "#87ceeb", "#dda0dd"]
+    },
+    "shadows": {
+      "enabled": true,
+      "sharpness": 0.3,
+      "opacity": 0.4,
+      "cosmic": true
+    }
+  },
+  "colorPalette": {
+    "primary": "#4b0082",
+    "secondary": "#8a2be2",
+    "accent": "#ffd700",
+    "shadows": "#191970",
+    "highlights": "#e6e6fa",
+    "background": ["#000011", "#1a0033", "#330066"],
+    "cosmic": ["#4b0082", "#6a5acd", "#9370db", "#ffd700"],
+    "temperature": "cool",
+    "saturation": 0.8,
+    "luminosity": "high"
+  },
+  "geometry": {
+    "proportions": {
+      "ethereal": true,
+      "elongated": true,
+      "cosmic": true
+    },
+    "guides": {
+      "visible": false,
+      "constellationLines": true,
+      "galaxySpiral": true
+    },
+    "transformation": {
+      "bodyToStars": 0.3,
+      "edges": "dissolving",
+      "particleIntegration": true
+    }
+  },
+  "materialProperties": {
+    "skinTone": {
+      "baseColor": "#e8d5c4",
+      "undertones": "#dbb5a0",
+      "smoothness": 0.95,
+      "luminosity": 0.8,
+      "subsurface": 0.9,
+      "stardustOverlay": true
+    },
+    "surface": {
+      "roughness": 0.05,
+      "metallic": 0.2,
+      "specular": 0.6,
+      "iridescence": 0.4
+    },
+    "emulation": {
+      "type": "cosmic",
+      "intensity": 0.7,
+      "starfield": true,
+      "nebula": 0.5
+    }
+  },
+  "atmosphere": {
+    "fog": {
+      "density": 0.4,
+      "color": "#6a5acd",
+      "distribution": "cosmic",
+      "nebular": true
+    },
+    "particles": {
+      "type": "sparkle",
+      "density": 0.8,
+      "motion": "floating",
+      "size": "varied",
+      "cosmic": true
+    },
+    "mood": {
+      "intensity": 0.9,
+      "mystery": 0.9,
+      "elegance": 0.95,
+      "transcendence": 0.9,
+      "energy": 0.8
+    },
+    "cosmicElements": {
+      "stardust": 0.7,
+      "galaxyArms": 0.4,
+      "nebulaGlow": 0.6,
+      "pulsars": 0.3
+    }
+  },
+  "pose": {
+    "type": "ethereal",
+    "armPosition": "flowing",
+    "bodyAngle": 0,
+    "headTilt": 20,
+    "eyeDirection": "skyward",
+    "expression": "transcendent",
+    "energy": "radiating",
+    "integration": {
+      "withCosmos": 0.6,
+      "boundaries": "soft",
+      "dissolution": 0.3
+    }
+  },
+  "celestialEffects": {
+    "starField": {
+      "density": "high",
+      "distribution": "natural",
+      "brightness": "varied",
+      "colors": ["white", "blue", "gold", "violet"]
+    },
+    "galaxyArms": {
+      "visible": true,
+      "spiral": true,
+      "luminosity": 0.4,
+      "integration": 0.3
+    },
+    "nebula": {
+      "type": "emission",
+      "colors": ["purple", "blue", "pink"],
+      "density": 0.5,
+      "glow": 0.8
+    },
+    "cosmicRays": {
+      "enabled": true,
+      "intensity": 0.3,
+      "direction": "radial"
+    }
+  },
+  "postProcessing": {
+    "contrast": 0.7,
+    "brightness": 0.8,
+    "saturation": 0.9,
+    "sharpness": 0.6,
+    "glow": {
+      "enabled": true,
+      "intensity": 0.8,
+      "radius": 15,
+      "color": "#ffd700"
+    },
+    "starGlow": {
+      "enabled": true,
+      "intensity": 0.9,
+      "diffraction": true
+    },
+    "filters": [
+      {
+        "type": "cosmic-enhancement",
+        "intensity": 0.8
+      },
+      {
+        "type": "stellar-glow",
+        "intensity": 0.7
+      },
+      {
+        "type": "nebula-blend",
+        "intensity": 0.6
+      }
+    ]
+  },
+  "cinematography": {
+    "camera": {
+      "angle": "slightly-low",
+      "distance": "medium",
+      "focus": "dreamy"
+    },
+    "depthOfField": {
+      "enabled": true,
+      "focusDistance": 0.6,
+      "aperture": 2.8,
+      "bokeh": "ethereal",
+      "starBokeh": true
+    }
+  },
+  "soundscape": {
+    "type": "ethereal",
+    "elements": ["cosmic-wind", "stellar-harmonics", "deep-space"]
+  },
+  "artisticNotes": [
+    "Blend human form seamlessly with cosmic elements",
+    "Use soft, luminous lighting to create ethereal quality",
+    "Incorporate particle effects to suggest transformation",
+    "Balance earthly beauty with celestial transcendence"
+  ],
+  "inspirations": [
+    "Gustav Klimt's golden period",
+    "Alex Grey's visionary art",
+    "Hubble Space Telescope imagery",
+    "Art Nouveau celestial motifs",
+    "Renaissance depictions of divine light"
+  ]
+}
