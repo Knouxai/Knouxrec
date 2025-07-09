@@ -344,12 +344,29 @@ const App = () => {
 
     window.addEventListener("keydown", handleHotkeys);
     return () => window.removeEventListener("keydown", handleHotkeys);
-  }, [settings.hotkeys, recorder, isSettingsOpen, pendingRecording]);
+  }, [
+    settings.hotkeys,
+    recorderState,
+    recorderActions,
+    isSettingsOpen,
+    pendingRecording,
+  ]);
 
   const handleStartRecording = () => {
     setGalleryPlaybackUrl(null);
-    recorder.startRecording();
+    recorderActions.startRecording();
   };
+
+  // مراقبة إنهاء التسجيل
+  useEffect(() => {
+    if (recorderState.recordingBlob && !recorderState.isRecording) {
+      onRecordingComplete(recorderState.recordingBlob);
+    }
+  }, [
+    recorderState.recordingBlob,
+    recorderState.isRecording,
+    onRecordingComplete,
+  ]);
 
   const renderMainView = () => (
     <main className="flex-grow p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-screen-2xl w-full mx-auto z-10">
