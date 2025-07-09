@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { AITool, ToolCategory, UserCredits } from "../types/templates";
 import {
-  toolboxService,
+  enhancedToolboxService as toolboxService,
   ToolExecutionResult,
-} from "../services/toolboxService";
+} from "../services/toolboxService_enhanced";
 import ImageToolInterface from "./tools/ImageToolInterface";
 import VideoToolInterface from "./tools/VideoToolInterface";
 import AudioToolInterface from "./tools/AudioToolInterface";
@@ -400,7 +400,7 @@ const ToolboxPanel: React.FC = () => {
         processing_time: "fast",
         input_types: ["video"],
         output_types: ["video"],
-        features: ["قص دقيق", "معاينة فورية", "تنسيقات متعد��ة"],
+        features: ["قص دقيق", "معاينة فورية", "تنسيقات متعددة"],
         premium: false,
         popular: true,
         beta: false,
@@ -474,7 +474,7 @@ const ToolboxPanel: React.FC = () => {
       {
         id: "noise-reduction",
         name: "تقليل الضوضاء",
-        description: "إزالة ضوضاء الخلفية من التسجي��ات الصوتية",
+        description: "إزالة ضوضاء الخلفية من التسجيلات الصوتية",
         category: "audio",
         icon: "🔇✋",
         ai_powered: true,
@@ -621,7 +621,7 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "text-to-speech",
-        name: "النص إلى كلام",
+        name: "النص إلى كل��م",
         description: "تحويل النصوص إلى كلام طبيعي بأصوات متنوعة",
         category: "text",
         icon: "📢",
