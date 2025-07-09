@@ -371,28 +371,29 @@ const App = () => {
   const renderMainView = () => (
     <main className="flex-grow p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-screen-2xl w-full mx-auto z-10">
       <div className="flex flex-col gap-6">
-        <Controls
-          settings={settings}
-          onSettingsChange={handleSettingsChange}
-          isRecording={recorder.recordingState !== "IDLE"}
-          isGameModeActive={settings.gameMode}
-        />
+        <Controls />
         <Features
           settings={settings}
           onSettingsChange={handleSettingsChange}
-          isRecording={recorder.recordingState !== "IDLE"}
+          isRecording={recorderState.isRecording}
         />
         <Actions
-          recordingState={recorder.recordingState}
+          recordingState={
+            recorderState.isRecording
+              ? "RECORDING"
+              : recorderState.isPaused
+                ? "PAUSED"
+                : "IDLE"
+          }
           onStart={handleStartRecording}
-          onStop={recorder.stopRecording}
-          onPause={recorder.pauseRecording}
-          onResume={recorder.resumeRecording}
-          onScreenshot={recorder.takeScreenshot}
-          disabled={recorder.recordingState === "STARTING"}
-          timer={recorder.timer}
-          fps={recorder.fps}
-          scheduleStatus={recorder.scheduleStatus}
+          onStop={recorderActions.stopRecording}
+          onPause={recorderActions.pauseRecording}
+          onResume={recorderActions.resumeRecording}
+          onScreenshot={recorderActions.takeScreenshot}
+          disabled={false}
+          timer={recorderState.recordingTime}
+          fps={recorderState.frameRate}
+          scheduleStatus={null}
           hotkeys={settings.hotkeys}
         />
       </div>
@@ -415,7 +416,7 @@ const App = () => {
             onClick={() => setCurrentView("templates")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-purple/20 transition-all duration-300"
           >
-            <div className="text-3xl mb-2">📽️</div>
+            <div className="text-3xl mb-2">📽��</div>
             <div className="font-orbitron font-bold text-knoux-purple">
               Templates
             </div>
