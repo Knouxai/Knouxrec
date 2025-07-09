@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { AITool, ToolCategory, UserCredits } from "../types/templates";
 import { offlineAI, AIProcessingTask } from "../services/offlineAI";
+import {
+  toolboxService,
+  ToolExecutionResult,
+} from "../services/toolboxService";
+import { localAIManager } from "../services/localAIMapper";
 import { videoProcessor } from "../services/videoProcessor";
 import { audioProcessor } from "../services/audioProcessor";
 import { imageProcessor } from "../services/imageProcessor";
@@ -70,7 +75,7 @@ const ToolboxPanel: React.FC = () => {
     }
   };
 
-  // تنفيذ عملية الأداة
+  // تنفيذ عملية ال��داة
   const executeToolOperation = async (
     tool: AITool,
     file?: File,
