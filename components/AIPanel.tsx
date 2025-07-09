@@ -4,6 +4,9 @@ import { processAdvancedTranscript } from "../services/offlineAI";
 import PerformancePanel from "./PerformancePanel";
 import AIModelsManager from "./AIModelsManager";
 import SystemStats from "./SystemStats";
+import AdvancedFeatures from "./AdvancedFeatures";
+import BatchProcessor from "./BatchProcessor";
+import AnalyticsDashboard from "./AnalyticsDashboard";
 
 interface AIPanelProps {
   recordings: Recording[];
@@ -43,7 +46,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
     },
     {
       id: "stats",
-      name: "إح��ائيات النظام",
+      name: "إحصائيات النظام",
       icon: "📊",
       description: "نظرة شاملة على أداء وحالة النظام",
       color: "indigo-400",
