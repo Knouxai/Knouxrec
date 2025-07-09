@@ -324,17 +324,21 @@ const App = () => {
 
       if (checkHotkey(e, settings.hotkeys.startStop)) {
         e.preventDefault();
-        recorder.recordingState === "IDLE"
-          ? recorder.startRecording()
-          : recorder.stopRecording();
+        !recorderState.isRecording
+          ? recorderActions.startRecording()
+          : recorderActions.stopRecording();
       } else if (checkHotkey(e, settings.hotkeys.pauseResume)) {
         e.preventDefault();
-        if (recorder.recordingState === "RECORDING") recorder.pauseRecording();
-        else if (recorder.recordingState === "PAUSED")
-          recorder.resumeRecording();
+        if (recorderState.isRecording && !recorderState.isPaused) {
+          recorderActions.pauseRecording();
+        } else if (recorderState.isRecording && recorderState.isPaused) {
+          recorderActions.resumeRecording();
+        }
       } else if (checkHotkey(e, settings.hotkeys.screenshot)) {
         e.preventDefault();
-        if (recorder.recordingState !== "IDLE") recorder.takeScreenshot();
+        if (recorderState.isRecording) {
+          recorderActions.takeScreenshot();
+        }
       }
     };
 
