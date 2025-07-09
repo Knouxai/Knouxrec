@@ -368,12 +368,12 @@ const ToolboxPanel: React.FC = () => {
 
   const handleToolSelect = (tool: AITool) => {
     if (tool.credits_cost > userCredits.remaining) {
-      alert("Insufficient credits! Please upgrade your plan.");
+      alert("نقاط غير كافية! يرجى ترقية الخطة.");
       return;
     }
 
-    // TODO: Open tool interface
-    console.log("Selected tool:", tool);
+    // استخدام الأداة مباشرة
+    handleToolUse(tool);
   };
 
   const ToolCard = ({ tool }: { tool: AITool }) => (
