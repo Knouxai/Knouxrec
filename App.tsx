@@ -13,6 +13,7 @@ import FileManager from "./components/FileManager";
 import BackNavigation from "./components/BackNavigation";
 import TemplatesPanel from "./components/TemplatesPanel";
 import ToolboxPanel from "./components/ToolboxPanel";
+import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
 import { useRecorder } from "./hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "./types";
 import { offlineAI } from "./services/offlineAI";
