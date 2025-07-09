@@ -179,10 +179,26 @@ export const toolboxAIMapping: ToolboxAIMapping = {
   },
 
   "ai-transition": {
-    primaryModel: "videocrafter",
+    primaryModel: "scenecut",
     supportingModels: ["yolo"],
     processingTime: "2-5s",
     memoryUsage: "50MB",
+    category: "video",
+  },
+
+  "video-translator": {
+    primaryModel: "whisper",
+    supportingModels: ["m2m100", "bark_tts"],
+    processingTime: "1-2x duration",
+    memoryUsage: "505MB",
+    category: "video",
+  },
+
+  "ai-shorts": {
+    primaryModel: "yolo",
+    supportingModels: ["whisper", "scenecut"],
+    processingTime: "5-15s",
+    memoryUsage: "130MB",
     category: "video",
   },
 
@@ -276,15 +292,15 @@ export const toolboxAIMapping: ToolboxAIMapping = {
   },
 
   "noise-reduction": {
-    primaryModel: "whisper",
+    primaryModel: "rnnoise",
     supportingModels: [],
-    processingTime: "0.1x duration",
-    memoryUsage: "85MB",
+    processingTime: "0.05x duration",
+    memoryUsage: "15MB",
     category: "audio",
   },
 
   "beat-detection": {
-    primaryModel: "spleeter",
+    primaryModel: "beat_detector",
     supportingModels: [],
     processingTime: "0.2x duration",
     memoryUsage: "25MB",
@@ -304,6 +320,14 @@ export const toolboxAIMapping: ToolboxAIMapping = {
     supportingModels: [],
     processingTime: "real-time",
     memoryUsage: "85MB",
+    category: "audio",
+  },
+
+  "split-subtitles": {
+    primaryModel: "whisper",
+    supportingModels: ["gpt4all"],
+    processingTime: "real-time",
+    memoryUsage: "205MB",
     category: "audio",
   },
 
@@ -371,6 +395,38 @@ export const toolboxAIMapping: ToolboxAIMapping = {
     processingTime: "3s/second",
     memoryUsage: "580MB",
     category: "ai",
+  },
+
+  "singing-face": {
+    primaryModel: "sadtalker",
+    supportingModels: ["wav2lip", "beat_detector"],
+    processingTime: "2-4s/second",
+    memoryUsage: "860MB",
+    category: "ai",
+  },
+
+  "screen-recorder": {
+    primaryModel: "yolo",
+    supportingModels: [],
+    processingTime: "real-time",
+    memoryUsage: "45MB",
+    category: "video",
+  },
+
+  "video-downloader": {
+    primaryModel: "yolo",
+    supportingModels: [],
+    processingTime: "network-dependent",
+    memoryUsage: "10MB",
+    category: "video",
+  },
+
+  "audio-extractor": {
+    primaryModel: "spleeter",
+    supportingModels: [],
+    processingTime: "0.1x duration",
+    memoryUsage: "50MB",
+    category: "audio",
   },
 };
 
