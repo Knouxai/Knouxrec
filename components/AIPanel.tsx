@@ -3,6 +3,7 @@ import { Recording } from "../types";
 import { processAdvancedTranscript } from "../services/offlineAI";
 import PerformancePanel from "./PerformancePanel";
 import AIModelsManager from "./AIModelsManager";
+import SystemStats from "./SystemStats";
 
 interface AIPanelProps {
   recordings: Recording[];
