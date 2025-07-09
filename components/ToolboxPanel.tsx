@@ -129,7 +129,7 @@ const ToolboxPanel: React.FC = () => {
     { id: "all", name: "جميع الأدوات", icon: "🛠️", color: "knoux-purple" },
     { id: "video", name: "الفيديو", icon: "🎥", color: "blue-400" },
     { id: "audio", name: "الصوت", icon: "🎵", color: "green-400" },
-    { id: "image", name: "Image", icon: "���️", color: "yellow-400" },
+    { id: "image", name: "الصور", icon: "🖼️", color: "yellow-400" },
     { id: "text", name: "Text", icon: "📝", color: "purple-400" },
     { id: "ai-tools", name: "AI Tools", icon: "🤖", color: "knoux-neon" },
   ] as const;
