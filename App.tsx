@@ -31,6 +31,7 @@ const App = () => {
     | "files"
     | "templates"
     | "toolbox"
+    | "elysian"
   >("main");
   const [settings, setSettings] = useState<RecordingSettings>({
     recordScreen: true,
@@ -110,7 +111,7 @@ const App = () => {
           "info",
         );
 
-        // استخدام نظام الذكاء الاصطناعي الجديد
+        // استخ��ام نظام الذكاء الاصطناعي الجديد
         const taskId = await offlineAI.addTask({
           type: "text",
           operation: "text_analysis",
