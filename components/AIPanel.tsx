@@ -43,7 +43,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
     },
     {
       id: "stats",
-      name: "إحصائيات النظام",
+      name: "إح��ائيات النظام",
       icon: "📊",
       description: "نظرة شاملة على أداء وحالة النظام",
       color: "indigo-400",
@@ -243,6 +243,9 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
 
       case "models":
         return <AIModelsManager />;
+
+      case "stats":
+        return <SystemStats />;
 
       default:
         return null;
