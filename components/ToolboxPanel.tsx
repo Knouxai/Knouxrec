@@ -126,7 +126,7 @@ const ToolboxPanel: React.FC = () => {
   };
 
   const categories = [
-    { id: "all", name: "All Tools", icon: "🛠️", color: "knoux-purple" },
+    { id: "all", name: "جميع الأدوات", icon: "🛠️", color: "knoux-purple" },
     { id: "video", name: "Video", icon: "🎥", color: "blue-400" },
     { id: "audio", name: "Audio", icon: "🎵", color: "green-400" },
     { id: "image", name: "Image", icon: "���️", color: "yellow-400" },
