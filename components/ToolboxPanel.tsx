@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { AITool, ToolCategory, UserCredits } from "../types/templates";
+import { offlineAI, AIProcessingTask } from "../services/offlineAI";
+import { videoProcessor } from "../services/videoProcessor";
+import { audioProcessor } from "../services/audioProcessor";
+import { imageProcessor } from "../services/imageProcessor";
 
 const ToolboxPanel: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>("all");
