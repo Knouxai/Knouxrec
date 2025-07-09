@@ -398,10 +398,14 @@ const App = () => {
       </div>
       <div className="flex flex-col gap-6">
         <VideoPreview
-          previewSource={recorder.previewSource || galleryPlaybackUrl}
-          isRecording={recorder.recordingState !== "IDLE"}
-          countdown={recorder.countdown}
-          pipCameraStream={recorder.pipCameraStream}
+          previewSource={
+            recorderState.recordingBlob
+              ? URL.createObjectURL(recorderState.recordingBlob)
+              : galleryPlaybackUrl
+          }
+          isRecording={recorderState.isRecording}
+          countdown={0}
+          pipCameraStream={null}
           settings={settings}
         />
 
