@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Recording } from "../types";
 import { processAdvancedTranscript } from "../services/offlineAI";
 import PerformancePanel from "./PerformancePanel";
+import AIModelsManager from "./AIModelsManager";
 
 interface AIPanelProps {
   recordings: Recording[];
