@@ -1,7 +1,8 @@
 // KNOUX REC - Local AI Service (No External APIs)
 // 100% Offline AI Processing System
 
-import { processAdvancedTranscript, AdvancedAIResult } from "./offlineAI";
+import { processAdvancedTranscript } from "./offlineAI";
+import type { AdvancedAIResult } from "./offlineAI";
 
 // Legacy interface for backward compatibility
 export interface AIProcessingResult {
