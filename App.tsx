@@ -13,6 +13,7 @@ import FileManager from "./components/FileManager";
 import BackNavigation from "./components/BackNavigation";
 import TemplatesPanel from "./components/TemplatesPanel";
 import ToolboxPanel from "./components/ToolboxPanel";
+import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
 import { useRecorder } from "./hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "./types";
 import { offlineAI } from "./services/offlineAI";
@@ -30,6 +31,7 @@ const App = () => {
     | "files"
     | "templates"
     | "toolbox"
+    | "elysian"
   >("main");
   const [settings, setSettings] = useState<RecordingSettings>({
     recordScreen: true,
@@ -109,7 +111,7 @@ const App = () => {
           "info",
         );
 
-        // استخدام نظام الذكاء الاصطناعي الجديد
+        // استخ��ام نظام الذكاء الاصطناعي الجديد
         const taskId = await offlineAI.addTask({
           type: "text",
           operation: "text_analysis",
@@ -411,7 +413,7 @@ const App = () => {
         />
 
         {/* Quick Access Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <button
             onClick={() => setCurrentView("templates")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-knoux-purple/20 transition-all duration-300"
@@ -432,6 +434,17 @@ const App = () => {
               Toolbox
             </div>
             <div className="text-sm text-white/70">AI Tools</div>
+          </button>
+
+          <button
+            onClick={() => setCurrentView("elysian")}
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 border border-purple-500/30"
+          >
+            <div className="text-3xl mb-2">✨</div>
+            <div className="font-orbitron font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Elysian Canvas
+            </div>
+            <div className="text-sm text-white/70">Adult Art Studio</div>
           </button>
 
           <button
@@ -505,6 +518,8 @@ const App = () => {
             />
           </div>
         );
+      case "elysian":
+        return <ElysianCanvas onClose={() => setCurrentView("main")} />;
       default:
         return renderMainView();
     }

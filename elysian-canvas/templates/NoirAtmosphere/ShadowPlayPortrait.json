@@ -1,0 +1,190 @@
+{
+  "id": "shadow-play-portrait",
+  "name": "Shadow Play Portrait",
+  "category": "NoirAtmosphere",
+  "description": "Dramatic use of shadow and light to create mystery and depth. The majority of the composition is veiled in darkness with strategic illumination revealing key elements.",
+  "maturityLevel": "sophisticated",
+  "aestheticProfile": "shadow-play",
+  "tags": ["noir", "shadows", "dramatic", "mystery", "chiaroscuro"],
+  "composition": {
+    "aspectRatio": "3:4",
+    "rule": "dynamic",
+    "focusPoint": { "x": 0.3, "y": 0.4 },
+    "guidingLines": ["diagonal", "s-curve"]
+  },
+  "lighting": {
+    "scheme": "noir",
+    "keyLight": {
+      "position": { "x": 0.1, "y": 0.2, "z": 0.8 },
+      "intensity": 1.0,
+      "color": "#ffffff",
+      "softness": 0.1,
+      "angle": 45
+    },
+    "fillLight": {
+      "position": { "x": 0.9, "y": 0.8, "z": 0.3 },
+      "intensity": 0.05,
+      "color": "#cccccc"
+    },
+    "ambientLight": {
+      "intensity": 0.02,
+      "color": "#111111"
+    },
+    "shadows": {
+      "enabled": true,
+      "sharpness": 0.95,
+      "opacity": 0.98,
+      "falloff": "sharp"
+    }
+  },
+  "colorPalette": {
+    "primary": "#1a1a1a",
+    "secondary": "#333333",
+    "accent": "#ffffff",
+    "shadows": "#000000",
+    "highlights": "#f5f5f5",
+    "background": ["#0a0a0a", "#1a1a1a"],
+    "temperature": "cool",
+    "saturation": 0.3,
+    "monochrome": true
+  },
+  "geometry": {
+    "proportions": {
+      "dramatic": true,
+      "asymmetrical": true
+    },
+    "guides": {
+      "visible": false,
+      "shadowLines": true,
+      "lightFalloff": true
+    }
+  },
+  "materialProperties": {
+    "skinTone": {
+      "baseColor": "#d4a574",
+      "undertones": "#c49668",
+      "smoothness": 0.8,
+      "luminosity": 0.4,
+      "subsurface": 0.7
+    },
+    "surface": {
+      "roughness": 0.2,
+      "metallic": 0.0,
+      "specular": 0.1
+    },
+    "emulation": {
+      "type": "marble",
+      "intensity": 0.3,
+      "patina": 0.1
+    }
+  },
+  "atmosphere": {
+    "fog": {
+      "density": 0.6,
+      "color": "#1a1a1a",
+      "distribution": "layered"
+    },
+    "particles": {
+      "type": "dust",
+      "density": 0.3,
+      "motion": "slow",
+      "size": "fine"
+    },
+    "mood": {
+      "intensity": 0.9,
+      "mystery": 0.95,
+      "elegance": 0.8,
+      "sensuality": 0.7
+    }
+  },
+  "pose": {
+    "type": "portrait",
+    "armPosition": "partial",
+    "bodyAngle": 35,
+    "headTilt": -15,
+    "eyeDirection": "camera",
+    "expression": "enigmatic",
+    "visibility": {
+      "face": 0.6,
+      "body": 0.3,
+      "background": 0.1
+    }
+  },
+  "shadowMapping": {
+    "primaryShadows": [
+      {
+        "area": "left-face",
+        "intensity": 0.9,
+        "edge": "hard"
+      },
+      {
+        "area": "body-left",
+        "intensity": 0.95,
+        "edge": "soft"
+      }
+    ],
+    "highlights": [
+      {
+        "area": "cheekbone",
+        "intensity": 0.8,
+        "size": "small"
+      },
+      {
+        "area": "shoulder",
+        "intensity": 0.4,
+        "size": "medium"
+      }
+    ]
+  },
+  "postProcessing": {
+    "contrast": 0.95,
+    "brightness": 0.3,
+    "saturation": 0.2,
+    "sharpness": 0.8,
+    "grain": {
+      "enabled": true,
+      "intensity": 0.2,
+      "size": "fine"
+    },
+    "vignette": {
+      "enabled": true,
+      "intensity": 0.7,
+      "feather": 0.6
+    },
+    "filters": [
+      {
+        "type": "film-noir",
+        "intensity": 0.8
+      },
+      {
+        "type": "shadow-enhance",
+        "intensity": 0.9
+      }
+    ]
+  },
+  "cinematography": {
+    "camera": {
+      "angle": "low",
+      "distance": "close",
+      "focus": "selective"
+    },
+    "depthOfField": {
+      "enabled": true,
+      "focusDistance": 0.3,
+      "aperture": 1.4,
+      "bokeh": "dramatic"
+    }
+  },
+  "artisticNotes": [
+    "Emphasize dramatic contrast between light and shadow",
+    "Use hard edge lighting to create defined shadow boundaries",
+    "Focus on emotional expression through partial revelation",
+    "Maintain mystery while revealing character"
+  ],
+  "inspirations": [
+    "Film noir cinematography",
+    "Caravaggio's chiaroscuro technique",
+    "Classic Hollywood portrait photography",
+    "Edward Weston's dramatic lighting"
+  ]
+}
