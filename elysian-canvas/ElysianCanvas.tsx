@@ -3,6 +3,11 @@ import { AdultGateAdvanced } from "./core/AdultGateAdvanced";
 import { MasterRenderer, RenderConfig } from "./core/MasterRenderer";
 import { AestheticEngine, AestheticProfile } from "./core/AestheticEngine";
 import { MasterSlider } from "./editor-ui/MasterSlider";
+import { EnhancedGallery } from "./components/EnhancedGallery";
+import {
+  imageUploadService,
+  UploadedImage,
+} from "./services/ImageUploadService";
 
 interface Template {
   id: string;
