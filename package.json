@@ -40,10 +40,21 @@
     "deploy": "npm run build:prod && gh-pages -d dist"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "@tensorflow/tfjs": "^4.15.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.15.0",
+    "@tensorflow/tfjs-converter": "^4.22.0",
+    "fabric": "^6.7.0",
+    "fast-xml-parser": "^5.2.5",
+    "fft-js": "^0.0.12",
+    "jimp": "^1.6.0",
+    "lamejs": "^1.2.1",
+    "ml-matrix": "^6.12.1",
+    "opus-recorder": "^8.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@tensorflow/tfjs": "^4.15.0",
-    "@tensorflow/tfjs-backend-webgl": "^4.15.0"
+    "recordrtc": "^5.6.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

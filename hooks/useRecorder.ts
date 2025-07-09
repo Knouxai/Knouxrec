@@ -1,316 +1,533 @@
+import { useState, useRef, useCallback, useEffect } from "react";
+import RecordRTC, { StereoAudioRecorder, MediaStreamRecorder } from "recordrtc";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { RecordingSettings, RecordingState, ClickEffect } from '../types';
-import { generateFileName } from '../utils';
+export interface RecorderState {
+  isRecording: boolean;
+  isPaused: boolean;
+  recordingTime: number;
+  recordingBlob: Blob | null;
+  error: string | null;
+  isInitialized: boolean;
+  devices: MediaDeviceInfo[];
+  currentDevice: string | null;
+  recordingQuality: "low" | "medium" | "high" | "ultra";
+  includeAudio: boolean;
+  includeMicrophone: boolean;
+  frameRate: number;
+  bitRate: number;
+}
 
-export const useRecorder = (
-  settings: RecordingSettings,
-  onComplete: (blob: Blob, transcript: string) => void,
-  addNotification: (message: string, type: 'info' | 'success' | 'warning' | 'error') => void
-) => {
-  const [recordingState, setRecordingState] = useState<RecordingState>(RecordingState.Idle);
-  const [timer, setTimer] = useState('00:00:00');
-  const [fps, setFps] = useState(0);
-  const [countdown, setCountdown] = useState(0);
-  const [scheduleStatus, setScheduleStatus] = useState('');
-  const [previewSource, setPreviewSource] = useState<MediaStream | null>(null);
-  const [pipCameraStream, setPipCameraStream] = useState<MediaStream | null>(null);
+export interface RecorderActions {
+  startRecording: () => Promise<void>;
+  stopRecording: () => Promise<void>;
+  pauseRecording: () => void;
+  resumeRecording: () => void;
+  initialize: () => Promise<void>;
+  setRecordingQuality: (quality: RecorderState["recordingQuality"]) => void;
+  setIncludeAudio: (include: boolean) => void;
+  setIncludeMicrophone: (include: boolean) => void;
+  setDevice: (deviceId: string) => void;
+  setFrameRate: (fps: number) => void;
+  setBitRate: (bitrate: number) => void;
+  downloadRecording: () => void;
+  clearRecording: () => void;
+  takeScreenshot: () => Promise<Blob | null>;
+  startWebcamRecording: () => Promise<void>;
+  recordSpecificWindow: () => Promise<void>;
+  recordSelectedArea: (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ) => Promise<void>;
+}
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const recordedChunksRef = useRef<Blob[]>([]);
-  const timerIntervalRef = useRef<number | null>(null);
-  const scheduleTimeoutRef = useRef<number | null>(null);
-  const recognitionRef = useRef<any>(null); // Using 'any' for SpeechRecognition to avoid extensive typing
-  const transcriptRef = useRef<string>('');
-  
-  // Canvas and Effects Refs
+export interface UseRecorderReturn {
+  state: RecorderState;
+  actions: RecorderActions;
+}
+
+const QUALITY_SETTINGS = {
+  low: { width: 1280, height: 720, bitRate: 2500000, frameRate: 15 },
+  medium: { width: 1920, height: 1080, bitRate: 5000000, frameRate: 30 },
+  high: { width: 2560, height: 1440, bitRate: 8000000, frameRate: 30 },
+  ultra: { width: 3840, height: 2160, bitRate: 15000000, frameRate: 60 },
+};
+
+export function useRecorder(): UseRecorderReturn {
+  const [state, setState] = useState<RecorderState>({
+    isRecording: false,
+    isPaused: false,
+    recordingTime: 0,
+    recordingBlob: null,
+    error: null,
+    isInitialized: false,
+    devices: [],
+    currentDevice: null,
+    recordingQuality: "high",
+    includeAudio: true,
+    includeMicrophone: false,
+    frameRate: 30,
+    bitRate: 8000000,
+  });
+
+  const recorderRef = useRef<RecordRTC | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const pausedTimeRef = useRef<number>(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const canvasStreamRef = useRef<MediaStream | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const mousePosRef = useRef({ x: -100, y: -100 });
-  const clickEffectsRef = useRef<ClickEffect[]>([]);
-  const sourceVideoRef = useRef<HTMLVideoElement | null>(null);
-  const sourceCameraRef = useRef<HTMLVideoElement | null>(null);
 
+  // تحديث الوقت
+  const updateTimer = useCallback(() => {
+    const now = Date.now();
+    const elapsed = Math.floor(
+      (now - startTimeRef.current - pausedTimeRef.current) / 1000,
+    );
+    setState((prev) => ({ ...prev, recordingTime: elapsed }));
+  }, []);
 
-  const cleanup = useCallback(() => {
-    // Stop all tracks from all streams
-    if (sourceVideoRef.current?.srcObject) (sourceVideoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-    if (sourceCameraRef.current?.srcObject) (sourceCameraRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-    if (pipCameraStream) pipCameraStream.getTracks().forEach(track => track.stop());
-    if (canvasStreamRef.current) canvasStreamRef.current.getTracks().forEach(track => track.stop());
-    
-    // Clean up refs
-    sourceVideoRef.current = null;
-    sourceCameraRef.current = null;
-    canvasStreamRef.current = null;
-    setPipCameraStream(null);
-    setPreviewSource(null);
-
-    // Stop recording and cleanup recorder instance
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    mediaRecorderRef.current = null;
-    
-    // Cleanup audio context
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-    }
-    audioContextRef.current = null;
-
-    // Cleanup timers and animations
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    timerIntervalRef.current = null;
-    animationFrameRef.current = null;
-    
-    // Cleanup speech recognition
-    if (recognitionRef.current) {
-        recognitionRef.current.stop();
-        recognitionRef.current = null;
-    }
-    transcriptRef.current = '';
-
-    // Cleanup mouse listeners
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mousedown', handleMouseDown);
-    
-    // Reset states
-    recordedChunksRef.current = [];
-    clickEffectsRef.current = [];
-    mousePosRef.current = { x: -100, y: -100 };
-    setTimer('00:00:00');
-    setFps(0);
-    setCountdown(0);
-  }, [pipCameraStream]);
-
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
-      mousePosRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-  };
-
-  const handleMouseDown = (e: MouseEvent) => {
-    if (canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect();
-        clickEffectsRef.current.push({
-            id: Date.now(),
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            radius: 15,
-            opacity: 1,
-            maxRadius: 50,
-        });
-    }
-  };
-
-  const startRecording = useCallback(async () => {
-    cleanup();
-    setRecordingState(RecordingState.Starting);
-
+  // تهيئة النظام
+  const initialize = useCallback(async () => {
     try {
-      if (!settings.recordScreen && !settings.recordCamera) {
-          throw new Error("No video source selected.");
-      }
-      
-      const requiresCanvas = settings.liveFilter !== 'none' || settings.highlightMouse || (settings.recordScreen && settings.recordCamera);
-      
-      // Get streams
-      const screenStream = settings.recordScreen 
-        ? await navigator.mediaDevices.getDisplayMedia({
-            video: { frameRate: settings.fps, cursor: settings.highlightMouse ? 'never' : 'motion' } as any,
-            audio: settings.recordSystemAudio,
-          }) 
-        : null;
-        
-      const micStream = settings.recordMic 
-        ? await navigator.mediaDevices.getUserMedia({ audio: true }) 
-        : null;
-        
-      const cameraStream = settings.recordCamera
-        ? await navigator.mediaDevices.getUserMedia({ video: true })
-        : null;
+      setState((prev) => ({ ...prev, error: null }));
 
-      let videoTrack: MediaStreamTrack | null = null;
-      const audioTracks: MediaStreamTrack[] = [];
-      
-      if (screenStream?.getAudioTracks()[0]) audioTracks.push(screenStream.getAudioTracks()[0]);
-      if (micStream?.getAudioTracks()[0]) audioTracks.push(micStream.getAudioTracks()[0]);
-
-      if (requiresCanvas) {
-        // Setup canvas and sources
-        const canvas = document.createElement('canvas');
-        canvasRef.current = canvas;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error("Canvas context failed");
-        
-        sourceVideoRef.current = document.createElement('video');
-        sourceVideoRef.current.muted = true;
-        sourceVideoRef.current.autoplay = true;
-
-        if (screenStream) {
-            sourceVideoRef.current.srcObject = screenStream;
-            const trackSettings = screenStream.getVideoTracks()[0].getSettings();
-            canvas.width = trackSettings.width || 1920;
-            canvas.height = trackSettings.height || 1080;
-        } else if (cameraStream) {
-            sourceVideoRef.current.srcObject = cameraStream;
-            const trackSettings = cameraStream.getVideoTracks()[0].getSettings();
-            canvas.width = trackSettings.width || 1280;
-            canvas.height = trackSettings.height || 720;
-        }
-        await sourceVideoRef.current.play();
-
-        if (settings.recordScreen && cameraStream) {
-            sourceCameraRef.current = document.createElement('video');
-            sourceCameraRef.current.muted = true;
-            sourceCameraRef.current.autoplay = true;
-            sourceCameraRef.current.srcObject = cameraStream;
-            setPipCameraStream(cameraStream);
-            await sourceCameraRef.current.play();
-        }
-
-        if (settings.highlightMouse) {
-            window.addEventListener('mousemove', handleMouseMove);
-            window.addEventListener('mousedown', handleMouseDown);
-        }
-        
-        // Drawing loop
-        const drawFrame = () => {
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            // Draw main video
-            if (sourceVideoRef.current) {
-                ctx.filter = settings.liveFilter !== 'none' ? `grayscale(${settings.liveFilter === 'grayscale' ? 1:0}) sepia(...)` : 'none';
-                ctx.drawImage(sourceVideoRef.current, 0, 0, canvas.width, canvas.height);
-            }
-            // Draw PIP
-            if (sourceCameraRef.current) {
-                // ... drawing logic for PIP ...
-                const pipWidth = 320;
-                const pipHeight = 180;
-                ctx.drawImage(sourceCameraRef.current, canvas.width - pipWidth - 20, canvas.height - pipHeight - 20, pipWidth, pipHeight);
-            }
-            // Draw mouse effects
-            if(settings.highlightMouse) {
-                clickEffectsRef.current = clickEffectsRef.current.filter(effect => {
-                    effect.radius += (effect.maxRadius - effect.radius) * 0.1;
-                    effect.opacity -= 0.04;
-                    if (effect.opacity <= 0) return false;
-                    ctx.beginPath();
-                    ctx.arc(effect.x, effect.y, effect.radius, 0, 2 * Math.PI);
-                    ctx.strokeStyle = `rgba(0, 240, 255, ${effect.opacity})`;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    return true;
-                });
-                ctx.beginPath();
-                ctx.arc(mousePosRef.current.x, mousePosRef.current.y, 15, 0, 2 * Math.PI);
-                ctx.fillStyle = "rgba(0, 240, 255, 0.2)";
-                ctx.fill();
-            }
-            animationFrameRef.current = requestAnimationFrame(drawFrame);
-        };
-        drawFrame();
-
-        canvasStreamRef.current = canvas.captureStream(settings.fps);
-        videoTrack = canvasStreamRef.current.getVideoTracks()[0];
-
-      } else {
-        videoTrack = screenStream?.getVideoTracks()[0] || cameraStream?.getVideoTracks()[0] || null;
-        if(cameraStream) setPipCameraStream(cameraStream);
-      }
-      
-      if (!videoTrack) throw new Error("Could not get a video track.");
-      
-      const finalStream = new MediaStream([videoTrack]);
-      setPreviewSource(finalStream);
-      
-      // Mix audio tracks if needed
-      if (audioTracks.length > 1) {
-        audioContextRef.current = new AudioContext();
-        const destination = audioContextRef.current.createMediaStreamDestination();
-        audioTracks.forEach(track => {
-            audioContextRef.current!.createMediaStreamSource(new MediaStream([track])).connect(destination)
-        });
-        finalStream.addTrack(destination.stream.getAudioTracks()[0]);
-      } else if (audioTracks.length === 1) {
-          finalStream.addTrack(audioTracks[0]);
+      // التحقق من دعم المتصفح
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error("المتصفح لا يدعم تسجيل الشاشة");
       }
 
-      mediaRecorderRef.current = new MediaRecorder(finalStream, { mimeType: 'video/webm; codecs=vp9,opus' });
+      // الحصول على الأجهزة المتاحة
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(
+        (device) => device.kind === "videoinput",
+      );
 
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
-      };
-
-      mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-        onComplete(blob, transcriptRef.current);
-        cleanup();
-        setRecordingState(RecordingState.Idle);
-      };
-      
-      // Countdown logic
-      if (settings.countdownEnabled) {
-          let count = settings.countdownSeconds;
-          setCountdown(count);
-          const interval = setInterval(() => {
-              count--;
-              setCountdown(count);
-              if (count === 0) {
-                  clearInterval(interval);
-                  mediaRecorderRef.current?.start();
-                  setRecordingState(RecordingState.Recording);
-              }
-          }, 1000);
-      } else {
-          mediaRecorderRef.current.start();
-          setRecordingState(RecordingState.Recording);
-      }
-
-      // Start timer, fps, speech recognition etc.
-      // ... (logic from App.tsx would go here)
-      
+      setState((prev) => ({
+        ...prev,
+        devices: videoDevices,
+        currentDevice: videoDevices[0]?.deviceId || null,
+        isInitialized: true,
+      }));
     } catch (error) {
-      addNotification(error instanceof Error ? error.message : "An unknown error occurred", 'error');
-      cleanup();
-      setRecordingState(RecordingState.Idle);
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error.message : "خطأ في التهيئة",
+        isInitialized: false,
+      }));
     }
-  }, [settings, cleanup, onComplete, addNotification]);
+  }, []);
 
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    // onstop handler will do the rest
-  };
-  const pauseRecording = () => {
-    mediaRecorderRef.current?.pause();
-    setRecordingState(RecordingState.Paused);
-  };
-  const resumeRecording = () => {
-    mediaRecorderRef.current?.resume();
-    setRecordingState(RecordingState.Recording);
-  };
-  const takeScreenshot = () => {
-    // Screenshot logic...
-    addNotification('Screenshot captured!', 'success');
-  };
+  // إنشاء تدفق الوسائط
+  const createMediaStream = useCallback(
+    async (type: "screen" | "webcam" | "window" = "screen") => {
+      const qualitySettings = QUALITY_SETTINGS[state.recordingQuality];
+
+      let videoStream: MediaStream;
+
+      if (type === "screen") {
+        // تسجيل الشاشة
+        videoStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            width: qualitySettings.width,
+            height: qualitySettings.height,
+            frameRate: state.frameRate,
+            cursor: "always",
+          },
+          audio: state.includeAudio,
+        });
+      } else if (type === "webcam") {
+        // تسجيل الكاميرا
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: state.currentDevice
+              ? { exact: state.currentDevice }
+              : undefined,
+            width: qualitySettings.width,
+            height: qualitySettings.height,
+            frameRate: state.frameRate,
+          },
+          audio: state.includeMicrophone,
+        });
+      } else {
+        // تسجيل نافذة محددة
+        videoStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            width: qualitySettings.width,
+            height: qualitySettings.height,
+            frameRate: state.frameRate,
+            cursor: "always",
+          },
+          audio: state.includeAudio,
+        });
+      }
+
+      // إضافة الميكروفون إذا كان مطلوباً
+      if (state.includeMicrophone && type === "screen") {
+        try {
+          const micStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const audioContext = new AudioContext();
+          const dest = audioContext.createMediaStreamDestination();
+
+          // دمج الصوت من الشاشة والميكروفون
+          const videoAudioSource =
+            audioContext.createMediaStreamSource(videoStream);
+          const micAudioSource =
+            audioContext.createMediaStreamSource(micStream);
+
+          videoAudioSource.connect(dest);
+          micAudioSource.connect(dest);
+
+          // استبدال المسار الصوتي
+          const audioTrack = dest.stream.getAudioTracks()[0];
+          videoStream.removeTrack(videoStream.getAudioTracks()[0]);
+          videoStream.addTrack(audioTrack);
+        } catch (micError) {
+          console.warn("تعذر إضافة الميكروفون:", micError);
+        }
+      }
+
+      return videoStream;
+    },
+    [
+      state.recordingQuality,
+      state.includeAudio,
+      state.includeMicrophone,
+      state.currentDevice,
+      state.frameRate,
+    ],
+  );
+
+  // بدء التسجيل
+  const startRecording = useCallback(async () => {
+    try {
+      setState((prev) => ({ ...prev, error: null }));
+
+      const stream = await createMediaStream("screen");
+      streamRef.current = stream;
+
+      // إعداد RecordRTC
+      const options = {
+        type: "video",
+        mimeType: "video/webm;codecs=vp9",
+        bitsPerSecond: state.bitRate,
+        videoBitsPerSecond: state.bitRate,
+        audioBitsPerSecond: 128000,
+        frameInterval: 1000 / state.frameRate,
+        quality: 10,
+        canvas: {
+          width: QUALITY_SETTINGS[state.recordingQuality].width,
+          height: QUALITY_SETTINGS[state.recordingQuality].height,
+        },
+      };
+
+      recorderRef.current = new RecordRTC(stream, options);
+      recorderRef.current.startRecording();
+
+      // بدء العداد
+      startTimeRef.current = Date.now();
+      pausedTimeRef.current = 0;
+      timerRef.current = setInterval(updateTimer, 1000);
+
+      setState((prev) => ({
+        ...prev,
+        isRecording: true,
+        isPaused: false,
+        recordingTime: 0,
+        recordingBlob: null,
+      }));
+
+      // مراقبة إغلاق التطبيق
+      stream.getVideoTracks()[0].addEventListener("ended", () => {
+        stopRecording();
+      });
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error.message : "خطأ في بدء التسجيل",
+      }));
+    }
+  }, [
+    createMediaStream,
+    state.bitRate,
+    state.frameRate,
+    state.recordingQuality,
+    updateTimer,
+  ]);
+
+  // إيقاف التسجيل
+  const stopRecording = useCallback(async () => {
+    return new Promise<void>((resolve) => {
+      if (!recorderRef.current || !state.isRecording) {
+        resolve();
+        return;
+      }
+
+      recorderRef.current.stopRecording(() => {
+        const blob = recorderRef.current!.getBlob();
+
+        // إيقاف التدفق
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+
+        // إيقاف العداد
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+
+        setState((prev) => ({
+          ...prev,
+          isRecording: false,
+          isPaused: false,
+          recordingBlob: blob,
+        }));
+
+        resolve();
+      });
+    });
+  }, [state.isRecording]);
+
+  // إيقاف مؤقت
+  const pauseRecording = useCallback(() => {
+    if (!recorderRef.current || !state.isRecording || state.isPaused) return;
+
+    recorderRef.current.pauseRecording();
+    pausedTimeRef.current += Date.now() - startTimeRef.current;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    setState((prev) => ({ ...prev, isPaused: true }));
+  }, [state.isRecording, state.isPaused]);
+
+  // استكمال التسجيل
+  const resumeRecording = useCallback(() => {
+    if (!recorderRef.current || !state.isRecording || !state.isPaused) return;
+
+    recorderRef.current.resumeRecording();
+    startTimeRef.current = Date.now();
+    timerRef.current = setInterval(updateTimer, 1000);
+
+    setState((prev) => ({ ...prev, isPaused: false }));
+  }, [state.isRecording, state.isPaused, updateTimer]);
+
+  // تنزيل التسجيل
+  const downloadRecording = useCallback(() => {
+    if (!state.recordingBlob) return;
+
+    const url = URL.createObjectURL(state.recordingBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `recording-${new Date().toISOString().slice(0, 19).replace(/[:.]/g, "-")}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [state.recordingBlob]);
+
+  // مسح التسجيل
+  const clearRecording = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      recordingBlob: null,
+      recordingTime: 0,
+      error: null,
+    }));
+  }, []);
+
+  // أخذ لقطة شاشة
+  const takeScreenshot = useCallback(async (): Promise<Blob | null> => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+      });
+
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+
+      return new Promise((resolve) => {
+        video.addEventListener("loadedmetadata", () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d")!;
+
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+
+          ctx.drawImage(video, 0, 0);
+
+          canvas.toBlob((blob) => {
+            stream.getTracks().forEach((track) => track.stop());
+            resolve(blob);
+          }, "image/png");
+        });
+      });
+    } catch (error) {
+      console.error("خطأ في أخذ لقطة الشاشة:", error);
+      return null;
+    }
+  }, []);
+
+  // تسجيل الكاميرا
+  const startWebcamRecording = useCallback(async () => {
+    try {
+      const stream = await createMediaStream("webcam");
+      streamRef.current = stream;
+
+      const options = {
+        type: "video",
+        mimeType: "video/webm;codecs=vp9",
+        bitsPerSecond: state.bitRate,
+      };
+
+      recorderRef.current = new RecordRTC(stream, options);
+      recorderRef.current.startRecording();
+
+      startTimeRef.current = Date.now();
+      pausedTimeRef.current = 0;
+      timerRef.current = setInterval(updateTimer, 1000);
+
+      setState((prev) => ({
+        ...prev,
+        isRecording: true,
+        isPaused: false,
+        recordingTime: 0,
+        recordingBlob: null,
+      }));
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error.message : "خطأ في تسجيل الكاميرا",
+      }));
+    }
+  }, [createMediaStream, state.bitRate, updateTimer]);
+
+  // تسجيل نافذة محددة
+  const recordSpecificWindow = useCallback(async () => {
+    try {
+      const stream = await createMediaStream("window");
+      streamRef.current = stream;
+
+      const options = {
+        type: "video",
+        mimeType: "video/webm;codecs=vp9",
+        bitsPerSecond: state.bitRate,
+      };
+
+      recorderRef.current = new RecordRTC(stream, options);
+      recorderRef.current.startRecording();
+
+      startTimeRef.current = Date.now();
+      pausedTimeRef.current = 0;
+      timerRef.current = setInterval(updateTimer, 1000);
+
+      setState((prev) => ({
+        ...prev,
+        isRecording: true,
+        isPaused: false,
+        recordingTime: 0,
+        recordingBlob: null,
+      }));
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error.message : "خطأ في تسجيل النافذة",
+      }));
+    }
+  }, [createMediaStream, state.bitRate, updateTimer]);
+
+  // تسجيل منطقة محددة
+  const recordSelectedArea = useCallback(
+    async (x: number, y: number, width: number, height: number) => {
+      try {
+        // هذه الميزة تتطلب مكتبة إضافية أو تطبيق desktop
+        console.log("تسجيل منطقة محددة:", { x, y, width, height });
+        // TODO: تطبيق تسجيل منطقة محددة
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          error:
+            error instanceof Error
+              ? error.message
+              : "خطأ في تسجيل المنطقة المحددة",
+        }));
+      }
+    },
+    [],
+  );
+
+  // إعدادات الجودة
+  const setRecordingQuality = useCallback(
+    (quality: RecorderState["recordingQuality"]) => {
+      setState((prev) => ({ ...prev, recordingQuality: quality }));
+    },
+    [],
+  );
+
+  const setIncludeAudio = useCallback((include: boolean) => {
+    setState((prev) => ({ ...prev, includeAudio: include }));
+  }, []);
+
+  const setIncludeMicrophone = useCallback((include: boolean) => {
+    setState((prev) => ({ ...prev, includeMicrophone: include }));
+  }, []);
+
+  const setDevice = useCallback((deviceId: string) => {
+    setState((prev) => ({ ...prev, currentDevice: deviceId }));
+  }, []);
+
+  const setFrameRate = useCallback((fps: number) => {
+    setState((prev) => ({ ...prev, frameRate: fps }));
+  }, []);
+
+  const setBitRate = useCallback((bitrate: number) => {
+    setState((prev) => ({ ...prev, bitRate: bitrate }));
+  }, []);
+
+  // تنظيف الموارد عند إلغاء المكون
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  // تهيئة تلقائية
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   return {
-    recordingState,
-    startRecording,
-    stopRecording,
-    pauseRecording,
-    resumeRecording,
-    takeScreenshot,
-    previewSource,
-    pipCameraStream,
-    timer,
-    fps,
-    countdown,
-    scheduleStatus,
+    state,
+    actions: {
+      startRecording,
+      stopRecording,
+      pauseRecording,
+      resumeRecording,
+      initialize,
+      setRecordingQuality,
+      setIncludeAudio,
+      setIncludeMicrophone,
+      setDevice,
+      setFrameRate,
+      setBitRate,
+      downloadRecording,
+      clearRecording,
+      takeScreenshot,
+      startWebcamRecording,
+      recordSpecificWindow,
+      recordSelectedArea,
+    },
   };
-};
+}
