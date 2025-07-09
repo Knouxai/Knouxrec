@@ -577,14 +577,14 @@ const ToolboxPanel: React.FC = () => {
             <div className="text-2xl font-bold text-yellow-400 capitalize">
               {userCredits.subscription_tier}
             </div>
-            <div className="text-sm text-white/70">Plan</div>
+            <div className="text-sm text-white/70">الخطة</div>
           </div>
         </div>
 
         {/* Credits Progress */}
         <div className="mt-4 p-4 bg-black/20 rounded-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white font-medium">Credits Usage</span>
+            <span className="text-white font-medium">استخدام النقاط</span>
             <span className="text-knoux-neon">
               {userCredits.used}/{userCredits.total}
             </span>
