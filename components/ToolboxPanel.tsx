@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { AITool, ToolCategory, UserCredits } from "../types/templates";
-import { offlineAI, AIProcessingTask } from "../services/offlineAI";
 import {
   toolboxService,
   ToolExecutionResult,
 } from "../services/toolboxService";
-import { localAIManager } from "../services/localAIMapper";
-import { videoProcessor } from "../services/videoProcessor";
-import { audioProcessor } from "../services/audioProcessor";
-import { imageProcessor } from "../services/imageProcessor";
 
 const ToolboxPanel: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>("all");
@@ -66,7 +61,7 @@ const ToolboxPanel: React.FC = () => {
     try {
       // التحقق من النق��ط المطلوبة
       if (tool.credits_cost > userCredits.remaining) {
-        throw new Error("نقاط غير كافية لتنفيذ هذه الأداة");
+        throw new Error("نقاط غير كافية لتن��يذ هذه الأداة");
       }
 
       // إعداد المدخلات
