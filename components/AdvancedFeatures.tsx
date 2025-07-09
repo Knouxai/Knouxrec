@@ -29,7 +29,7 @@ interface WorkflowStep {
 
 const AdvancedFeatures: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    "workspaces" | "automation" | "shortcuts" | "customization"
+    "workspaces" | "automation" | "shortcuts" | "customization" | "controls"
   >("workspaces");
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workflows, setWorkflows] = useState<AutomationWorkflow[]>([]);
