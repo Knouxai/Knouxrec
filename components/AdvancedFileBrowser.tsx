@@ -141,7 +141,7 @@ const AdvancedFileBrowser: React.FC<AdvancedFileBrowserProps> = ({
   const captureScreenshot = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { mediaSource: "screen" },
+        video: true,
       });
 
       const video = document.createElement("video");
