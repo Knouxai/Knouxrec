@@ -190,9 +190,6 @@ const App = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
-        if (typeof loadingId !== "undefined") {
-          feedbackService.dismiss(loadingId);
-        }
         addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
@@ -473,9 +470,9 @@ const App = () => {
           onResume={recorderActions.resumeRecording}
           onScreenshot={handleScreenshot}
           disabled={false}
-          timer={recorderState.recordingTime}
+          timer={recorderState.recordingTime.toString()}
           fps={recorderState.frameRate}
-          scheduleStatus={null}
+          scheduleStatus="idle"
           hotkeys={settings.hotkeys}
         />
       </div>
