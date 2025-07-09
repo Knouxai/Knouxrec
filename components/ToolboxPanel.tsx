@@ -373,7 +373,7 @@ const ToolboxPanel: React.FC = () => {
 
   const handleToolSelect = (tool: AITool) => {
     if (tool.credits_cost > userCredits.remaining) {
-      alert("نقاط غير كافية! يرجى ترقية الخطة.");
+      alert("نقاط ��ير كافية! يرجى ترقية الخطة.");
       return;
     }
 
@@ -643,11 +643,9 @@ const ToolboxPanel: React.FC = () => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-orbitron font-bold text-white mb-2">
-              No Tools Found
+              لم يتم العثور على أدوات
             </h3>
-            <p className="text-white/70">
-              Try adjusting your search or category filter
-            </p>
+            <p className="text-white/70">جرب تعديل البحث أو تغيير الفئة</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
