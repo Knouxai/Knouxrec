@@ -524,7 +524,7 @@ const App = () => {
       {/* Header */}
       <div className="relative z-20">
         <Header
-          isRecording={recorder.recordingState !== "IDLE"}
+          isRecording={recorderState.isRecording}
           onSettingsClick={() => setIsSettingsOpen(true)}
           onNotificationsClick={() => setIsNotificationsOpen((p) => !p)}
           notificationCount={notifications.length}
