@@ -23,12 +23,12 @@ const ToolboxPanel: React.FC = () => {
   const [selectedTool, setSelectedTool] = useState<AITool | null>(null);
   const [showToolInterface, setShowToolInterface] = useState(false);
 
-  // معالجة الأدوات
-  const _handleToolUse = async (
-    tool: AITool,
-    file?: File,
-    additionalInput?: string,
-  ) => {
+      // معالجة الأدوات - commented out for now
+  // const _handleToolUse = async (
+  //   tool: AITool,
+  //   file?: File,
+  //   additionalInput?: string,
+  // ) => {
     try {
       if (!file && tool.input_types.includes("file")) {
         // فتح منتقي الملفات
@@ -168,7 +168,7 @@ const ToolboxPanel: React.FC = () => {
         id: "ai-animation",
         name: "الرسوم المتحركة الذكية",
         description:
-          "توليد رسوم متحركة من صور أو نصوص بتقنيات الذكاء الاصطناعي",
+          "توليد رسوم متحركة من صور أو نصوص بتقنيات الذكاء الاصطنا��ي",
         category: "video",
         icon: "🎞️",
         ai_powered: true,
@@ -362,7 +362,7 @@ const ToolboxPanel: React.FC = () => {
         name: "تبديل الوجوه",
         description: "تبديل الوجوه في الصور والفيديو بواقعية عالية",
         category: "video",
-        icon: "🧑��️🧑",
+        icon: "🧑↔️🧑",
         ai_powered: true,
         credits_cost: 50,
         processing_time: "slow",
@@ -406,7 +406,7 @@ const ToolboxPanel: React.FC = () => {
         beta: false,
       },
 
-      // ========== أدوات الصو�� (Audio Tools) ==========
+      // ========== أدوات الصوت (Audio Tools) ==========
       {
         id: "vocal-remover",
         name: "مزيل الأصوات",
@@ -571,7 +571,7 @@ const ToolboxPanel: React.FC = () => {
       },
       {
         id: "reference-image",
-        name: "الصورة المرجعية",
+        name: "الصورة ال��رجعية",
         description: "استخدام صورة مرجعية لتوليد أو تعديل صور جديدة",
         category: "image",
         icon: "🖼️🔗",
@@ -678,7 +678,7 @@ const ToolboxPanel: React.FC = () => {
         processing_time: "medium",
         input_types: ["video", "audio"],
         output_types: ["text"],
-        features: ["ترجمة تلقائية", "تنسيقات متعددة", "مزامنة دقيقة"],
+        features: ["ترجمة تلقائية", "تنسيقا�� متعددة", "مزامنة دقيقة"],
         premium: false,
         popular: true,
         beta: false,
@@ -740,7 +740,7 @@ const ToolboxPanel: React.FC = () => {
       }));
     }
 
-    // عرض رسالة نجا��
+    // عرض رسالة نجاح
     alert(`تم إنجاز ${selectedTool?.name} بنجاح! ✨`);
 
     // تحميل النتيجة تلقائياً إذا كانت ملف
