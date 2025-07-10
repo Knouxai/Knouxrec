@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AdultGateAdvanced } from "./core/AdultGateAdvanced";
 import { MasterRenderer, RenderConfig } from "./core/MasterRenderer";
-import { AestheticEngine, AestheticProfile } from "./core/AestheticEngine";
+import { AestheticEngine } from "./core/AestheticEngine";
 import { MasterSlider } from "./editor-ui/MasterSlider";
 import { EnhancedGallery } from "./components/EnhancedGallery";
-import { ImageEditingTools } from "./components/ImageEditingTools";
+
 import {
   imageUploadService,
   UploadedImage,
