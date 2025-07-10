@@ -37,7 +37,7 @@ const AppStatus = () => {
   const [appInfo, setAppInfo] = useState<AppInfo>({
     version: "1.0.0",
     buildDate: new Date().toISOString().split("T")[0],
-    environment: import.meta.env.MODE || "development",
+    environment: "production",
     aiModelsLoaded: 0,
     totalFeatures: 35,
     activeFeatures: 0,
