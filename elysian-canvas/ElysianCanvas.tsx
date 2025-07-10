@@ -704,11 +704,14 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
                 <div className="canvas-info">
                   {selectedImage && (
                     <div className="image-info">
-                      <span>📸 {selectedImage.name}</span>
+                      <span>📸 {selectedImage.metadata.name}</span>
                       <span>
-                        📏 {selectedImage.width}x{selectedImage.height}
+                        📏 {selectedImage.metadata.width}x
+                        {selectedImage.metadata.height}
                       </span>
-                      <span>💾 {Math.round(selectedImage.size / 1024)}KB</span>
+                      <span>
+                        💾 {Math.round(selectedImage.metadata.size / 1024)}KB
+                      </span>
                     </div>
                   )}
                   {selectedTemplate && (
