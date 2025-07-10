@@ -13,6 +13,7 @@ import FileManager from "./components/FileManager";
 import BackNavigation from "./components/BackNavigation";
 import TemplatesPanel from "./components/TemplatesPanel";
 import ToolboxPanel from "./components/ToolboxPanel";
+import AppStatus from "./components/AppStatus";
 import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
 import { useRecorder } from "./hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "./types";
@@ -226,7 +227,7 @@ const App = () => {
         setPendingRecording(newRecording);
       } else {
         setRecordings((prev) => [newRecording, ...prev]);
-        addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
+        addNotification(`تم حفظ ا��تسجيل "${newRecording.name}".`, "success");
         feedbackService.success(`تم حفظ التسجيل بنجاح! 🎬`, {
           actions: [
             {
@@ -298,7 +299,7 @@ const App = () => {
   const onSettingsSave = (newSettings: RecordingSettings) => {
     handleSettingsChange(newSettings);
     addNotification("Settings saved!", "success");
-    feedbackService.success("تم ��فظ الإعدادات بنجاح! ⚙️");
+    feedbackService.success("تم ��ف�� الإعدادات بنجاح! ⚙️");
   };
 
   const handleDeleteRecording = (id: string) => {
@@ -666,6 +667,9 @@ const App = () => {
 
       {/* Main Content */}
       {renderContent()}
+
+      {/* App Status */}
+      <AppStatus />
     </div>
   );
 };
