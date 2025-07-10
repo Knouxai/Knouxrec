@@ -490,9 +490,9 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
                         setActiveView("editor");
                       }}
                     >
-                      <img src={image.url} alt={image.name} />
+                      <img src={image.url} alt={image.metadata.name} />
                       <div className="thumbnail-overlay">
-                        <span>{image.name}</span>
+                        <span>{image.metadata.name}</span>
                       </div>
                     </div>
                   ))}
