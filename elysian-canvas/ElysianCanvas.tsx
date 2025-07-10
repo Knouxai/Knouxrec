@@ -334,11 +334,27 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
 
     switch (id) {
       case "lighting-intensity":
-        if (!newConfig.lighting) newConfig.lighting = {};
-        newConfig.lighting.primaryLight = {
-          ...newConfig.lighting.primaryLight,
-          intensity: value,
-        };
+        if (!newConfig.lighting)
+          newConfig.lighting = {
+            primaryLight: {
+              intensity: 1,
+              color: "#ffffff",
+              position: { x: 0, y: 0, z: 1 },
+              softness: 0.5,
+            },
+            ambientLight: { intensity: 0.3, color: "#ffffff" },
+            shadows: { enabled: true, softness: 0.5, opacity: 0.7 },
+          };
+        if (!newConfig.lighting.primaryLight) {
+          newConfig.lighting.primaryLight = {
+            intensity: value,
+            color: "#ffffff",
+            position: { x: 0, y: 0, z: 1 },
+            softness: 0.5,
+          };
+        } else {
+          newConfig.lighting.primaryLight.intensity = value;
+        }
         break;
       // Add more cases for other sliders
     }
