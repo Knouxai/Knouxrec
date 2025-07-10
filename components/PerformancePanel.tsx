@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   PerformanceMetrics,
   SystemInfo,
+  PerformanceMonitor,
   performanceMonitor,
 } from "../services/performanceMonitor";
 
