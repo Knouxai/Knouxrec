@@ -24,7 +24,7 @@ const ToolboxPanel: React.FC = () => {
   const [showToolInterface, setShowToolInterface] = useState(false);
 
   // معالجة الأدوات
-  const handleToolUse = async (
+  const _handleToolUse = async (
     tool: AITool,
     file?: File,
     additionalInput?: string,
@@ -362,7 +362,7 @@ const ToolboxPanel: React.FC = () => {
         name: "تبديل الوجوه",
         description: "تبديل الوجوه في الصور والفيديو بواقعية عالية",
         category: "video",
-        icon: "🧑↔️🧑",
+        icon: "🧑��️🧑",
         ai_powered: true,
         credits_cost: 50,
         processing_time: "slow",
@@ -406,7 +406,7 @@ const ToolboxPanel: React.FC = () => {
         beta: false,
       },
 
-      // ========== أدوات الصوت (Audio Tools) ==========
+      // ========== أدوات الصو�� (Audio Tools) ==========
       {
         id: "vocal-remover",
         name: "مزيل الأصوات",
@@ -740,7 +740,7 @@ const ToolboxPanel: React.FC = () => {
       }));
     }
 
-    // عرض رسالة نجاح
+    // عرض رسالة نجا��
     alert(`تم إنجاز ${selectedTool?.name} بنجاح! ✨`);
 
     // تحميل النتيجة تلقائياً إذا كانت ملف
