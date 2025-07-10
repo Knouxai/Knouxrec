@@ -37,7 +37,15 @@
     "build:prod": "npm run type-check && vite build --mode production",
     "build:dev": "vite build --mode development",
     "serve": "npm run build && npm run preview",
-    "deploy": "npm run build:prod && gh-pages -d dist"
+    "deploy": "npm run build:prod && gh-pages -d dist",
+    "test": "echo \"No tests specified\" && exit 0",
+    "test:watch": "echo \"No tests specified\" && exit 0",
+    "start": "npm run dev",
+    "install:deps": "npm install",
+    "setup": "npm run install:deps && npm run type-check",
+    "dev:debug": "vite --host --debug",
+    "build:analyze": "npm run build && npm run analyze",
+    "health-check": "npm run type-check && npm run lint"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
@@ -60,7 +68,6 @@
     "@types/node": "^22.14.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@types/recordrtc": "^5.6.14",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
