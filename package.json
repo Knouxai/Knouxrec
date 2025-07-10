@@ -37,7 +37,15 @@
     "build:prod": "npm run type-check && vite build --mode production",
     "build:dev": "vite build --mode development",
     "serve": "npm run build && npm run preview",
-    "deploy": "npm run build:prod && gh-pages -d dist"
+    "deploy": "npm run build:prod && gh-pages -d dist",
+    "test": "echo \"No tests specified\" && exit 0",
+    "test:watch": "echo \"No tests specified\" && exit 0",
+    "start": "npm run dev",
+    "install:deps": "npm install",
+    "setup": "npm run install:deps && npm run type-check",
+    "dev:debug": "vite --host --debug",
+    "build:analyze": "npm run build && npm run analyze",
+    "health-check": "npm run type-check && npm run lint"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",

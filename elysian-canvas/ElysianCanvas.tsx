@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AdultGateAdvanced } from "./core/AdultGateAdvanced";
 import { MasterRenderer, RenderConfig } from "./core/MasterRenderer";
-import { AestheticEngine, AestheticProfile } from "./core/AestheticEngine";
+import { AestheticEngine } from "./core/AestheticEngine";
 import { MasterSlider } from "./editor-ui/MasterSlider";
 import { EnhancedGallery } from "./components/EnhancedGallery";
-import { ImageEditingTools } from "./components/ImageEditingTools";
+
 import {
   imageUploadService,
   UploadedImage,
@@ -334,11 +334,27 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
 
     switch (id) {
       case "lighting-intensity":
-        if (!newConfig.lighting) newConfig.lighting = {};
-        newConfig.lighting.primaryLight = {
-          ...newConfig.lighting.primaryLight,
-          intensity: value,
-        };
+        if (!newConfig.lighting)
+          newConfig.lighting = {
+            primaryLight: {
+              intensity: 1,
+              color: "#ffffff",
+              position: { x: 0, y: 0, z: 1 },
+              softness: 0.5,
+            },
+            ambientLight: { intensity: 0.3, color: "#ffffff" },
+            shadows: { enabled: true, softness: 0.5, opacity: 0.7 },
+          };
+        if (!newConfig.lighting.primaryLight) {
+          newConfig.lighting.primaryLight = {
+            intensity: value,
+            color: "#ffffff",
+            position: { x: 0, y: 0, z: 1 },
+            softness: 0.5,
+          };
+        } else {
+          newConfig.lighting.primaryLight.intensity = value;
+        }
         break;
       // Add more cases for other sliders
     }
@@ -490,9 +506,9 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
                         setActiveView("editor");
                       }}
                     >
-                      <img src={image.url} alt={image.name} />
+                      <img src={image.url} alt={image.metadata.name} />
                       <div className="thumbnail-overlay">
-                        <span>{image.name}</span>
+                        <span>{image.metadata.name}</span>
                       </div>
                     </div>
                   ))}
@@ -704,11 +720,14 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
                 <div className="canvas-info">
                   {selectedImage && (
                     <div className="image-info">
-                      <span>📸 {selectedImage.name}</span>
+                      <span>📸 {selectedImage.metadata.name}</span>
                       <span>
-                        📏 {selectedImage.width}x{selectedImage.height}
+                        📏 {selectedImage.metadata.width}x
+                        {selectedImage.metadata.height}
                       </span>
-                      <span>💾 {Math.round(selectedImage.size / 1024)}KB</span>
+                      <span>
+                        💾 {Math.round(selectedImage.metadata.size / 1024)}KB
+                      </span>
                     </div>
                   )}
                   {selectedTemplate && (

@@ -23,35 +23,6 @@ const ToolboxPanel: React.FC = () => {
   const [selectedTool, setSelectedTool] = useState<AITool | null>(null);
   const [showToolInterface, setShowToolInterface] = useState(false);
 
-  // معالجة الأدوات
-  const handleToolUse = async (
-    tool: AITool,
-    file?: File,
-    additionalInput?: string,
-  ) => {
-    try {
-      if (!file && tool.input_types.includes("file")) {
-        // فتح منتقي الملفات
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = getAcceptedFileTypes(tool.input_types);
-        input.onchange = (e) => {
-          const selectedFile = (e.target as HTMLInputElement).files?.[0];
-          if (selectedFile) {
-            executeToolOperation(tool, selectedFile, additionalInput);
-          }
-        };
-        input.click();
-        return;
-      }
-
-      await executeToolOperation(tool, file, additionalInput);
-    } catch (error) {
-      console.error("خطأ في تشغيل الأداة:", error);
-      alert(`خطأ في تشغيل ${tool.name}: ${error}`);
-    }
-  };
-
   // تنفيذ عملية الأداة
   const executeToolOperation = async (
     tool: AITool,
@@ -73,1046 +44,660 @@ const ToolboxPanel: React.FC = () => {
         {
           input,
           file,
-          options: {
-            quality: "high",
-            format: "auto",
-          },
+          settings: {},
         },
       );
 
-      // معالجة النتيجة
+      // تحديث النقاط
+      setUserCredits((prev) => ({
+        ...prev,
+        used: prev.used + tool.credits_cost,
+        remaining: prev.remaining - tool.credits_cost,
+      }));
+
+      // إظهار النتيجة
       if (result.success) {
-        console.log(`✅ نجح تنفيذ ${tool.name}:`, result);
-
-        // تحديث النقاط
-        setUserCredits((prev) => ({
-          ...prev,
-          remaining: prev.remaining - tool.credits_cost,
-          used: prev.used + tool.credits_cost,
-        }));
-
-        // عرض رسالة نجاح
-        alert(`تم إنجاز ${tool.name} بنجاح! ✨`);
-
-        // تحميل النتيجة تلقائياً إذا كانت ملف
-        if (result.output && typeof result.output !== "string") {
-          downloadFile(result.output, `${tool.name}_result`);
+        alert(`تم تنفيذ ${tool.name} بنجاح!`);
+        if (result.downloadUrl) {
+          // تنزيل النتيجة
+          const a = document.createElement("a");
+          a.href = result.downloadUrl;
+          a.download = `result_${tool.id}_${Date.now()}`;
+          a.click();
         }
       } else {
-        throw new Error(result.error || "فشل في تنفيذ العملية");
+        throw new Error(result.error || "فشل في تنفيذ الأداة");
       }
     } catch (error) {
-      console.error(`❌ خطأ في تنفيذ ${tool.name}:`, error);
-      alert(`خطأ في ${tool.name}: ${error}`);
+      console.error("خطأ في تنفيذ الأداة:", error);
+      alert(`خطأ في تنفيذ ${tool.name}: ${error}`);
     }
-  };
-
-  // تحميل الملفات
-  const downloadFile = (blob: Blob, name: string) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   // الحصول على أنواع الملفات المقبولة
   const getAcceptedFileTypes = (inputTypes: string[]): string => {
-    const typeMapping: Record<string, string> = {
+    const typeMap: Record<string, string> = {
+      image: "image/*",
       video: "video/*",
       audio: "audio/*",
-      image: "image/*",
-      text: "text/*",
+      text: ".txt,.md,.json",
       file: "*/*",
     };
 
-    return inputTypes.map((type) => typeMapping[type] || "*/*").join(",");
+    return inputTypes.map((type) => typeMap[type] || "*/*").join(",");
   };
 
-  const categories = [
-    { id: "all", name: "جميع الأدوات", icon: "🛠️", color: "knoux-purple" },
-    { id: "video", name: "الفيديو", icon: "🎥", color: "blue-400" },
-    { id: "audio", name: "الصوت", icon: "🎵", color: "green-400" },
-    { id: "image", name: "الصور", icon: "🖼️", color: "yellow-400" },
-    { id: "text", name: "النصوص", icon: "📝", color: "purple-400" },
-    {
-      id: "ai-tools",
-      name: "أدوات الذكاء الاصطناعي",
-      icon: "🤖",
-      color: "knoux-neon",
-    },
-  ] as const;
-
-  // جميع أدوات Toolbox - مطابقة للمتطلبات الكاملة
-  useEffect(() => {
-    const comprehensiveTools: AITool[] = [
-      // ========== أدوات الفيديو (Video Tools) ==========
+  // إنشاء أدوات شاملة ومتقدمة
+  const generateAdvancedTools = (): AITool[] => {
+    return [
+      // أدوات الفيديو
       {
-        id: "ai-effects",
-        name: "التأثيرات الذكية",
-        description: "تأثيرات ذكية على الفيديو مع تتبع الحركة وفلاتر متقدمة",
+        id: "video_enhancer",
+        name: "تحسين الفيديو",
+        description: "تحسين جودة الفيديو باستخدام ا��ذكاء الاصطناعي",
         category: "video",
-        icon: "🎨",
+        icon: "🎬",
         ai_powered: true,
-        credits_cost: 25,
+        credits_cost: 15,
         processing_time: "medium",
-        input_types: ["video"],
+        input_types: ["video", "file"],
         output_types: ["video"],
-        features: ["تتبع الحركة", "فلاتر ذكية", "خلفيات ديناميكية"],
+        features: ["تحسين الدقة", "إزالة الضوضاء", "تحسين الألوان"],
         premium: false,
         popular: true,
         beta: false,
       },
       {
-        id: "ai-animation",
-        name: "الرسوم المتحركة الذكية",
-        description:
-          "توليد رسوم متحركة من صور أو نصوص بتقنيات الذكاء الاصطناعي",
+        id: "video_generator",
+        name: "مولد الفيديو",
+        description: "إنشاء فيديوهات من النصوص والصور",
         category: "video",
         icon: "🎞️",
         ai_powered: true,
-        credits_cost: 40,
-        processing_time: "slow",
-        input_types: ["image", "text"],
-        output_types: ["video"],
-        features: ["توليد حركة", "أنماط متعددة", "تحكم بالمدة"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "ai-transition",
-        name: "الانتقالات الذكية",
-        description: "انتقالات سلسة ومبتكرة بين مقاطع الفيديو تلقائياً",
-        category: "video",
-        icon: "🔀",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "fast",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["انتقالات تلقائية", "تحليل المشاهد", "مدة قابلة للتعديل"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "image-to-video",
-        name: "الصورة إلى فيديو",
-        description: "تحويل مجموعة صور إلى فيديو مع حركة كاميرا احترافية",
-        category: "video",
-        icon: "🖼️➡️🎬",
-        ai_powered: true,
-        credits_cost: 30,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["video"],
-        features: ["حركة كاميرا", "مؤثرات بصرية", "موسيقى تلقائية"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "text-to-video",
-        name: "النص إلى فيديو",
-        description: "إنشاء فيديو كامل من أوصاف نصية فقط",
-        category: "video",
-        icon: "📝➡️🎞️",
-        ai_powered: true,
-        credits_cost: 60,
-        processing_time: "slow",
-        input_types: ["text"],
-        output_types: ["video"],
-        features: ["توليد مشاهد", "تحكم بالأسلوب", "سرد صوتي"],
-        premium: true,
-        popular: true,
-        beta: true,
-      },
-      {
-        id: "screen-recorder",
-        name: "مسجل الشاشة",
-        description: "تسجيل شاشة النظام مع صوت عالي الجودة",
-        category: "video",
-        icon: "🎥",
-        ai_powered: false,
-        credits_cost: 5,
-        processing_time: "fast",
-        input_types: ["screen"],
-        output_types: ["video"],
-        features: ["تسجيل كامل", "تسجيل جزئي", "صوت النظام"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "video-downloader",
-        name: "محمل الفيديو",
-        description: "تحميل فيديوهات من منصات متعددة بجودة عالية",
-        category: "video",
-        icon: "⬇️🎞️",
-        ai_powered: false,
-        credits_cost: 2,
-        processing_time: "fast",
-        input_types: ["url"],
-        output_types: ["video"],
-        features: ["منصات متعددة", "جودة متنوعة", "تحميل سريع"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "ai-video-generator",
-        name: "مولد الفيديو الذكي",
-        description: "توليد فيديوهات كاملة تلقائياً من نصوص أو صور",
-        category: "video",
-        icon: "🧠🎬",
-        ai_powered: true,
-        credits_cost: 80,
+        credits_cost: 25,
         processing_time: "slow",
         input_types: ["text", "image"],
         output_types: ["video"],
-        features: ["توليد كامل", "سرد متقدم", "مؤثرات شاملة"],
+        features: ["توليد AI", "انتقالات ذكية", "تأثيرات متقدمة"],
         premium: true,
         popular: true,
+        beta: false,
+      },
+      {
+        id: "video_stabilizer",
+        name: "مثبت الفيديو",
+        description: "تثبيت الفيديوهات المهتزة تلقائياً",
+        category: "video",
+        icon: "🎯",
+        ai_powered: true,
+        credits_cost: 10,
+        processing_time: "medium",
+        input_types: ["video"],
+        output_types: ["video"],
+        features: ["تثبيت ذكي", "تقليل الاهتزاز", "تحسين السلاسة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "scene_detector",
+        name: "كاشف المشاهد",
+        description: "تحليل المشاهد وتقطيع الفيديو تلقائياً",
+        category: "video",
+        icon: "🔍",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "fast",
+        input_types: ["video"],
+        output_types: ["text", "video"],
+        features: ["تحليل المحتوى", "تقطيع ذكي", "استخراج اللقطات"],
+        premium: false,
+        popular: false,
+        beta: false,
+      },
+
+      // أدوات الصوت
+      {
+        id: "voice_enhancer",
+        name: "محسن الصوت",
+        description: "تحسين جودة الصوت وإزالة الضوضاء",
+        category: "audio",
+        icon: "🎙️",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "fast",
+        input_types: ["audio", "video"],
+        output_types: ["audio"],
+        features: ["إزالة الضوضاء", "تحسين الوضوح", "تطبيع الصوت"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "voice_changer",
+        name: "مُغير الصوت",
+        description: "تغيير نبرة وشخصية الصوت",
+        category: "audio",
+        icon: "🎭",
+        ai_powered: true,
+        credits_cost: 12,
+        processing_time: "medium",
+        input_types: ["audio"],
+        output_types: ["audio"],
+        features: ["تغيير النبرة", "تأثيرات صوتية", "أصوات مختلفة"],
+        premium: true,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "music_generator",
+        name: "مولد الموسيقى",
+        description: "إنشاء موسيقى تصويرية مخصصة",
+        category: "audio",
+        icon: "🎵",
+        ai_powered: true,
+        credits_cost: 20,
+        processing_time: "slow",
+        input_types: ["text"],
+        output_types: ["audio"],
+        features: ["توليد AI", "أنماط متنوعة", "موسيقى مخصصة"],
+        premium: true,
+        popular: false,
         beta: true,
       },
       {
-        id: "video-stabilization",
-        name: "مثبت الفيديو",
-        description: "تثبيت الفيديو لتقليل الاهتزاز والحركة غير المرغوبة",
-        category: "video",
+        id: "beat_sync",
+        name: "مزامن الإيقاع",
+        description: "مزامنة الفيديو مع إيقاع الموسيقى",
+        category: "audio",
+        icon: "🥁",
+        ai_powered: true,
+        credits_cost: 15,
+        processing_time: "medium",
+        input_types: ["video", "audio"],
+        output_types: ["video"],
+        features: ["كشف الإيقاع", "مزامنة ذكية", "تأثيرات إيقاعية"],
+        premium: true,
+        popular: false,
+        beta: false,
+      },
+
+      // أدوات الصور
+      {
+        id: "image_upscaler",
+        name: "مكبر الصور",
+        description: "تكبير الصور مع الحفاظ على الجودة",
+        category: "image",
+        icon: "🔍",
+        ai_powered: true,
+        credits_cost: 10,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["تكبير AI", "تحسين التفاصيل", "دقة عالية"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "background_remover",
+        name: "مزيل الخلفية",
+        description: "إزالة خلفية الصور تلقائياً",
+        category: "image",
+        icon: "✂️",
+        ai_powered: true,
+        credits_cost: 5,
+        processing_time: "fast",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["قص دقيق", "حواف ناعمة", "شفافية كاملة"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "style_transfer",
+        name: "نقل النمط",
+        description: "تطبيق أنماط فنية على الصور",
+        category: "image",
+        icon: "🎨",
+        ai_powered: true,
+        credits_cost: 12,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["أنماط فنية", "لوحات مشهورة", "تأثيرات إبداعية"],
+        premium: true,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "colorizer",
+        name: "مُلون الصور",
+        description: "تلوين الصور القديمة والأبيض والأسود",
+        category: "image",
+        icon: "🌈",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "medium",
+        input_types: ["image"],
+        output_types: ["image"],
+        features: ["تلوين ذكي", "ألوان طبي��ية", "تحسين التاريخ"],
+        premium: false,
+        popular: false,
+        beta: false,
+      },
+
+      // أدوات النصوص
+      {
+        id: "content_writer",
+        name: "كاتب المحتوى",
+        description: "إنشاء محتوى إبداعي ومقالات",
+        category: "text",
+        icon: "✍️",
+        ai_powered: true,
+        credits_cost: 15,
+        processing_time: "medium",
+        input_types: ["text"],
+        output_types: ["text"],
+        features: ["كتابة إبداعية", "مقالات احترافية", "أساليب متنوعة"],
+        premium: true,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "translator",
+        name: "المترجم الذكي",
+        description: "ترجمة النصوص بدقة عالية",
+        category: "text",
+        icon: "🌍",
+        ai_powered: true,
+        credits_cost: 5,
+        processing_time: "fast",
+        input_types: ["text"],
+        output_types: ["text"],
+        features: ["100+ لغة", "ترجمة طبيعية", "حفظ السياق"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "summarizer",
+        name: "ملخص ال��صوص",
+        description: "تلخيص النصوص الطويلة تلقائياً",
+        category: "text",
+        icon: "📝",
+        ai_powered: true,
+        credits_cost: 8,
+        processing_time: "fast",
+        input_types: ["text"],
+        output_types: ["text"],
+        features: ["تلخيص ذكي", "نقاط رئيسية", "ملخصات قابلة للتخصيص"],
+        premium: false,
+        popular: true,
+        beta: false,
+      },
+      {
+        id: "seo_optimizer",
+        name: "محسن SEO",
+        description: "تحسين المحتوى لمحركات البحث",
+        category: "text",
+        icon: "📈",
+        ai_powered: true,
+        credits_cost: 12,
+        processing_time: "medium",
+        input_types: ["text"],
+        output_types: ["text"],
+        features: ["تحليل الكلمات المفتاحية", "تحسين المحتوى", "اقتراحات SEO"],
+        premium: true,
+        popular: false,
+        beta: false,
+      },
+
+      // أدوات متقدمة
+      {
+        id: "deepfake_detector",
+        name: "كاشف التزييف العميق",
+        description: "كشف المحتوى المُعدل بالذكاء الاصطناعي",
+        category: "ai-tools",
         icon: "🛡️",
         ai_powered: true,
         credits_cost: 20,
         processing_time: "medium",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["تحليل الحركة", "تثبيت متقدم", "حفظ الجودة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "auto-bg-removal",
-        name: "إزالة الخلفية التلقائية",
-        description: "إزالة خلفية الفيديو تلقائياً بدقة عالية",
-        category: "video",
-        icon: "🎭",
-        ai_powered: true,
-        credits_cost: 35,
-        processing_time: "medium",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["فصل دقيق", "حواف ناعمة", "معالجة متقدمة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "blur-background",
-        name: "تمويه الخلفية",
-        description: "تمويه خلفية الفيديو مع إبراز الموضوع الرئيسي",
-        category: "video",
-        icon: "🖼️〰️",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "fast",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["تحديد ذكي", "تمويه متدرج", "تحكم بالشدة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "video-translator",
-        name: "مترجم الفيديو",
-        description: "ترجمة الفيديو صوتياً ونصياً لعدة لغات",
-        category: "video",
-        icon: "🌍💬",
-        ai_powered: true,
-        credits_cost: 45,
-        processing_time: "slow",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["ترجمة صوتية", "ترجمة نصية", "لغات متعددة"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "ai-shorts",
-        name: "المقاطع القصيرة الذكية",
-        description: "إنشاء مقاطع قصيرة مثيرة للاهتمام من فيديوهات طويلة",
-        category: "video",
-        icon: "📱🎬",
-        ai_powered: true,
-        credits_cost: 30,
-        processing_time: "medium",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["اختيار ذكي", "تنسيق تلقائي", "تحسين للمنصات"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "face-swap",
-        name: "تبديل الوجوه",
-        description: "تبديل الوجوه في الصور والفيديو بواقعية عالية",
-        category: "video",
-        icon: "🧑↔️🧑",
-        ai_powered: true,
-        credits_cost: 50,
-        processing_time: "slow",
-        input_types: ["video", "image"],
-        output_types: ["video"],
-        features: ["واقعية عالية", "مزامنة التعابير", "إضاءة طبيعية"],
+        input_types: ["image", "video"],
+        output_types: ["text"],
+        features: ["كشف التزييف", "تحليل الأصالة", "تقرير مفصل"],
         premium: true,
         popular: false,
         beta: true,
       },
       {
-        id: "ai-text-editing",
-        name: "التحرير النصي الذكي",
-        description: "تحرير الفيديو عبر التفاعل مع النص المنسوخ",
-        category: "video",
-        icon: "📝▶️",
-        ai_powered: true,
-        credits_cost: 25,
-        processing_time: "medium",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["تحرير نصي", "قص ذكي", "تزامن دقيق"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "video-trimmer",
-        name: "قص الفيديو",
-        description: "قص وتقطيع الفيديوهات بدقة عالية",
-        category: "video",
-        icon: "✂️",
-        ai_powered: false,
-        credits_cost: 3,
-        processing_time: "fast",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["قص دقيق", "معاينة فورية", "تنسيقات متعددة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-
-      // ========== أدوات الصوت (Audio Tools) ==========
-      {
-        id: "vocal-remover",
-        name: "مزيل الأصوات",
-        description: "فصل الغناء عن الموسيقى وإنشاء نسخ كاريوكي",
-        category: "audio",
-        icon: "🎤🚫",
-        ai_powered: true,
-        credits_cost: 20,
-        processing_time: "medium",
-        input_types: ["audio", "video"],
-        output_types: ["audio"],
-        features: ["فصل دقيق", "نسخ كاريوكي", "جودة عالية"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "audio-downloader",
-        name: "محمل الصوت",
-        description: "تحميل ملفات صوتية من منصات متعددة",
-        category: "audio",
-        icon: "⬇️🎶",
-        ai_powered: false,
-        credits_cost: 2,
-        processing_time: "fast",
-        input_types: ["url"],
-        output_types: ["audio"],
-        features: ["منصات متعددة", "جودة عالية", "تنسيقات متنوعة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "extract-audio",
-        name: "استخراج الصوت",
-        description: "استخراج الصوت من مقاطع الفيديو",
-        category: "audio",
-        icon: "🎞️➡️🎵",
-        ai_powered: false,
-        credits_cost: 2,
-        processing_time: "fast",
-        input_types: ["video"],
-        output_types: ["audio"],
-        features: ["استخراج سريع", "جودة أصلية", "تنسيقات متعددة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "voice-change",
-        name: "تغيير الصوت",
-        description: "تغيير نغمة وطابع الصوت بتأثيرات متنوعة",
-        category: "audio",
-        icon: "🎙️❤️",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "fast",
-        input_types: ["audio"],
-        output_types: ["audio"],
-        features: ["تأثيرات متعددة", "تحكم بالنغمة", "جودة طبيعية"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "noise-reduction",
-        name: "تقليل الضوضاء",
-        description: "إزالة ضوضاء الخلفية من التسجيلات الصوتية",
-        category: "audio",
-        icon: "🔇✋",
-        ai_powered: true,
-        credits_cost: 10,
-        processing_time: "fast",
-        input_types: ["audio"],
-        output_types: ["audio"],
-        features: ["إزالة ذكية", "حفظ الكلام", "تحسين الوضوح"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "beat-detection",
-        name: "كشف الإيقاع",
-        description: "تحليل الإيقاع الموسيقي لمزامنة الفيديو مع الموسيقى",
-        category: "audio",
-        icon: "🎶⏱️",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["audio"],
-        output_types: ["data"],
-        features: ["تحليل الإيقاع", "مزامنة تلقائية", "دقة عالية"],
-        premium: false,
-        popular: false,
-        beta: false,
-      },
-
-      // ========== أدوات الصور (Image Tools) ==========
-      {
-        id: "photo-enhancer",
-        name: "محسن الصور",
-        description: "تحسين جودة الصور ووضوحها وألوانها تل��ائياً",
-        category: "image",
-        icon: "✨",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["تحسين تلقائي", "تصحيح الألوان", "إزالة التشويش"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "image-bg-removal",
-        name: "إزالة خلفية الصور",
-        description: "إزالة الخلفية من الصور بدقة احترافية",
-        category: "image",
-        icon: "🖼️🚫🌫️",
-        ai_powered: true,
-        credits_cost: 5,
-        processing_time: "fast",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["فصل دقيق", "حواف ناعمة", "صور شفافة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "custom-cutout",
-        name: "القص المخصص",
-        description: "قص مخصص لعناصر محددة من الصور بدقة عالية",
-        category: "image",
-        icon: "✂️🖼️",
-        ai_powered: true,
-        credits_cost: 10,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["تحديد ذكي", "قص دقيق", "تحسين الحواف"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "text-to-image",
-        name: "النص إلى صورة",
-        description: "توليد صور مذهلة من أوصاف نصية",
-        category: "image",
-        icon: "📝➡️🖼️",
-        ai_powered: true,
-        credits_cost: 25,
-        processing_time: "medium",
-        input_types: ["text"],
-        output_types: ["image"],
-        features: ["توليد إبداعي", "أنماط متعددة", "دقة عالية"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "reference-image",
-        name: "الصورة المرجعية",
-        description: "استخدام صورة مرجعية لتوليد أو تعديل صور جديدة",
-        category: "image",
-        icon: "🖼️🔗",
-        ai_powered: true,
-        credits_cost: 20,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["مرجع أسلوب", "تحويل إبداعي", "حفظ ا��هوية"],
-        premium: true,
-        popular: false,
-        beta: false,
-      },
-      {
-        id: "image-upscaler",
-        name: "مكبر الصور",
-        description: "تكبير الصور وتحسين دقتها حتى 8K",
-        category: "image",
-        icon: "🖼️↔️",
-        ai_powered: true,
-        credits_cost: 12,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["تكبير ذكي", "دقة 8K", "حفظ التفاصيل"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-
-      // ========== أدوات النصوص (Text Tools) ==========
-      {
-        id: "ai-copywriting",
-        name: "الكتابة الإعلانية الذكية",
-        description: "توليد نصوص تسويقية وإعلانية احترافية",
-        category: "text",
-        icon: "✍️✨",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "fast",
-        input_types: ["text"],
-        output_types: ["text"],
-        features: ["نصوص تسويقية", "أنماط متعددة", "تحسين SEO"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "text-to-speech",
-        name: "النص إلى كل��م",
-        description: "تحويل النصوص إلى كلام طبيعي بأصوات متنوعة",
-        category: "text",
-        icon: "📢",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["text"],
-        output_types: ["audio"],
-        features: ["أصوات متعددة", "تحكم بالسرعة", "لغات متنوعة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "speech-to-text",
-        name: "الكلام إلى نص",
-        description: "تحويل التسجيلات الصوتية إلى نصوص دقيقة",
-        category: "text",
-        icon: "🎤📝",
-        ai_powered: true,
-        credits_cost: 10,
-        processing_time: "medium",
-        input_types: ["audio", "video"],
-        output_types: ["text"],
-        features: ["دقة عالية", "لهجات متعددة", "ترميز زمني"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "split-subtitles",
-        name: "تقسيم الترجمات",
-        description: "تقسيم النصوص الطويلة لترجمات مناسبة للعرض",
-        category: "text",
-        icon: "📝✂️",
-        ai_powered: true,
-        credits_cost: 5,
-        processing_time: "fast",
-        input_types: ["text"],
-        output_types: ["text"],
-        features: ["تقسيم ذكي", "توقيت مناسب", "تنسيق احترافي"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "subtitle-maker",
-        name: "صانع الترجمات",
-        description: "إنشاء ملفات ترجمة احترافية تلقائياً",
-        category: "text",
-        icon: "🎬💬",
-        ai_powered: true,
-        credits_cost: 12,
-        processing_time: "medium",
-        input_types: ["video", "audio"],
-        output_types: ["text"],
-        features: ["ترجمة تلقائية", "تنسيقات متعددة", "مزامنة دقيقة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-
-      // ========== أدوات الذكاء الاصطناعي المتقدمة ==========
-      {
-        id: "ai-avatar",
-        name: "الصورة الرمزية الذكية",
-        description: "توليد صور رمزية متحركة قادرة على الكلام والغناء",
+        id: "face_animator",
+        name: "محرك الوجوه",
+        description: "تحريك الوجوه في الصور الثابتة",
         category: "ai-tools",
-        icon: "👤🎤",
+        icon: "😄",
         ai_powered: true,
-        credits_cost: 40,
+        credits_cost: 18,
         processing_time: "slow",
-        input_types: ["image", "audio"],
+        input_types: ["image"],
         output_types: ["video"],
-        features: ["تحريك الوجه", "مزامنة الشفاه", "تعابير طبيعية"],
+        features: ["تحريك طبيعي", "تعبيرات متنوعة", "جودة عالية"],
         premium: true,
         popular: true,
-        beta: true,
+        beta: false,
       },
     ];
+  };
 
-    setTools(comprehensiveTools);
+  useEffect(() => {
+    const loadTools = async () => {
+      try {
+        const generatedTools = generateAdvancedTools();
+        setTools(generatedTools);
+      } catch (error) {
+        console.error("خطأ في تحميل الأدوات:", error);
+      }
+    };
+
+    loadTools();
   }, []);
 
+  // فلترة الأدوات
   const filteredTools = tools.filter((tool) => {
-    if (selectedCategory !== "all" && tool.category !== selectedCategory)
-      return false;
-    if (
-      searchQuery &&
-      !tool.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false;
-    return true;
+    const matchesCategory =
+      selectedCategory === "all" || tool.category === selectedCategory;
+    const matchesSearch =
+      !searchQuery ||
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.features.some((feature) =>
+        feature.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    return matchesCategory && matchesSearch;
   });
 
-  const handleToolSelect = (tool: AITool) => {
-    if (tool.credits_cost > userCredits.remaining) {
-      alert("نقاط غير كافية! يرجى ترقية الخطة.");
-      return;
-    }
+  // فئات الأدوات
+  const categories = [
+    { id: "all", name: "الكل", icon: "🔧", count: tools.length },
+    {
+      id: "video",
+      name: "فيديو",
+      icon: "🎬",
+      count: tools.filter((t) => t.category === "video").length,
+    },
+    {
+      id: "audio",
+      name: "صوت",
+      icon: "🎵",
+      count: tools.filter((t) => t.category === "audio").length,
+    },
+    {
+      id: "image",
+      name: "صور",
+      icon: "🖼️",
+      count: tools.filter((t) => t.category === "image").length,
+    },
+    {
+      id: "text",
+      name: "نصوص",
+      icon: "📝",
+      count: tools.filter((t) => t.category === "text").length,
+    },
+    {
+      id: "ai-tools",
+      name: "أدوات AI",
+      icon: "🤖",
+      count: tools.filter((t) => t.category === "ai-tools").length,
+    },
+  ] as const;
 
-    // فتح الواجهة المخصصة للأداة
+  // معالجة اختيار الأداة
+  const handleToolSelect = (tool: AITool) => {
     setSelectedTool(tool);
     setShowToolInterface(true);
   };
 
-  const handleToolSuccess = (result: ToolExecutionResult) => {
-    console.log("✅ نجح تنفيذ الأداة:", result);
-
-    // تحديث النقاط
-    if (selectedTool) {
-      setUserCredits((prev) => ({
-        ...prev,
-        remaining: prev.remaining - selectedTool.credits_cost,
-        used: prev.used + selectedTool.credits_cost,
-      }));
-    }
-
-    // عرض رسالة نجاح
-    alert(`تم إنجاز ${selectedTool?.name} بنجاح! ✨`);
-
-    // تحميل النتيجة تلقائياً إذا كانت ملف
-    if (result.output && typeof result.output !== "string") {
-      const blob = result.output as Blob;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${selectedTool?.name}_result`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  };
-
-  const handleToolError = (error: string) => {
-    console.error("❌ خطأ في تنفيذ الأداة:", error);
-    alert(`خطأ في ${selectedTool?.name}: ${error}`);
-  };
-
-  const closeToolInterface = () => {
-    setShowToolInterface(false);
-    setSelectedTool(null);
-  };
-
+  // إنشاء واجهة الأداة
   const renderToolInterface = () => {
-    if (!selectedTool || !showToolInterface) return null;
+    if (!selectedTool) return null;
 
-    const props = {
+    const commonProps = {
       tool: selectedTool,
-      onClose: closeToolInterface,
-      onSuccess: handleToolSuccess,
-      onError: handleToolError,
+      onClose: () => setShowToolInterface(false),
+      onSuccess: (result: any) => {
+        console.log("نجح تنفيذ الأداة:", result);
+        setShowToolInterface(false);
+      },
+      onError: (error: string) => {
+        console.error("فشل تنفيذ الأداة:", error);
+        alert(`خطأ: ${error}`);
+      },
     };
 
-    // اختيار الواجهة المناسبة حسب نوع الأداة
     switch (selectedTool.category) {
       case "image":
-        return <ImageToolInterface {...props} />;
+        return <ImageToolInterface {...commonProps} />;
       case "video":
-        return <VideoToolInterface {...props} />;
+        return <VideoToolInterface {...commonProps} />;
       case "audio":
-        return <AudioToolInterface {...props} />;
+        return <AudioToolInterface {...commonProps} />;
       case "text":
-        return <TextToolInterface {...props} />;
-      case "ai-tools":
-        // الأدوات المتقدمة - اختيار الواجهة حسب نوع المدخلات
-        if (selectedTool.input_types.includes("image")) {
-          return <ImageToolInterface {...props} />;
-        } else if (selectedTool.input_types.includes("video")) {
-          return <VideoToolInterface {...props} />;
-        } else if (selectedTool.input_types.includes("audio")) {
-          return <AudioToolInterface {...props} />;
-        } else {
-          return <TextToolInterface {...props} />;
-        }
+        return <TextToolInterface {...commonProps} />;
       default:
-        return <ImageToolInterface {...props} />;
+        return (
+          <div className="glass-card p-8 rounded-xl text-center">
+            <h3 className="text-xl font-bold mb-4">أداة غير مدعومة</h3>
+            <p className="text-white/70 mb-4">
+              هذه الأداة لا تحتوي على واجهة مخصصة بعد.
+            </p>
+            <button
+              onClick={() => setShowToolInterface(false)}
+              className="glow-button px-6 py-2 rounded-lg"
+            >
+              إغلاق
+            </button>
+          </div>
+        );
     }
   };
 
-  const ToolCard = ({ tool }: { tool: AITool }) => (
-    <div
-      className="glass-card p-6 rounded-xl border border-knoux-purple/20 hover:border-knoux-purple/60 transition-all duration-300 cursor-pointer group interactive"
-      onClick={() => handleToolSelect(tool)}
-    >
-      {/* Tool Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div
-            className={`text-3xl p-2 rounded-lg ${
-              tool.ai_powered ? "bg-knoux-purple/20" : "bg-gray-500/20"
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
+            صندوق الأدوات الذكية
+          </h2>
+          <p className="text-white/70 mt-2">
+            مجموعة شاملة من أدوات الذكاء الاصطناعي للمحتوى الرقمي
+          </p>
+        </div>
+
+        {/* Credits Display */}
+        <div className="glass-card p-4 rounded-xl">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-knoux-neon">
+              {userCredits.remaining}
+            </div>
+            <div className="text-white/70 text-sm">نقطة متبقية</div>
+            <div className="text-xs text-white/50 mt-1">
+              {userCredits.subscription_tier}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-md">
+        <input
+          type="text"
+          placeholder="ابحث عن أداة..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full glass-card px-4 py-3 pr-12 rounded-xl text-white placeholder-white/50 border-white/20 focus:border-knoux-purple/50 transition-all duration-300"
+        />
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50">
+          🔍
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => setSelectedCategory(category.id as ToolCategory)}
+            className={`glass-card interactive p-4 rounded-xl text-center transition-all duration-300 ${
+              selectedCategory === category.id
+                ? "bg-knoux-purple/20 border-knoux-purple"
+                : "hover:bg-white/10"
             }`}
           >
-            {tool.icon}
+            <div className="text-2xl mb-2">{category.icon}</div>
+            <div
+              className={`font-semibold text-sm ${
+                selectedCategory === category.id
+                  ? "text-knoux-purple"
+                  : "text-white"
+              }`}
+            >
+              {category.name}
+            </div>
+            <div className="text-xs text-white/50">{category.count}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredTools.map((tool) => (
+          <div
+            key={tool.id}
+            onClick={() => handleToolSelect(tool)}
+            className="glass-card interactive rounded-xl overflow-hidden group cursor-pointer"
+          >
+            {/* Tool Header */}
+            <div className="p-6 text-center">
+              <div className="text-4xl mb-3">{tool.icon}</div>
+              <h3 className="font-orbitron font-bold text-white mb-2">
+                {tool.name}
+              </h3>
+              <p className="text-white/70 text-sm line-clamp-2 mb-4">
+                {tool.description}
+              </p>
+
+              {/* Badges */}
+              <div className="flex flex-wrap gap-1 mb-4 justify-center">
+                {tool.ai_powered && (
+                  <span className="bg-knoux-purple/20 text-knoux-purple px-2 py-1 rounded-full text-xs">
+                    AI
+                  </span>
+                )}
+                {tool.premium && (
+                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs">
+                    مميز
+                  </span>
+                )}
+                {tool.beta && (
+                  <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs">
+                    تجريبي
+                  </span>
+                )}
+                {tool.popular && (
+                  <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">
+                    شائع
+                  </span>
+                )}
+              </div>
+
+              {/* Credits Cost */}
+              <div className="flex items-center justify-center space-x-2 text-sm">
+                <span className="text-knoux-neon font-bold">
+                  {tool.credits_cost}
+                </span>
+                <span className="text-white/70">نقطة</span>
+              </div>
+            </div>
+
+            {/* Features */}
+            <div className="px-6 pb-6">
+              <div className="border-t border-white/20 pt-4">
+                <div className="text-xs text-white/50 mb-2">المزايا:</div>
+                <div className="flex flex-wrap gap-1">
+                  {tool.features.slice(0, 3).map((feature, index) => (
+                    <span
+                      key={index}
+                      className="bg-white/10 text-white/70 px-2 py-1 rounded text-xs"
+                    >
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Hover Effect */}
+            <div className="absolute inset-0 bg-knoux-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div className="bg-knoux-purple text-white px-4 py-2 rounded-lg font-semibold transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                استخدم الأداة
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {filteredTools.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            لم يتم العثور على أدوات
+          </h3>
+          <p className="text-white/70">جرب تغيير الفئة أو مصطلح البحث</p>
+        </div>
+      )}
+
+      {/* Statistics */}
+      <div className="glass-card p-6 rounded-xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <div className="text-2xl font-bold text-knoux-purple">
+              {tools.length}
+            </div>
+            <div className="text-white/70 text-sm">إجمالي الأدوات</div>
           </div>
           <div>
-            <h3 className="font-rajdhani font-bold text-white group-hover:text-knoux-purple transition-colors">
-              {tool.name}
-            </h3>
-            <div className="flex items-center space-x-2 mt-1">
-              {tool.ai_powered && (
-                <span className="px-2 py-0.5 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded text-xs font-bold text-white">
-                  AI
-                </span>
-              )}
-              {tool.premium && (
-                <span className="px-2 py-0.5 bg-yellow-500/80 rounded text-xs font-bold text-black">
-                  PRO
-                </span>
-              )}
-              {tool.beta && (
-                <span className="px-2 py-0.5 bg-orange-500/80 rounded text-xs font-bold text-white">
-                  BETA
-                </span>
-              )}
-              {tool.popular && (
-                <span className="px-2 py-0.5 bg-green-500/80 rounded text-xs font-bold text-white">
-                  🔥 شائع
-                </span>
-              )}
+            <div className="text-2xl font-bold text-knoux-neon">
+              {tools.filter((t) => t.ai_powered).length}
             </div>
+            <div className="text-white/70 text-sm">أدوات AI</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-green-400">
+              {tools.filter((t) => !t.premium).length}
+            </div>
+            <div className="text-white/70 text-sm">أدوات مجانية</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-yellow-400">
+              {tools.filter((t) => t.premium).length}
+            </div>
+            <div className="text-white/70 text-sm">أدوات مميزة</div>
           </div>
         </div>
-
-        {/* Credits Cost */}
-        <div className="text-right">
-          <div className="text-lg font-bold text-knoux-neon">
-            {tool.credits_cost}
-          </div>
-          <div className="text-xs text-white/60">نقاط</div>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="text-white/70 text-sm mb-4 leading-relaxed">
-        {tool.description}
-      </p>
-
-      {/* Features */}
-      <div className="mb-4">
-        <div className="flex flex-wrap gap-1">
-          {tool.features.slice(0, 3).map((feature, idx) => (
-            <span
-              key={idx}
-              className="px-2 py-1 bg-knoux-purple/10 border border-knoux-purple/20 rounded text-xs text-knoux-purple"
-            >
-              {feature}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Processing Info */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              tool.processing_time === "fast"
-                ? "bg-green-400"
-                : tool.processing_time === "medium"
-                  ? "bg-yellow-400"
-                  : "bg-red-400"
-            }`}
-          ></span>
-          <span className="text-xs text-white/60 capitalize">
-            {tool.processing_time === "fast"
-              ? "سريع"
-              : tool.processing_time === "medium"
-                ? "متوسط"
-                : "بطيء"}
-          </span>
-        </div>
-
-        <div className="flex space-x-1">
-          {tool.input_types.map((type, idx) => (
-            <span key={idx} className="text-xs text-white/50">
-              {type === "text"
-                ? "📝"
-                : type === "image"
-                  ? "🖼️"
-                  : type === "video"
-                    ? "🎥"
-                    : type === "audio"
-                      ? "🎵"
-                      : type === "url"
-                        ? "🔗"
-                        : "📄"}
-            </span>
-          ))}
-          <span className="text-white/30">→</span>
-          {tool.output_types.map((type, idx) => (
-            <span key={idx} className="text-xs text-knoux-neon">
-              {type === "text"
-                ? "📝"
-                : type === "image"
-                  ? "🖼️"
-                  : type === "video"
-                    ? "🎞️"
-                    : type === "audio"
-                      ? "🎵"
-                      : "📄"}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Action Button */}
-      <button
-        onClick={() => handleToolSelect(tool)}
-        className={`w-full py-2 rounded-lg font-medium transition-all ${
-          tool.credits_cost > userCredits.remaining
-            ? "bg-gray-500/20 text-gray-500 cursor-not-allowed"
-            : "bg-knoux-purple/20 hover:bg-knoux-purple/40 text-knoux-purple hover:text-white"
-        }`}
-        disabled={tool.credits_cost > userCredits.remaining}
-      >
-        {tool.credits_cost > userCredits.remaining
-          ? "نقاط غير كافية"
-          : "فتح الأداة"}
-      </button>
-    </div>
-  );
-
-  return (
-    <>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="glass-card p-6 rounded-2xl border border-knoux-purple/30">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
-                🛠️ صندوق الأدوات الاحترافي
-              </h2>
-              <p className="text-white/70 mt-1">
-                أدوات الذكاء الاصطناعي المتقدمة لتحرير المحتوى
-              </p>
-            </div>
-
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="ابحث عن الأدوات..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 px-4 py-2 pl-10 bg-black/30 border border-knoux-purple/30 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-knoux-purple focus:border-knoux-purple"
-              />
-              <svg
-                className="w-5 h-5 text-white/50 absolute left-3 top-2.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* Credits Info */}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-knoux-purple/10 rounded-lg">
-              <div className="text-2xl font-bold text-knoux-purple">
-                {userCredits.remaining}
-              </div>
-              <div className="text-sm text-white/70">النقاط المتبقية</div>
-            </div>
-            <div className="text-center p-3 bg-knoux-neon/10 rounded-lg">
-              <div className="text-2xl font-bold text-knoux-neon">
-                {tools.filter((t) => t.ai_powered).length}
-              </div>
-              <div className="text-sm text-white/70">أدوات ذكية</div>
-            </div>
-            <div className="text-center p-3 bg-green-400/10 rounded-lg">
-              <div className="text-2xl font-bold text-green-400">
-                {tools.filter((t) => t.popular).length}
-              </div>
-              <div className="text-sm text-white/70">شائعة</div>
-            </div>
-            <div className="text-center p-3 bg-yellow-400/10 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-400 capitalize">
-                {userCredits.subscription_tier}
-              </div>
-              <div className="text-sm text-white/70">الخطة</div>
-            </div>
-          </div>
-
-          {/* Credits Progress */}
-          <div className="mt-4 p-4 bg-black/20 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-medium">استخدام النقاط</span>
-              <span className="text-knoux-neon">
-                {userCredits.used}/{userCredits.total}
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-knoux-purple to-knoux-neon h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${(userCredits.used / userCredits.total) * 100}%`,
-                }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Categories */}
-        <div className="glass-card p-4 rounded-2xl border border-knoux-purple/20">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id as ToolCategory)}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
-                  selectedCategory === category.id
-                    ? `bg-${category.color}/30 border border-${category.color} text-${category.color}`
-                    : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-transparent"
-                }`}
-              >
-                <span>{category.icon}</span>
-                <span>{category.name}</span>
-                <span className="text-xs opacity-75">
-                  (
-                  {
-                    tools.filter(
-                      (t) =>
-                        category.id === "all" || t.category === category.id,
-                    ).length
-                  }
-                  )
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tools Grid */}
-        <div className="glass-card p-6 rounded-2xl border border-knoux-purple/20">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-orbitron font-bold text-white">
-              {categories.find((c) => c.id === selectedCategory)?.icon}{" "}
-              {categories.find((c) => c.id === selectedCategory)?.name}
-            </h3>
-            <span className="text-white/70">{filteredTools.length} أداة</span>
-          </div>
-
-          {filteredTools.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-orbitron font-bold text-white mb-2">
-                لم يتم العثور على أدوات
-              </h3>
-              <p className="text-white/70">جرب تعديل البحث أو تغيير الفئة</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Upgrade Notice */}
-        {userCredits.subscription_tier === "free" && (
-          <div className="glass-card p-6 rounded-2xl border border-yellow-400/30 bg-yellow-400/5">
-            <div className="flex items-center space-x-4">
-              <div className="text-4xl">⭐</div>
-              <div className="flex-grow">
-                <h3 className="text-xl font-orbitron font-bold text-yellow-400 mb-1">
-                  ترقية إلى الاحترافي
-                </h3>
-                <p className="text-white/70">
-                  احصل على نقاط غير محدودة وإمكانية الوصول لأدوات الذكاء
-                  الاصطناعي المتقدمة
-                </p>
-              </div>
-              <button className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl font-bold text-black hover:scale-105 transition-transform">
-                ترقية الآن
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Tool Interface Modal */}
-      {renderToolInterface()}
-    </>
+      {showToolInterface && selectedTool && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-knoux-dark/95 backdrop-blur-xl border border-knoux-purple/30 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {renderToolInterface()}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

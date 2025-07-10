@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import QuickControls from "./QuickControls";
 
 interface Workspace {
   id: string;

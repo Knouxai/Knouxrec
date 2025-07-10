@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Recording } from "../types";
-import { processAdvancedTranscript } from "../services/offlineAI";
+import { offlineAI } from "../services/offlineAI";
 import PerformancePanel from "./PerformancePanel";
 import AIModelsManager from "./AIModelsManager";
 import SystemStats from "./SystemStats";
@@ -133,7 +133,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
 
     setProcessing(recording.id);
     try {
-      const result = await processTranscript(recording.transcript);
+      const result = await offlineAI.processTranscript(recording.transcript);
       const updatedRecording = {
         ...recording,
         name: result.title,
@@ -151,7 +151,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
 
   const renderToolContent = () => {
     switch (selectedTool) {
-      case "performance":
+      case "audio":
         return <PerformancePanel />;
 
       case "transcript":

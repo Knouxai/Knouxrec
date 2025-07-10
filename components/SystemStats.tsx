@@ -14,7 +14,7 @@ interface SystemStats {
 }
 
 const SystemStats: React.FC = () => {
-  const [stats, setStats] = useState<SystemStats>({
+  const [stats] = useState<SystemStats>({
     totalTools: 35,
     aiPoweredTools: 28,
     totalTemplates: 88,

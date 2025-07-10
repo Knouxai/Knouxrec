@@ -888,6 +888,27 @@ export class OfflineAI {
     };
   }
 
+  // معالجة النص المستخرج من التسجيل
+  async processTranscript(
+    transcript: string,
+  ): Promise<{ title: string; summary: string; keywords: string[] }> {
+    try {
+      const analysis = await this.analyzeText(transcript);
+      return {
+        title: analysis.title || "تسجيل جديد",
+        summary: analysis.summary || "ملخص التسجيل",
+        keywords: analysis.keywords || [],
+      };
+    } catch (error) {
+      console.error("خطأ في معالجة النص:", error);
+      return {
+        title: "تسجيل جديد",
+        summary: "فشل في تحليل المحتوى",
+        keywords: [],
+      };
+    }
+  }
+
   // تنظيف الموارد
   cleanup(): void {
     this.models.forEach((model) => {

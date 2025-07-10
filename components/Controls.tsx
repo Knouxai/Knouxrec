@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRecorder } from "../hooks/useRecorder";
 import { formatTime } from "../utils";
 import ToggleSwitch from "./ToggleSwitch";
-import { ScreenIcon, MicIcon, SystemAudioIcon, CameraIcon } from "./icons";
+import { MicIcon, SystemAudioIcon } from "./icons";
 
 const ControlCard = ({
   icon,

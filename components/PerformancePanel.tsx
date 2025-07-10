@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   PerformanceMetrics,
   SystemInfo,
+  PerformanceMonitor,
   performanceMonitor,
 } from "../services/performanceMonitor";
 
@@ -21,8 +22,7 @@ const PerformancePanel: React.FC = () => {
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
-    const sysInfo =
-      performanceMonitor.constructor.getSystemInfo() as SystemInfo;
+    const sysInfo = PerformanceMonitor.getSystemInfo() as SystemInfo;
     setSystemInfo(sysInfo);
 
     const handleMetricsUpdate = (newMetrics: PerformanceMetrics) => {
