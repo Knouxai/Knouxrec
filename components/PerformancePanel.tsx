@@ -21,7 +21,7 @@ const PerformancePanel: React.FC = () => {
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
-    const sysInfo = performanceMonitor.getSystemInfo() as SystemInfo;
+    const sysInfo = PerformanceMonitor.getSystemInfo() as SystemInfo;
     setSystemInfo(sysInfo);
 
     const handleMetricsUpdate = (newMetrics: PerformanceMetrics) => {
