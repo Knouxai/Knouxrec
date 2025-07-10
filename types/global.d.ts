@@ -1,6 +1,6 @@
 // Global type declarations for KNOUX REC
 
-declare module 'lamejs' {
+declare module "lamejs" {
   export class Mp3Encoder {
     constructor(channels: number, sampleRate: number, kbps: number);
     encodeBuffer(left: Int16Array, right?: Int16Array): Int8Array;
@@ -8,41 +8,48 @@ declare module 'lamejs' {
   }
 }
 
-declare module 'onnxruntime-web' {
+declare module "onnxruntime-web" {
   export interface InferenceSession {
     run(feeds: Record<string, any>): Promise<Record<string, any>>;
   }
-  
+
   export interface SessionOptions {
     executionProviders?: string[];
     graphOptimizationLevel?: string;
   }
-  
+
   export class InferenceSession {
-    static create(path: string, options?: SessionOptions): Promise<InferenceSession>;
+    static create(
+      path: string,
+      options?: SessionOptions,
+    ): Promise<InferenceSession>;
   }
-  
+
   export interface Tensor {
     data: Float32Array | Int32Array | Uint8Array;
     dims: number[];
     type: string;
   }
-  
+
   export class Tensor {
-    constructor(type: string, data: Float32Array | Int32Array | Uint8Array, dims: number[]);
+    constructor(
+      type: string,
+      data: Float32Array | Int32Array | Uint8Array,
+      dims: number[],
+    );
   }
 }
 
-declare module 'fft-js' {
+declare module "fft-js" {
   export function fft(signal: number[]): number[][];
   export function ifft(signal: number[]): number[][];
-  export function util: {
+  export const util: {
     fftMag(signal: number[][]): number[];
     fftFreq(signal: number[][], sampleRate: number): number[];
   };
 }
 
-declare module 'jimp' {
+declare module "jimp" {
   export interface Jimp {
     bitmap: {
       data: Buffer;
@@ -58,15 +65,15 @@ declare module 'jimp' {
     contrast(contrast: number): Jimp;
     crop(x: number, y: number, width: number, height: number): Jimp;
   }
-  
+
   export function read(path: string | Buffer): Promise<Jimp>;
   export function create(width: number, height: number, color?: string): Jimp;
-  
+
   export const MIME_PNG: string;
   export const MIME_JPEG: string;
 }
 
-declare module 'ml-matrix' {
+declare module "ml-matrix" {
   export class Matrix {
     constructor(rows: number, columns: number);
     static from2DArray(array: number[][]): Matrix;
@@ -78,7 +85,7 @@ declare module 'ml-matrix' {
   }
 }
 
-declare module 'opus-recorder' {
+declare module "opus-recorder" {
   export interface OpusRecorderOptions {
     encoderPath?: string;
     encoderSampleRate?: number;
@@ -92,9 +99,8 @@ declare module 'opus-recorder' {
     resampleQuality?: number;
     bufferLength?: number;
     monitorGain?: number;
-    recordingGain?: number;
   }
-  
+
   export class Recorder {
     constructor(options?: OpusRecorderOptions);
     start(): Promise<void>;
@@ -106,7 +112,7 @@ declare module 'opus-recorder' {
   }
 }
 
-declare module 'fast-xml-parser' {
+declare module "fast-xml-parser" {
   export interface XMLParserOptions {
     ignoreAttributes?: boolean;
     attributeNamePrefix?: string;
@@ -115,12 +121,12 @@ declare module 'fast-xml-parser' {
     parseAttributeValue?: boolean;
     trimValues?: boolean;
   }
-  
+
   export class XMLParser {
     constructor(options?: XMLParserOptions);
     parse(xml: string): any;
   }
-  
+
   export class XMLBuilder {
     constructor(options?: XMLParserOptions);
     build(data: any): string;
