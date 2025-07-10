@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "./components/Header";
 import Controls from "./components/Controls";
 import Features from "./components/Features";
@@ -17,11 +17,11 @@ import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
 import { useRecorder } from "./hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "./types";
 import { offlineAI } from "./services/offlineAI";
-import { videoProcessor } from "./services/videoProcessor";
+
 import { audioProcessor } from "./services/audioProcessor";
-import { imageProcessor } from "./services/imageProcessor";
+
 import { feedbackService } from "./services/feedbackService";
-import { systemTester } from "./services/systemTester";
+
 import { generateFileName } from "./utils";
 
 const App = () => {
