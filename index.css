@@ -630,3 +630,6 @@ video {
   backface-visibility: hidden;
   perspective: 1000px;
 }
+
+/* Visual Patch Lab Styles */
+@import "./src/visualPatchLab.css";
