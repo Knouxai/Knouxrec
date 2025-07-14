@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import LuxuryHeader from "./LuxuryHeader";
 import Controls from "./Controls";
 import Features from "./Features";
