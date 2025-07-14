@@ -13,7 +13,8 @@ interface BackNavigationProps {
       | "templates"
       | "toolbox"
       | "offline-tools"
-      | "visual-patch-lab",
+      | "visual-patch-lab"
+      | "ai-body-editor",
   ) => void;
 }
 
@@ -40,6 +41,8 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
         return "🧠 أدوات أوفلاين";
       case "visual-patch-lab":
         return "🧩 Visual Patch Lab";
+      case "ai-body-editor":
+        return "🔞 AI Body Editor (18+)";
       default:
         return "🏠 KNOUX REC";
     }
@@ -51,6 +54,7 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
     { id: "toolbox", icon: "🛠️", label: "Toolbox" },
     { id: "offline-tools", icon: "🧠", label: "أدوات أوفلاين" },
     { id: "visual-patch-lab", icon: "🧩", label: "Visual Patch" },
+    { id: "ai-body-editor", icon: "🔞", label: "AI Body Editor" },
     { id: "recordings", icon: "🎬", label: "Recordings" },
     { id: "ai", icon: "🧠", label: "AI Tools" },
     { id: "files", icon: "📁", label: "Files" },
