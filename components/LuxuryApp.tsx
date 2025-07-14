@@ -28,6 +28,7 @@ import {
   ToolboxIcon,
   FloatingParticles,
 } from "./LuxuryIcons";
+import { LuxuryBackgroundEffects } from "./LuxuryEffects";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
@@ -270,7 +271,7 @@ const LuxuryApp = () => {
         if (!transcript && settings.aiProcessingEnabled) {
           try {
             const audioLoadingId = feedbackService.loading(
-              "جار استخراج الصوت وتحويله لنص...",
+              "��ار استخراج الصوت وتحويله لنص...",
               0,
             );
             addNotification("جار استخراج الصوت وتحويله لنص...", "info");
