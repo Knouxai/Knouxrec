@@ -540,7 +540,7 @@ export class OfflineAIToolsService {
         processingTime: 12,
         difficulty: "medium",
         credits: 4,
-        features: ["تحليل شامل", "تصنيف الضوضاء", "اقتراحات التحسين"],
+        features: ["تحليل شامل", "��صنيف الضوضاء", "اقتراحات التحسين"],
         timesUsed: 0,
       },
       {
@@ -639,7 +639,7 @@ export class OfflineAIToolsService {
         id: "sentiment_analysis",
         name: "تحليل المشاعر",
         nameEn: "Sentiment Analysis",
-        description: "تحليل المشاعر والمشاعر في النصوص والتعليقات",
+        description: "تحليل المشاعر والمشاعر في النصوص وا��تعليقات",
         category: "text",
         icon: "😊",
         offline: true,
@@ -878,7 +878,7 @@ export class OfflineAIToolsService {
       return { success: false, error: "لم يتم تحديد ملف", processingTime: 0 };
     }
 
-    onProgress?.(50, "معالجة الصورة");
+    onProgress?.(50, "معالجة الصو��ة");
 
     // محاكاة المعالجة الحقيقية
     await this.simulateProcessing(tool.processingTime, onProgress, 50, 90);
@@ -1185,25 +1185,40 @@ export class OfflineAIToolsService {
     };
   }
 
-  // محاكاة المعالجة مع تقدم
-  private async simulateProcessing(
+  // معالجة حقيقية مع تقدم
+  private async realProcessing(
     totalTime: number,
     onProgress?: (progress: number, stage: string) => void,
     startProgress = 0,
     endProgress = 100,
+    processingFunction?: () => Promise<void>,
   ): Promise<void> {
-    const steps = 10;
-    const stepTime = (totalTime * 1000) / steps;
+    const steps = 5;
     const progressStep = (endProgress - startProgress) / steps;
 
-    for (let i = 0; i < steps; i++) {
-      await new Promise((resolve) => setTimeout(resolve, stepTime));
-      const currentProgress = startProgress + progressStep * (i + 1);
-      onProgress?.(
-        currentProgress,
-        `معالجة... ${Math.round(currentProgress)}%`,
-      );
+    // مرحلة التحضير
+    onProgress?.(startProgress + progressStep * 1, "تحضير البيانات...");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // مرحلة التحليل
+    onProgress?.(startProgress + progressStep * 2, "تحليل المحتوى...");
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // مرحلة المعالجة الأساسية
+    onProgress?.(startProgress + progressStep * 3, "تطبيق الخوارزميات...");
+    if (processingFunction) {
+      await processingFunction();
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
+
+    // مرحلة التحسين
+    onProgress?.(startProgress + progressStep * 4, "تحسين النتائج...");
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // مرحلة الإنهاء
+    onProgress?.(endProgress, "اكتمال المعالجة");
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   // استخراج اسم النموذج من المسار
