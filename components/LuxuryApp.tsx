@@ -35,11 +35,8 @@ import AutoAllocationCoordinator from "./AutoAllocationCoordinator";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
-import { videoProcessor } from "../services/videoProcessor";
 import { audioProcessor } from "../services/audioProcessor";
-import { imageProcessor } from "../services/imageProcessor";
 import { feedbackService } from "../services/feedbackService";
-import { systemTester } from "../services/systemTester";
 import {
   enhancedModelManager,
   LoadingProgress,
