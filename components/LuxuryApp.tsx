@@ -674,6 +674,21 @@ const LuxuryApp = () => {
           </button>
 
           <button
+            onClick={() => setCurrentView("knoux-morph-core")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group cosmic-glow border-2 border-purple-500/50"
+          >
+            <div className="mb-3">
+              <div className="text-5xl mx-auto text-purple-400">🧱</div>
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1 text-purple-300">
+              Knoux MorphCore™
+            </div>
+            <div className="luxury-text text-sm opacity-70 text-purple-400">
+              50 أداة محلية • بدون AI
+            </div>
+          </button>
+
+          <button
             onClick={() => setCurrentView("ai-body-editor")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group electric-effect border-2 border-red-500/50"
           >
