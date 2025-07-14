@@ -13,6 +13,7 @@ import FileManager from "./components/FileManager";
 import BackNavigation from "./components/BackNavigation";
 import TemplatesPanel from "./components/TemplatesPanel";
 import ToolboxPanel from "./components/ToolboxPanel";
+import OfflineAIToolsPanel from "./components/OfflineAIToolsPanel";
 import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./components/AdvancedProgressIndicator";
 import AdvancedModelSettings from "./components/AdvancedModelSettings";
@@ -45,6 +46,7 @@ const App = () => {
     | "files"
     | "templates"
     | "toolbox"
+    | "offline-tools"
     | "elysian"
   >("main");
   const [settings, setSettings] = useState<RecordingSettings>({
@@ -603,6 +605,17 @@ const App = () => {
           </button>
 
           <button
+            onClick={() => setCurrentView("offline-tools")}
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 border border-purple-500/30"
+          >
+            <div className="text-3xl mb-2">🧠</div>
+            <div className="font-orbitron font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              أدوات أوفلاين
+            </div>
+            <div className="text-sm text-white/70">38 أداة ذكية</div>
+          </button>
+
+          <button
             onClick={() => setCurrentView("elysian")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 border border-purple-500/30"
           >
@@ -759,6 +772,12 @@ const App = () => {
               recordings={recordings}
               onDeleteRecording={handleDeleteRecording}
             />
+          </div>
+        );
+      case "offline-tools":
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <OfflineAIToolsPanel />
           </div>
         );
       case "elysian":
