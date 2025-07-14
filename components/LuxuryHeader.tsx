@@ -89,7 +89,7 @@ const LuxuryHeader: React.FC<LuxuryHeaderProps> = ({
                     <div className="wave-bar"></div>
                     <div className="wave-bar"></div>
                   </div>
-                  <span className="luxury-text text-sm opacity-60">
+                  <span className="luxury-text-ar text-sm opacity-60">
                     مدعوم بالذكاء الاصطناعي
                   </span>
                 </div>
