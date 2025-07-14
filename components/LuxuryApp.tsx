@@ -160,7 +160,7 @@ const LuxuryApp = () => {
           0,
         );
         addNotification(
-          `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
+          `جار المعالجة بالذكاء الاصط��اعي لـ "${recording.name}"...`,
           "info",
         );
 
@@ -437,7 +437,7 @@ const LuxuryApp = () => {
       }
     } catch (error) {
       feedbackService.error(
-        `خطأ في التقاط لقطة الشاشة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+        `خطأ في التقاط لقطة ا��شاشة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
       );
     }
   }, [recorderActions]);
@@ -873,7 +873,7 @@ const LuxuryApp = () => {
         onNotificationsClick={() => setIsNotificationsOpen((p) => !p)}
         notificationCount={notifications.length}
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={(view: string) => setCurrentView(view as any)}
       />
 
       {/* Notifications */}
