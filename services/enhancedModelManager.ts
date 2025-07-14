@@ -165,7 +165,7 @@ export class EnhancedModelManager {
         requiredMemory: 256,
         maxConcurrent: 1,
         chunkSize: 10,
-        fallbackAvailable: false,
+        fallbackAvailable: true,
       },
     ],
     [
@@ -191,7 +191,7 @@ export class EnhancedModelManager {
         requiredMemory: 280,
         maxConcurrent: 1,
         chunkSize: 15,
-        fallbackAvailable: false,
+        fallbackAvailable: true,
       },
     ],
     [
@@ -522,7 +522,7 @@ export class EnhancedModelManager {
       return model;
     } catch (error) {
       if (config.fallbackAvailable) {
-        console.warn(`فشل تحميل ${modelName}, استخدام النمو��ج الاحتياطي...`);
+        console.warn(`فشل تحميل ${modelName}, استخدام النموذج الاحتياطي...`);
         return this.createFallbackModel(modelName, config);
       }
       throw error;
@@ -567,7 +567,7 @@ export class EnhancedModelManager {
           dummyInput = tf.zeros([1, 10]);
       }
 
-      // ��شغيل تجريبي
+      // تشغيل تجريبي
       const output = model.predict(dummyInput) as tf.Tensor;
       output.dispose();
       dummyInput.dispose();
@@ -706,7 +706,7 @@ export class EnhancedModelManager {
     return available >= requiredMemory;
   }
 
-  // تحرير ذاكرة للنموذج الجديد
+  // تحرير ذ��كرة للنموذج الجديد
   private async freeMemoryForModel(config: ModelConfig): Promise<void> {
     const sortedModels = Array.from(this.modelCache.entries()).sort(
       ([, a], [, b]) => {
