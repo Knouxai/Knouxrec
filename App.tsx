@@ -14,6 +14,7 @@ import BackNavigation from "./components/BackNavigation";
 import TemplatesPanel from "./components/TemplatesPanel";
 import ToolboxPanel from "./components/ToolboxPanel";
 import OfflineAIToolsPanel from "./components/OfflineAIToolsPanel";
+import VisualPatchLabPanel from "./components/VisualPatchLabPanel";
 import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./components/AdvancedProgressIndicator";
 import AdvancedModelSettings from "./components/AdvancedModelSettings";
@@ -47,6 +48,7 @@ const App = () => {
     | "templates"
     | "toolbox"
     | "offline-tools"
+    | "visual-patch-lab"
     | "elysian"
   >("main");
   const [settings, setSettings] = useState<RecordingSettings>({
@@ -616,6 +618,17 @@ const App = () => {
           </button>
 
           <button
+            onClick={() => setCurrentView("visual-patch-lab")}
+            className="glass-card interactive p-6 rounded-2xl text-center hover:bg-gradient-to-r hover:from-indigo-500/20 hover:to-purple-500/20 transition-all duration-300 border border-indigo-500/30"
+          >
+            <div className="text-3xl mb-2">🧩</div>
+            <div className="font-orbitron font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              Visual Patch Lab
+            </div>
+            <div className="text-sm text-white/70">50 أداة تحرير</div>
+          </button>
+
+          <button
             onClick={() => setCurrentView("elysian")}
             className="glass-card interactive p-6 rounded-2xl text-center hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 border border-purple-500/30"
           >
@@ -780,6 +793,8 @@ const App = () => {
             <OfflineAIToolsPanel />
           </div>
         );
+      case "visual-patch-lab":
+        return <VisualPatchLabPanel />;
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
       default:
