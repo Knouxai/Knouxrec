@@ -562,7 +562,7 @@ export class EnhancedModelManager {
     }
   }
 
-  // إنشاء نموذج احتياطي
+  // إنشاء نمو��ج احتياطي
   private async createFallbackModel(
     modelName: string,
     config: ModelConfig,
@@ -627,6 +627,24 @@ export class EnhancedModelManager {
         });
 
       case "enhancement":
+        // نموذج خاص لـ RNNoise - تقليل الضوضاء الصوتية
+        if (modelName === "rnnoise") {
+          return tf.sequential({
+            layers: [
+              tf.layers.dense({
+                inputShape: [480], // 30ms @ 16kHz
+                units: 128,
+                activation: "relu",
+              }),
+              tf.layers.dropout({ rate: 0.2 }),
+              tf.layers.dense({ units: 64, activation: "relu" }),
+              tf.layers.dense({ units: 32, activation: "relu" }),
+              tf.layers.dense({ units: 480, activation: "tanh" }), // output audio
+            ],
+          });
+        }
+
+        // نموذج عام للتحسين (للصور)
         return tf.sequential({
           layers: [
             tf.layers.conv2d({
