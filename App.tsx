@@ -196,7 +196,7 @@ const App = () => {
               feedbackService.dismiss(loadingId);
               addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
             } else if (task.status === "processing") {
-              // استمرار المراقبة
+              // استمر��ر المراقبة
               setTimeout(checkTaskStatus, 2000);
             }
           }
@@ -253,7 +253,7 @@ const App = () => {
           ],
         });
 
-        // بدء المعالجة الذكية التلقائ��ة إذا كانت مفعلة
+        // بدء المعالجة الذكية التلقائية إذا كانت مفعلة
         if (newRecording.isProcessing && transcript) {
           runAiProcessing(newRecording);
         }
@@ -807,6 +807,16 @@ const App = () => {
         setTheme={setTheme}
         settings={settings}
         onSave={onSettingsSave}
+      />
+
+      {/* Advanced Model Settings */}
+      <AdvancedModelSettings
+        isOpen={isAdvancedSettingsOpen}
+        onClose={() => setIsAdvancedSettingsOpen(false)}
+        onSave={(modelSettings) => {
+          console.log("حُفظت إعدادات النماذج:", modelSettings);
+          addNotification("تم حفظ إعدادات النماذج المتقدمة!", "success");
+        }}
       />
 
       {/* Trim Modal */}
