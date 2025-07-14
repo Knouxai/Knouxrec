@@ -136,7 +136,7 @@ const LuxuryApp = () => {
     async (recording: Recording) => {
       if (!recording.transcript || recording.transcript.trim().length < 10) {
         addNotification(
-          `تم تخطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
+          `تم ��خطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
           "info",
         );
         setRecordings((prev) =>
@@ -191,7 +191,7 @@ const LuxuryApp = () => {
               );
               feedbackService.dismiss(loadingId);
               addNotification(
-                `ا��تمل التحليل الذكي لـ "${recording.name}"`,
+                `اكتمل التحليل الذكي لـ "${recording.name}"`,
                 "success",
               );
             } else if (task.status === "error") {
@@ -225,7 +225,7 @@ const LuxuryApp = () => {
               ? {
                   ...r,
                   isProcessing: false,
-                  summary: `فشل التحليل ا��ذكي: ${errorMessage}`,
+                  summary: `فشل التحليل الذكي: ${errorMessage}`,
                 }
               : r,
           ),
@@ -346,7 +346,7 @@ const LuxuryApp = () => {
 
       if (usagePercentage > 90) {
         addNotification(
-          "تحذير: الذاكرة ممتلئة تقريباً! قد يتم إلغاء تحميل بعض النماذج تلق��ئياً.",
+          "تحذير: الذاكرة ممتلئة تقريباً! قد يتم إلغاء تحميل بعض النماذج تلقائياً.",
           "warning",
         );
       } else if (usagePercentage > 80) {
@@ -390,7 +390,7 @@ const LuxuryApp = () => {
   const onSettingsSave = (newSettings: RecordingSettings) => {
     handleSettingsChange(newSettings);
     addNotification("Settings saved!", "success");
-    feedbackService.success("تم حفظ الإعدا��ات بنجاح! ⚙️");
+    feedbackService.success("تم حفظ الإعدادات بنجاح! ⚙️");
   };
 
   const handleDeleteRecording = (id: string) => {
@@ -662,7 +662,7 @@ const LuxuryApp = () => {
               <FilesIcon size={48} className="mx-auto" />
             </div>
             <div className="luxury-text font-bold text-lg mb-1">
-              إدارة الم��ف��ت
+              إدارة الملف��ت
             </div>
             <div className="luxury-text text-sm opacity-70">File Manager</div>
           </button>
@@ -823,6 +823,9 @@ const LuxuryApp = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative luxury-arabic">
+      {/* تحسينات الواجهة الشاملة */}
+      <UIEnhancer />
+
       {/* التأثيرات البصرية الفاخرة */}
       <LuxuryBackgroundEffects
         effects={["starfield", "orbs", "waves"]}
