@@ -29,6 +29,7 @@ import {
   FloatingParticles,
 } from "./LuxuryIcons";
 import { LuxuryBackgroundEffects } from "./LuxuryEffects";
+import UIEnhancer from "./UIEnhancer";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
@@ -144,7 +145,7 @@ const LuxuryApp = () => {
               ? {
                   ...r,
                   isProcessing: false,
-                  summary: "لم يتم اك��شاف كلام واضح.",
+                  summary: "لم يتم اكتشاف كلام واضح.",
                 }
               : r,
           ),
@@ -190,7 +191,7 @@ const LuxuryApp = () => {
               );
               feedbackService.dismiss(loadingId);
               addNotification(
-                `اكتمل التحليل الذكي لـ "${recording.name}"`,
+                `ا��تمل التحليل الذكي لـ "${recording.name}"`,
                 "success",
               );
             } else if (task.status === "error") {
@@ -224,7 +225,7 @@ const LuxuryApp = () => {
               ? {
                   ...r,
                   isProcessing: false,
-                  summary: `فشل التحليل الذكي: ${errorMessage}`,
+                  summary: `فشل التحليل ا��ذكي: ${errorMessage}`,
                 }
               : r,
           ),
@@ -345,7 +346,7 @@ const LuxuryApp = () => {
 
       if (usagePercentage > 90) {
         addNotification(
-          "تحذير: الذاكرة ممتلئة تقريباً! قد يتم إلغاء تحميل بعض النماذج تلقائياً.",
+          "تحذير: الذاكرة ممتلئة تقريباً! قد يتم إلغاء تحميل بعض النماذج تلق��ئياً.",
           "warning",
         );
       } else if (usagePercentage > 80) {
@@ -389,7 +390,7 @@ const LuxuryApp = () => {
   const onSettingsSave = (newSettings: RecordingSettings) => {
     handleSettingsChange(newSettings);
     addNotification("Settings saved!", "success");
-    feedbackService.success("تم حفظ الإعدادات بنجاح! ⚙️");
+    feedbackService.success("تم حفظ الإعدا��ات بنجاح! ⚙️");
   };
 
   const handleDeleteRecording = (id: string) => {
@@ -624,7 +625,7 @@ const LuxuryApp = () => {
             <div className="luxury-text font-bold text-lg mb-1 neon-glow">
               أدوات أوفلاين
             </div>
-            <div className="luxury-text text-sm opacity-70">38 أدا�� ذكية</div>
+            <div className="luxury-text text-sm opacity-70">38 أداة ذكية</div>
           </button>
 
           <button
@@ -661,7 +662,7 @@ const LuxuryApp = () => {
               <FilesIcon size={48} className="mx-auto" />
             </div>
             <div className="luxury-text font-bold text-lg mb-1">
-              إدارة الملف��ت
+              إدارة الم��ف��ت
             </div>
             <div className="luxury-text text-sm opacity-70">File Manager</div>
           </button>
