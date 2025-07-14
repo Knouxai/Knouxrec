@@ -7,6 +7,7 @@ import {
   allocationTester,
   VerificationReport,
 } from "../services/allocationTester";
+import { QuickPackager, PackagingResult } from "../services/exePackager";
 
 interface AutoAllocationCoordinatorProps {
   onComplete?: (report: VerificationReport) => void;
@@ -26,6 +27,8 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
   >([]);
   const [verificationReport, setVerificationReport] =
     useState<VerificationReport | null>(null);
+  const [packagingResult, setPackagingResult] =
+    useState<PackagingResult | null>(null);
   const [progress, setProgress] = useState(0);
   const [currentSection, setCurrentSection] = useState("");
 
@@ -169,7 +172,7 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
 
     console.log("\n" + "=".repeat(80));
     console.log("🎉 تم إنجاز التخصيص التلقائي الذكي بنجاح!");
-    console.log("📦 جميع المك��نات جاهزة للتشغيل والتغليف في ملف EXE");
+    console.log("📦 جميع المكونات جاهزة للتشغيل والتغليف في ملف EXE");
     console.log("=".repeat(80) + "\n");
   };
 
@@ -217,7 +220,7 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
             ? "التخصيص التلقائي جارٍ..."
             : phase === "testing"
               ? "اختبار المكونات..."
-              : "اكتمل التخصيص بنجاح!"}
+              : "اكتمل التخصيص ��نجاح!"}
         </h2>
         <p className="text-white/70">{currentSection}</p>
       </div>
@@ -413,14 +416,34 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
               📊 عرض التقرير التفصيلي
             </button>
             <button
-              onClick={() => {
-                // هنا يمكن إضافة منطق التغليف في EXE
-                console.log("🎉 جاهز للتغليف في ملف EXE!");
-                alert("جميع المكونات جاهزة للتغليف والتثبيت!");
+              onClick={async () => {
+                try {
+                  setCurrentSection("جاري التغليف في ملف EXE...");
+                  setIsRunning(true);
+
+                  const result = await QuickPackager.packageKnouxRec();
+                  setPackagingResult(result);
+
+                  if (result.success) {
+                    setCurrentSection("تم التغليف بنجاح!");
+                    alert(
+                      "🎉 تم تغليف KNOUX REC في ملف EXE بنجاح!\n\nالملف جاهز للتوزيع والتثبيت.",
+                    );
+                  } else {
+                    setCurrentSection("فشل في التغليف");
+                    alert("❌ فشل في تغليف التطبيق: " + result.error);
+                  }
+                } catch (error) {
+                  setCurrentSection("خطأ في التغليف");
+                  alert("❌ خطأ غير متوقع في التغليف");
+                } finally {
+                  setIsRunning(false);
+                }
               }}
-              className="px-6 py-3 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded-xl font-bold text-white hover:scale-105 transition-all"
+              disabled={isRunning}
+              className="px-6 py-3 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded-xl font-bold text-white hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              📦 تغليف في EXE
+              {isRunning ? "⏳ جاري التغليف..." : "📦 تغليف في EXE"}
             </button>
           </div>
         </div>
