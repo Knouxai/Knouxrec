@@ -44,6 +44,8 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
         return "🧩 Visual Patch Lab";
       case "ai-body-editor":
         return "🔞 AI Body Editor (18+)";
+      case "knoux-morph-core":
+        return "🧱 Knoux MorphCore™ - Offline Visual Patch Lab";
       default:
         return "🏠 KNOUX REC";
     }
