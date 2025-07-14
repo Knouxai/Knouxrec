@@ -32,6 +32,7 @@ import {
 import { LuxuryBackgroundEffects } from "./LuxuryEffects";
 import UIEnhancer from "./UIEnhancer";
 import AutoAllocationCoordinator from "./AutoAllocationCoordinator";
+import RealContentManager from "./RealContentManager";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
@@ -106,6 +107,7 @@ const LuxuryApp = () => {
   const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
   const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
   const [showAutoAllocation, setShowAutoAllocation] = useState(false);
+  const [showRealContent, setShowRealContent] = useState(false);
 
   const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
@@ -160,7 +162,7 @@ const LuxuryApp = () => {
           0,
         );
         addNotification(
-          `جار المعالجة بالذكاء الاصط��اعي لـ "${recording.name}"...`,
+          `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
           "info",
         );
 
@@ -437,7 +439,7 @@ const LuxuryApp = () => {
       }
     } catch (error) {
       feedbackService.error(
-        `خطأ في التقاط لقطة ا��شاشة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+        `خطأ في التقاط لقطة الشاشة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
       );
     }
   }, [recorderActions]);
