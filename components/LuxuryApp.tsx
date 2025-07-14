@@ -970,20 +970,39 @@ const LuxuryApp = () => {
         </div>
       )}
 
-      {/* Auto-Allocation Floating Button */}
-      {currentView === "main" && !showAutoAllocation && (
-        <button
-          onClick={() => setShowAutoAllocation(true)}
-          className="fixed bottom-6 right-6 z-40 p-4 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded-full text-white font-bold shadow-lg hover:scale-110 transition-all duration-300 group"
-          title="التخصيص التلقائي الذكي"
-        >
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">🤖</span>
-            <span className="hidden group-hover:block text-sm whitespace-nowrap">
-              تخصيص ذكي
-            </span>
-          </div>
-        </button>
+      {/* Floating Action Buttons */}
+      {currentView === "main" && (
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col space-y-3">
+          {/* Real Content Button */}
+          <button
+            onClick={() => setCurrentView("real-content")}
+            className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full text-white font-bold shadow-lg hover:scale-110 transition-all duration-300 group"
+            title="المحتوى الحقيقي للمستخدم"
+          >
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">🎆</span>
+              <span className="hidden group-hover:block text-sm whitespace-nowrap">
+                محتوى حقيقي
+              </span>
+            </div>
+          </button>
+
+          {/* Auto-Allocation Button */}
+          {!showAutoAllocation && (
+            <button
+              onClick={() => setShowAutoAllocation(true)}
+              className="p-4 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded-full text-white font-bold shadow-lg hover:scale-110 transition-all duration-300 group"
+              title="التخصيص التلقائي الذكي"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl">🤖</span>
+                <span className="hidden group-hover:block text-sm whitespace-nowrap">
+                  تخصيص ذكي
+                </span>
+              </div>
+            </button>
+          )}
+        </div>
       )}
 
       {/* Main Content */}
