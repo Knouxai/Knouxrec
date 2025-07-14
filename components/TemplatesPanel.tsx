@@ -25,6 +25,27 @@ const TemplatesPanel: React.FC = () => {
   );
   const [showPreview, setShowPreview] = useState(false);
 
+  // Helper function to convert CSS string to React style object
+  const getPreviewStyle = (cssString: string): React.CSSProperties => {
+    const styles: React.CSSProperties = {};
+
+    // Split by semicolon and parse each property
+    const declarations = cssString.split(";").filter((d) => d.trim());
+
+    declarations.forEach((declaration) => {
+      const [property, value] = declaration.split(":").map((s) => s.trim());
+      if (property && value) {
+        // Convert kebab-case to camelCase for React
+        const camelCaseProperty = property.replace(/-([a-z])/g, (g) =>
+          g[1].toUpperCase(),
+        );
+        styles[camelCaseProperty as keyof React.CSSProperties] = value;
+      }
+    });
+
+    return styles;
+  };
+
   // قوالب CSS/HTML حقيقية وفعالة
   const realTemplates: RealTemplate[] = [
     {
@@ -142,7 +163,8 @@ const TemplatesPanel: React.FC = () => {
           </div>
         </div>
       `,
-      previewCode: "text-shadow: 0 0 20px #00ff88; border: 2px solid #00ff88;",
+      previewCode:
+        "background: #0a0a0a; color: #00ff88; text-shadow: 0 0 20px #00ff88",
     },
     {
       id: "minimalist-outro-1",
@@ -541,8 +563,8 @@ const TemplatesPanel: React.FC = () => {
             >
               {/* Preview */}
               <div
-                className="h-48 relative overflow-hidden"
-                style={{ background: template.previewCode }}
+                className="h-48 relative overflow-hidden preview-background"
+                style={getPreviewStyle(template.previewCode)}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-white text-center">
