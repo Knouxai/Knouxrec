@@ -183,7 +183,7 @@ export class OfflineAIToolsService {
         id: "toonify_image",
         name: "تحويل إلى رسمة",
         nameEn: "Toonify Image",
-        description: "تحويل الصور ا��حقيقية إلى رسوم متحركة",
+        description: "تحويل الصور الحقيقية إلى رسوم متحرك��",
         category: "image",
         icon: "🎭",
         offline: true,
@@ -421,7 +421,7 @@ export class OfflineAIToolsService {
         id: "separate_audio",
         name: "فصل الصوت والموسيقى",
         nameEn: "Audio Separation",
-        description: "فصل الأصوات والآلات الموسيقية باستخدا�� Spleeter",
+        description: "فصل الأصوات والآلات الموسيقية باستخدام Spleeter",
         category: "audio",
         icon: "🎵",
         offline: true,
@@ -486,7 +486,7 @@ export class OfflineAIToolsService {
         processingTime: 20,
         difficulty: "medium",
         credits: 6,
-        features: ["دقة عالية", "لغات متعددة", "توقيت��ت دقيقة"],
+        features: ["دقة عالية", "لغات متعددة", "توقيتات دقيقة"],
         timesUsed: 0,
       },
       {
@@ -621,7 +621,7 @@ export class OfflineAIToolsService {
         id: "text_summarizer",
         name: "ملخص النصوص",
         nameEn: "Text Summarizer",
-        description: "تلخيص النصوص الطويلة والوثائق تلقائياً",
+        description: "تلخيص النصوص الطويل�� والوثائق تلقائياً",
         category: "text",
         icon: "📋",
         offline: true,
@@ -655,7 +655,7 @@ export class OfflineAIToolsService {
       },
       {
         id: "local_speech_to_text",
-        name: "تحويل ��لكلام المحلي",
+        name: "تحويل الكلام المحلي",
         nameEn: "Local Speech to Text",
         description: "تحويل الكلام إلى نص بشكل محلي وسريع",
         category: "text",
@@ -813,7 +813,7 @@ export class OfflineAIToolsService {
         };
       }
 
-      onProgress?.(30, "معالجة البيانات");
+      onProgress?.(30, "معالجة البيان��ت");
 
       // تنفيذ الأداة حسب النوع
       let result: ToolExecutionResult;
@@ -940,7 +940,7 @@ export class OfflineAIToolsService {
     }
 
     onProgress?.(50, "معالجة الفيديو");
-    await this.simulateProcessing(tool.processingTime, onProgress, 50, 90);
+    await this.realProcessing(tool.processingTime, onProgress, 50, 90);
 
     // إنشاء نتيجة JSON تجريبية
     const result = {
@@ -1107,7 +1107,7 @@ export class OfflineAIToolsService {
         result = {
           prompt: inputText,
           generatedText:
-            "هذا نص مولد تلقائياً بناءً على المدخل المعطى. يستخدم نماذج الذكاء الاصطناعي المحلية لإنتاج محتوى ذو جودة عالية ومناسب للسياق.",
+            "هذا نص مولد تلقائياً بناءً على المدخل الم��طى. يستخدم نماذج الذكاء الاصطناعي المحلية لإنتاج محتوى ذو جودة عالية ومناسب للسياق.",
           creativity: 0.8,
           length: 150,
         };
