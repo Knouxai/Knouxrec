@@ -317,7 +317,7 @@ const TemplatesPanel: React.FC = () => {
             <h1 class="edu-title">عنوان الدرس</h1>
             <ul class="edu-points">
               <li style="--delay: 0s">النقطة الأولى المهمة</li>
-              <li style="--delay: 0.2s">النقطة الثانية</li>
+              <li style="--delay: 0.2s">النقطة ا��ثانية</li>
               <li style="--delay: 0.4s">النقطة الثالثة</li>
               <li style="--delay: 0.6s">الخلاصة والتطبيق</li>
             </ul>
@@ -542,8 +542,8 @@ const TemplatesPanel: React.FC = () => {
             >
               {/* Preview */}
               <div
-                className="h-48 relative overflow-hidden"
-                style={{ background: template.previewCode }}
+                className="h-48 relative overflow-hidden preview-background"
+                style={getPreviewStyle(template.previewCode)}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-white text-center">
