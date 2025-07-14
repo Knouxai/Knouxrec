@@ -14,7 +14,8 @@ interface BackNavigationProps {
       | "toolbox"
       | "offline-tools"
       | "visual-patch-lab"
-      | "ai-body-editor",
+      | "ai-body-editor"
+      | "knoux-morph-core",
   ) => void;
 }
 
