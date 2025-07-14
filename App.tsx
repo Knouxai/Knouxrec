@@ -196,7 +196,7 @@ const App = () => {
               feedbackService.dismiss(loadingId);
               addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
             } else if (task.status === "processing") {
-              // استمر��ر المراقبة
+              // استمرار المراقبة
               setTimeout(checkTaskStatus, 2000);
             }
           }
@@ -781,6 +781,17 @@ const App = () => {
 
       {/* Header */}
       <div className="relative z-20">
+        {/* Advanced Settings Button */}
+        <div className="absolute top-4 left-4 z-30">
+          <button
+            onClick={() => setIsAdvancedSettingsOpen(true)}
+            className="glass-card interactive p-3 rounded-xl hover:bg-white/10 transition-all duration-200"
+            title="إعدادات النماذج المتقدمة"
+          >
+            <div className="text-white/80 hover:text-white text-lg">⚙️</div>
+          </button>
+        </div>
+
         <Header
           isRecording={recorderState.isRecording}
           onSettingsClick={() => setIsSettingsOpen(true)}
