@@ -31,6 +31,7 @@ import {
 } from "./LuxuryIcons";
 import { LuxuryBackgroundEffects } from "./LuxuryEffects";
 import UIEnhancer from "./UIEnhancer";
+import AutoAllocationCoordinator from "./AutoAllocationCoordinator";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
@@ -107,6 +108,7 @@ const LuxuryApp = () => {
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress[]>([]);
   const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
   const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
+  const [showAutoAllocation, setShowAutoAllocation] = useState(false);
 
   const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
@@ -220,7 +222,7 @@ const LuxuryApp = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
-        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
+        addNotification(`��شل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
             r.id === recording.id
