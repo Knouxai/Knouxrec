@@ -633,3 +633,6 @@ video {
 
 /* Visual Patch Lab Styles */
 @import "./src/visualPatchLab.css";
+
+/* Luxury Styles */
+@import "./src/luxuryStyles.css";
