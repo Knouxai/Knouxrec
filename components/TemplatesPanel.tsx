@@ -142,7 +142,8 @@ const TemplatesPanel: React.FC = () => {
           </div>
         </div>
       `,
-      previewCode: "text-shadow: 0 0 20px #00ff88; border: 2px solid #00ff88;",
+      previewCode:
+        "background: #0a0a0a; color: #00ff88; text-shadow: 0 0 20px #00ff88",
     },
     {
       id: "minimalist-outro-1",
