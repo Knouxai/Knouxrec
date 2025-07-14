@@ -402,7 +402,21 @@ export class EnhancedModelManager {
     }
 
     // محاولة التحميل الاحتياطي
-    return this.loadFallbackModel(modelName);
+    const fallbackSuccess = await this.loadFallbackModel(modelName);
+
+    if (!fallbackSuccess) {
+      console.error(
+        `فشل تحميل النموذج ${modelName} والنموذج الاحتياطي غير متاح`,
+      );
+      this.updateProgress(
+        modelName,
+        0,
+        "error",
+        new Error(`لا يمكن تحميل النموذج ${modelName}`),
+      );
+    }
+
+    return fallbackSuccess;
   }
 
   // تحميل نموذج مع مراقبة التقدم
@@ -508,7 +522,7 @@ export class EnhancedModelManager {
       return model;
     } catch (error) {
       if (config.fallbackAvailable) {
-        console.warn(`فشل تحميل ${modelName}, استخدام النموذج الاحتياطي...`);
+        console.warn(`فشل تحميل ${modelName}, استخدام النمو��ج الاحتياطي...`);
         return this.createFallbackModel(modelName, config);
       }
       throw error;
@@ -553,7 +567,7 @@ export class EnhancedModelManager {
           dummyInput = tf.zeros([1, 10]);
       }
 
-      // تشغيل تجريبي
+      // ��شغيل تجريبي
       const output = model.predict(dummyInput) as tf.Tensor;
       output.dispose();
       dummyInput.dispose();
