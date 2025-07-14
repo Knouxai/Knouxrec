@@ -62,6 +62,7 @@ const LuxuryApp = () => {
     | "offline-tools"
     | "visual-patch-lab"
     | "ai-body-editor"
+    | "knoux-morph-core"
     | "elysian"
     | "real-content"
   >("main");
