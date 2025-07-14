@@ -220,7 +220,7 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
             ? "التخصيص التلقائي جارٍ..."
             : phase === "testing"
               ? "اختبار المكونات..."
-              : "اكتمل التخصيص ��نجاح!"}
+              : "اكتمل التخصيص بنجاح!"}
         </h2>
         <p className="text-white/70">{currentSection}</p>
       </div>
@@ -391,6 +391,84 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
               </div>
             </div>
           )}
+
+          {/* Packaging Results */}
+          {packagingResult && (
+            <div className="glass-card p-4 rounded-lg border border-knoux-purple/20">
+              <h4 className="font-rajdhani font-bold text-white mb-3">
+                {packagingResult.success
+                  ? "📦 نتائج التغليف الناجح"
+                  : "❌ فشل التغليف"}
+              </h4>
+
+              {packagingResult.success ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-white/70">مسار الملف:</span>
+                      <div className="text-knoux-neon font-mono text-xs mt-1 break-all">
+                        {packagingResult.outputPath}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-white/70">حجم الملف:</span>
+                      <div className="text-white font-medium">
+                        {packagingResult.fileSize
+                          ? (
+                              packagingResult.fileSize /
+                              1024 /
+                              1024 /
+                              1024
+                            ).toFixed(2) + " GB"
+                          : "غير محدد"}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-white/70">وقت التغليف:</span>
+                      <div className="text-white font-medium">
+                        {(packagingResult.packagingTime / 1000).toFixed(1)}{" "}
+                        ثانية
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-white/70">المكونات:</span>
+                      <div className="text-white font-medium">
+                        {packagingResult.manifest?.components.length || 0} مكون
+                      </div>
+                    </div>
+                  </div>
+
+                  {packagingResult.warnings.length > 0 && (
+                    <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                      <div className="text-yellow-400 font-medium mb-2">
+                        ⚠️ تحذيرات:
+                      </div>
+                      {packagingResult.warnings.map((warning, index) => (
+                        <div key={index} className="text-yellow-300 text-xs">
+                          • {warning}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="text-green-400 font-medium text-center">
+                      🎉 التطبيق جاهز للتوزيع والتثبيت!
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-red-300 text-sm">
+                  <div className="mb-2">خطأ: {packagingResult.error}</div>
+                  {packagingResult.warnings.length > 0 && (
+                    <div className="text-yellow-300">
+                      تحذيرات: {packagingResult.warnings.join(", ")}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -407,7 +485,7 @@ const AutoAllocationCoordinator: React.FC<AutoAllocationCoordinatorProps> = ({
               }}
               className="px-6 py-3 bg-gray-500/20 hover:bg-gray-500/40 rounded-xl text-white font-medium transition-all"
             >
-              إعادة تشغيل
+              إ��ادة تشغيل
             </button>
             <button
               onClick={generateConsoleReport}
