@@ -75,10 +75,10 @@ const LuxuryHeader: React.FC<LuxuryHeaderProps> = ({
               </div>
 
               <div>
-                <h1 className="luxury-title text-4xl font-bold mb-2">
+                <h1 className="luxury-title-ar text-4xl font-bold mb-2">
                   KNOUX REC
                 </h1>
-                <p className="luxury-text text-lg opacity-80">
+                <p className="luxury-subtitle-ar text-lg opacity-80">
                   استوديو التسجيل الاحترافي المتقدم
                 </p>
                 <div className="flex items-center gap-4 mt-2">
