@@ -930,6 +930,48 @@ const LuxuryApp = () => {
         />
       )}
 
+      {/* Auto-Allocation Modal */}
+      {showAutoAllocation && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-6xl max-h-[90vh] overflow-auto">
+            <AutoAllocationCoordinator
+              autoStart={true}
+              onComplete={(report) => {
+                console.log("تم الانتهاء من التخصيص التلقائي:", report);
+                addNotification(
+                  "تم إنجاز التخصيص التلقائي الذكي بنجاح!",
+                  "success",
+                );
+              }}
+            />
+            <div className="text-center mt-4">
+              <button
+                onClick={() => setShowAutoAllocation(false)}
+                className="px-6 py-3 bg-gray-500/20 hover:bg-gray-500/40 rounded-xl text-white font-medium transition-all"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auto-Allocation Floating Button */}
+      {currentView === "main" && !showAutoAllocation && (
+        <button
+          onClick={() => setShowAutoAllocation(true)}
+          className="fixed bottom-6 right-6 z-40 p-4 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded-full text-white font-bold shadow-lg hover:scale-110 transition-all duration-300 group"
+          title="التخصيص التلقائي الذكي"
+        >
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl">🤖</span>
+            <span className="hidden group-hover:block text-sm whitespace-nowrap">
+              تخصيص ذكي
+            </span>
+          </div>
+        </button>
+      )}
+
       {/* Main Content */}
       {renderContent()}
     </div>
