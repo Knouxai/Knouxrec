@@ -25,6 +25,27 @@ const TemplatesPanel: React.FC = () => {
   );
   const [showPreview, setShowPreview] = useState(false);
 
+  // Helper function to convert CSS string to React style object
+  const getPreviewStyle = (cssString: string): React.CSSProperties => {
+    const styles: React.CSSProperties = {};
+
+    // Split by semicolon and parse each property
+    const declarations = cssString.split(";").filter((d) => d.trim());
+
+    declarations.forEach((declaration) => {
+      const [property, value] = declaration.split(":").map((s) => s.trim());
+      if (property && value) {
+        // Convert kebab-case to camelCase for React
+        const camelCaseProperty = property.replace(/-([a-z])/g, (g) =>
+          g[1].toUpperCase(),
+        );
+        styles[camelCaseProperty as keyof React.CSSProperties] = value;
+      }
+    });
+
+    return styles;
+  };
+
   // قوالب CSS/HTML حقيقية وفعالة
   const realTemplates: RealTemplate[] = [
     {
@@ -317,7 +338,7 @@ const TemplatesPanel: React.FC = () => {
             <h1 class="edu-title">عنوان الدرس</h1>
             <ul class="edu-points">
               <li style="--delay: 0s">النقطة الأولى المهمة</li>
-              <li style="--delay: 0.2s">النقطة ا��ثانية</li>
+              <li style="--delay: 0.2s">النقطة الثانية</li>
               <li style="--delay: 0.4s">النقطة الثالثة</li>
               <li style="--delay: 0.6s">الخلاصة والتطبيق</li>
             </ul>
