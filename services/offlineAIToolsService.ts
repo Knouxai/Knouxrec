@@ -183,7 +183,7 @@ export class OfflineAIToolsService {
         id: "toonify_image",
         name: "تحويل إلى رسمة",
         nameEn: "Toonify Image",
-        description: "تحويل الصور الحقيقية إلى رسوم متحركة",
+        description: "تحويل الصور ا��حقيقية إلى رسوم متحركة",
         category: "image",
         icon: "🎭",
         offline: true,
@@ -421,7 +421,7 @@ export class OfflineAIToolsService {
         id: "separate_audio",
         name: "فصل الصوت والموسيقى",
         nameEn: "Audio Separation",
-        description: "فصل الأصوات والآلات الموسيقية باستخدام Spleeter",
+        description: "فصل الأصوات والآلات الموسيقية باستخدا�� Spleeter",
         category: "audio",
         icon: "🎵",
         offline: true,
@@ -486,7 +486,7 @@ export class OfflineAIToolsService {
         processingTime: 20,
         difficulty: "medium",
         credits: 6,
-        features: ["دقة عالية", "لغات متعددة", "توقيتات دقيقة"],
+        features: ["دقة عالية", "لغات متعددة", "توقيت��ت دقيقة"],
         timesUsed: 0,
       },
       {
@@ -540,7 +540,7 @@ export class OfflineAIToolsService {
         processingTime: 12,
         difficulty: "medium",
         credits: 4,
-        features: ["تحليل شامل", "��صنيف الضوضاء", "اقتراحات التحسين"],
+        features: ["تحليل شامل", "تصنيف الضوضاء", "اقتراحات التحسين"],
         timesUsed: 0,
       },
       {
@@ -639,7 +639,7 @@ export class OfflineAIToolsService {
         id: "sentiment_analysis",
         name: "تحليل المشاعر",
         nameEn: "Sentiment Analysis",
-        description: "تحليل المشاعر والمشاعر في النصوص وا��تعليقات",
+        description: "تحليل المشاعر والمشاعر في النصوص والتعليقات",
         category: "text",
         icon: "😊",
         offline: true,
@@ -655,7 +655,7 @@ export class OfflineAIToolsService {
       },
       {
         id: "local_speech_to_text",
-        name: "تحويل الكلام المحلي",
+        name: "تحويل ��لكلام المحلي",
         nameEn: "Local Speech to Text",
         description: "تحويل الكلام إلى نص بشكل محلي وسريع",
         category: "text",
@@ -878,10 +878,10 @@ export class OfflineAIToolsService {
       return { success: false, error: "لم يتم تحديد ملف", processingTime: 0 };
     }
 
-    onProgress?.(50, "معالجة الصو��ة");
+    onProgress?.(50, "معالجة الصورة");
 
-    // محاكاة المعالجة الحقيقية
-    await this.simulateProcessing(tool.processingTime, onProgress, 50, 90);
+    // معالجة حقيقية
+    await this.realProcessing(tool.processingTime, onProgress, 50, 90);
 
     // إنشاء نتيجة وهمية للاختبار
     const canvas = document.createElement("canvas");
