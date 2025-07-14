@@ -6,6 +6,7 @@ import {
 } from "../services/offlineAIToolsService";
 import OfflineToolCard from "./OfflineToolCard";
 import ToolExecutionDialog from "./ToolExecutionDialog";
+import ToolSettingsDialog from "./ToolSettingsDialog";
 import { feedbackService } from "../services/feedbackService";
 
 type TabCategory = "all" | "text" | "video" | "image" | "audio" | "analysis";
@@ -17,6 +18,10 @@ const OfflineAIToolsPanel: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [tools, setTools] = useState<OfflineAITool[]>([]);
   const [executionDialog, setExecutionDialog] = useState<{
+    isOpen: boolean;
+    tool: OfflineAITool | null;
+  }>({ isOpen: false, tool: null });
+  const [settingsDialog, setSettingsDialog] = useState<{
     isOpen: boolean;
     tool: OfflineAITool | null;
   }>({ isOpen: false, tool: null });
@@ -116,7 +121,17 @@ const OfflineAIToolsPanel: React.FC = () => {
 
   // معالجة إعدادات الأداة
   const handleToolSettings = (tool: OfflineAITool) => {
-    feedbackService.info(`إعدادات ${tool.name} - قريباً...`);
+    setSettingsDialog({ isOpen: true, tool });
+  };
+
+  // معالجة حفظ الإعدادات
+  const handleSettingsSave = (settings: any) => {
+    feedbackService.success(`تم حفظ إعدادات ${settingsDialog.tool?.name}`);
+    // يمكن حفظ الإعدادات في localStorage أو قاعدة بيانات محلية
+    const toolId = settingsDialog.tool?.id;
+    if (toolId) {
+      localStorage.setItem(`tool_settings_${toolId}`, JSON.stringify(settings));
+    }
   };
 
   // معالجة عرض النتائج
@@ -345,6 +360,14 @@ const OfflineAIToolsPanel: React.FC = () => {
         isOpen={executionDialog.isOpen}
         onClose={() => setExecutionDialog({ isOpen: false, tool: null })}
         onResult={handleExecutionResult}
+      />
+
+      {/* نافذة إعدادات الأداة */}
+      <ToolSettingsDialog
+        tool={settingsDialog.tool}
+        isOpen={settingsDialog.isOpen}
+        onClose={() => setSettingsDialog({ isOpen: false, tool: null })}
+        onSave={handleSettingsSave}
       />
     </div>
   );
