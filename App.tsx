@@ -14,6 +14,9 @@ import BackNavigation from "./components/BackNavigation";
 import TemplatesPanel from "./components/TemplatesPanel";
 import ToolboxPanel from "./components/ToolboxPanel";
 import ElysianCanvas from "./elysian-canvas/ElysianCanvas";
+import AdvancedProgressIndicator from "./components/AdvancedProgressIndicator";
+import AdvancedModelSettings from "./components/AdvancedModelSettings";
+import MemoryMonitor from "./components/MemoryMonitor";
 import { useRecorder } from "./hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "./types";
 import { offlineAI } from "./services/offlineAI";
@@ -22,6 +25,15 @@ import { audioProcessor } from "./services/audioProcessor";
 import { imageProcessor } from "./services/imageProcessor";
 import { feedbackService } from "./services/feedbackService";
 import { systemTester } from "./services/systemTester";
+import {
+  enhancedModelManager,
+  LoadingProgress,
+  MemoryStatus,
+} from "./services/enhancedModelManager";
+import {
+  enhancedErrorHandler,
+  ErrorReport,
+} from "./services/enhancedErrorHandler";
 import { generateFileName } from "./utils";
 
 const App = () => {
@@ -73,6 +85,10 @@ const App = () => {
   const [galleryPlaybackUrl, setGalleryPlaybackUrl] = useState<string | null>(
     null,
   );
+  const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<LoadingProgress[]>([]);
+  const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
+  const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
 
   const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
