@@ -5,6 +5,7 @@ import {
   MorphTool,
   ProcessResult,
 } from "../services/knouxMorphCore";
+import "../styles/morphcore.css";
 
 interface KnouxMorphCorePanelProps {
   onClose?: () => void;
@@ -212,7 +213,7 @@ const KnouxMorphCorePanel: React.FC<KnouxMorphCorePanelProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex">
-      {/* القائمة الجانبية - الأدوات */}
+      {/* القائمة ��لجانبية - الأدوات */}
       <div className="w-80 bg-gradient-to-b from-gray-900 to-black border-r border-purple-500/30 overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
