@@ -124,7 +124,7 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
     },
     { id: "smudge", name: "تلطيخ", icon: "👆", cursor: "grab" },
     { id: "blur", name: "ضبابية", icon: "🌫️", cursor: "crosshair" },
-    { id: "sharpen", name: "وضو��", icon: "🔍", cursor: "crosshair" },
+    { id: "sharpen", name: "وضوح", icon: "🔍", cursor: "crosshair" },
     {
       id: "dodge",
       name: "إضاءة",
@@ -1179,17 +1179,224 @@ export const ElysianCanvas: React.FC<ElysianCanvasProps> = ({ onClose }) => {
           </div>
         )}
 
-        {/* Editor View - Keep existing editor code */}
+        {/* Editor View */}
         {activeView === "editor" && (selectedImage || selectedTemplate) && (
           <div className="editor-view">
-            {/* Keep existing editor implementation */}
+            <div className="editor-header">
+              <h2>🎨 Creative Studio</h2>
+              <p>Transform your vision with professional tools</p>
+            </div>
+
+            <div className="editor-layout">
+              {/* Left Panel - Tools */}
+              <div className="tools-panel">
+                <div className="tool-section">
+                  <h3>🔧 Image Controls</h3>
+
+                  <div className="control-group">
+                    <label>Brightness</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="200"
+                      value={brightness}
+                      onChange={(e) => setBrightness(Number(e.target.value))}
+                      className="slider"
+                    />
+                    <span>{brightness}%</span>
+                  </div>
+
+                  <div className="control-group">
+                    <label>Contrast</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="200"
+                      value={contrast}
+                      onChange={(e) => setContrast(Number(e.target.value))}
+                      className="slider"
+                    />
+                    <span>{contrast}%</span>
+                  </div>
+
+                  <div className="control-group">
+                    <label>Saturation</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="200"
+                      value={saturation}
+                      onChange={(e) => setSaturation(Number(e.target.value))}
+                      className="slider"
+                    />
+                    <span>{saturation}%</span>
+                  </div>
+
+                  <div className="control-group">
+                    <label>Hue Rotate</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="360"
+                      value={hue}
+                      onChange={(e) => setHue(Number(e.target.value))}
+                      className="slider"
+                    />
+                    <span>{hue}°</span>
+                  </div>
+
+                  <div className="control-group">
+                    <label>Blur</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      value={blur}
+                      onChange={(e) => setBlur(Number(e.target.value))}
+                      className="slider"
+                    />
+                    <span>{blur}px</span>
+                  </div>
+
+                  <div className="control-group">
+                    <label>Sepia</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={sepia}
+                      onChange={(e) => setSepia(Number(e.target.value))}
+                      className="slider"
+                    />
+                    <span>{sepia}%</span>
+                  </div>
+                </div>
+
+                <div className="tool-section">
+                  <h3>⚡ Actions</h3>
+                  <div className="action-buttons">
+                    <button
+                      onClick={resetFilters}
+                      className="action-button reset"
+                    >
+                      🔄 Reset
+                    </button>
+                    <button
+                      onClick={downloadImage}
+                      className="action-button download"
+                    >
+                      💾 Download
+                    </button>
+                    <button
+                      onClick={handlePreview}
+                      className="action-button preview"
+                    >
+                      👁️ Preview
+                    </button>
+                  </div>
+                </div>
+
+                {/* Template controls if template is selected */}
+                {selectedTemplate && (
+                  <div className="tool-section">
+                    <h3>🎨 Template Controls</h3>
+                    <MasterSlider
+                      configs={sliderConfigs}
+                      onValueChange={handleSliderChange}
+                      masterIntensity={masterIntensity}
+                      onMasterIntensityChange={setMasterIntensity}
+                      preset={selectedTemplate.name}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Center Panel - Canvas */}
+              <div className="canvas-panel">
+                <div className="canvas-container">
+                  <canvas
+                    ref={imageCanvasRef}
+                    width={800}
+                    height={600}
+                    className="main-canvas"
+                  />
+
+                  {selectedTemplate && (
+                    <canvas
+                      ref={canvasRef}
+                      width={800}
+                      height={600}
+                      className="template-canvas"
+                    />
+                  )}
+                </div>
+
+                <div className="canvas-info">
+                  {selectedImage && (
+                    <div className="image-info">
+                      <span>📸 {selectedImage.name}</span>
+                      <span>
+                        📏 {selectedImage.width}x{selectedImage.height}
+                      </span>
+                      <span>💾 {Math.round(selectedImage.size / 1024)}KB</span>
+                    </div>
+                  )}
+                  {selectedTemplate && (
+                    <div className="template-info">
+                      <span>🎭 {selectedTemplate.name}</span>
+                      <span>📂 {selectedTemplate.category}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Preview View - Keep existing preview code */}
+        {/* Preview View */}
         {activeView === "preview" && (selectedImage || selectedTemplate) && (
           <div className="preview-view">
-            {/* Keep existing preview implementation */}
+            <div className="preview-header">
+              <h2>👁️ Final Preview</h2>
+              <p>Your artistic masterpiece ready for the world</p>
+            </div>
+
+            <div className="preview-container">
+              <canvas
+                ref={canvasRef}
+                width={1200}
+                height={900}
+                className="final-canvas"
+              />
+            </div>
+
+            <div className="preview-actions">
+              <button
+                onClick={() => setActiveView("editor")}
+                className="action-button edit"
+              >
+                ← Back to Editor
+              </button>
+              <button onClick={downloadImage} className="action-button export">
+                💾 Export Masterpiece
+              </button>
+              <button className="action-button save">⭐ Save to Gallery</button>
+              <button
+                onClick={() => {
+                  if (navigator.share && selectedImage) {
+                    navigator.share({
+                      title: "Elysian Canvas Creation",
+                      text: "Check out my artistic creation!",
+                      url: selectedImage.url,
+                    });
+                  }
+                }}
+                className="action-button share"
+              >
+                🌐 Share
+              </button>
+            </div>
           </div>
         )}
       </div>
