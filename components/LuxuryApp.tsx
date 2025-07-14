@@ -62,6 +62,7 @@ const LuxuryApp = () => {
     | "visual-patch-lab"
     | "ai-body-editor"
     | "elysian"
+    | "real-content"
   >("main");
 
   const [settings, setSettings] = useState<RecordingSettings>({
@@ -840,6 +841,20 @@ const LuxuryApp = () => {
         );
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
+      case "real-content":
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <RealContentManager
+              onContentUpdate={(stats) => {
+                console.log("تم تحديث المحتوى الحقيقي:", stats);
+                addNotification(
+                  `تم تفعيل ${stats.total} عنصر محتوى حقيقي!`,
+                  "success",
+                );
+              }}
+            />
+          </div>
+        );
       default:
         return renderMainView();
     }
