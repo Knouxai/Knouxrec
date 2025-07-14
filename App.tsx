@@ -253,7 +253,7 @@ const App = () => {
           ],
         });
 
-        // بدء المعالجة الذكية التلقائية إذا كانت مفعلة
+        // بدء المعالجة الذكية التلقائ��ة إذا كانت مفعلة
         if (newRecording.isProcessing && transcript) {
           runAiProcessing(newRecording);
         }
@@ -637,6 +637,83 @@ const App = () => {
             <div className="text-sm text-white/70">Offline AI</div>
           </button>
         </div>
+
+        {/* Memory Monitor */}
+        <MemoryMonitor onMemoryWarning={handleMemoryWarning} className="mt-4" />
+
+        {/* Loading Progress Indicators */}
+        {loadingProgress.length > 0 && (
+          <div className="mt-4 space-y-3">
+            <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+              ⏳ جار تحميل النماذج
+            </h3>
+            {loadingProgress.map((progress) => (
+              <AdvancedProgressIndicator
+                key={progress.modelName}
+                progress={progress}
+                memoryStatus={memoryStatus || undefined}
+                onCancel={() => {
+                  console.log(`إلغاء تحميل ${progress.modelName}`);
+                }}
+                showDetails={progress.stage === "error"}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Error Reports */}
+        {errorReports.length > 0 && (
+          <div className="mt-4 space-y-3">
+            <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+              ⚠️ تقارير الأخطاء
+            </h3>
+            {errorReports.slice(0, 3).map((report) => (
+              <div
+                key={report.id}
+                className="glass-card p-4 rounded-xl border border-red-500/30"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-red-300 font-medium">
+                    {report.solution.title}
+                  </h4>
+                  <button
+                    onClick={() =>
+                      setErrorReports((prev) =>
+                        prev.filter((r) => r.id !== report.id),
+                      )
+                    }
+                    className="text-red-400 hover:text-red-300 text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="text-white/70 text-sm mb-3">
+                  {report.solution.description}
+                </p>
+                <div className="flex gap-2">
+                  {report.solution.actions.slice(0, 2).map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        enhancedErrorHandler.resolveError(report.id, index);
+                        setErrorReports((prev) =>
+                          prev.filter((r) => r.id !== report.id),
+                        );
+                      }}
+                      className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 ${
+                        action.isPrimary
+                          ? "bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300"
+                          : "bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 text-gray-300"
+                      }`}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
