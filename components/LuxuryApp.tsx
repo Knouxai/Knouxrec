@@ -419,7 +419,7 @@ const LuxuryApp = () => {
       feedbackService.dismiss(loadingId);
 
       if (result.success) {
-        feedbackService.success(`تم التقاط لقطة الشاشة بنجاح! 📸`, {
+        feedbackService.success(`تم التقاط ل��طة الشاشة بنجاح! 📸`, {
           message: `الملف: ${result.filename}`,
           actions: [
             {
@@ -816,6 +816,12 @@ const LuxuryApp = () => {
         );
       case "visual-patch-lab":
         return <VisualPatchLabPanel />;
+      case "ai-body-editor":
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <AIBodyEditorPanel />
+          </div>
+        );
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
       default:
@@ -882,7 +888,7 @@ const LuxuryApp = () => {
         onClose={() => setIsAdvancedSettingsOpen(false)}
         onSave={(modelSettings) => {
           console.log("حُفظت إعدادات النماذج:", modelSettings);
-          addNotification("تم حفظ إعدادات النماذج المتقدمة!", "success");
+          addNotification("تم حفظ إعدادات ��لنماذج المتقدمة!", "success");
         }}
       />
 
