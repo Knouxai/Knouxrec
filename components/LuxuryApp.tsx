@@ -841,6 +841,8 @@ const LuxuryApp = () => {
             <AIBodyEditorPanel />
           </div>
         );
+      case "knoux-morph-core":
+        return <KnouxMorphCorePanel onClose={() => setCurrentView("main")} />;
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
       case "real-content":
