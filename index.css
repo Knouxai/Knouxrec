@@ -636,3 +636,6 @@ video {
 
 /* Luxury Styles */
 @import "./src/luxuryStyles.css";
+
+/* Arabic Fonts */
+@import "./src/arabicFonts.css";
