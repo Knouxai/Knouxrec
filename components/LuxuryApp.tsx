@@ -15,6 +15,7 @@ import TemplatesPanel from "./TemplatesPanel";
 import ToolboxPanel from "./ToolboxPanel";
 import OfflineAIToolsPanel from "./OfflineAIToolsPanel";
 import VisualPatchLabPanel from "./VisualPatchLabPanel";
+import AIBodyEditorPanel from "./AIBodyEditorPanel";
 import ElysianCanvas from "../elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./AdvancedProgressIndicator";
 import AdvancedModelSettings from "./AdvancedModelSettings";
@@ -700,7 +701,7 @@ const LuxuryApp = () => {
         {errorReports.length > 0 && (
           <div className="luxury-glass-card space-y-3">
             <h3 className="luxury-text font-semibold text-lg flex items-center gap-2">
-              ���️ تقارير الأخطاء
+              ���️ ت��ارير الأخطاء
             </h3>
             {errorReports.slice(0, 3).map((report) => (
               <div
@@ -897,7 +898,7 @@ const LuxuryApp = () => {
           onSaveFull={(rec) => {
             setRecordings((prev) => [rec, ...prev]);
             addNotification(`Recording "${rec.name}" saved.`, "success");
-            feedbackService.success("تم حفظ التسجيل كاملاً! 🎬");
+            feedbackService.success("��م حفظ التسجيل كاملاً! 🎬");
             if (rec.isProcessing) runAiProcessing(rec);
             setPendingRecording(null);
           }}
