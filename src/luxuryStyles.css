@@ -1,0 +1,578 @@
+/* KNOUX REC - خطوط عربية فاخرة وتأثيرات بصرية مذهلة */
+
+/* استيراد خطوط عربية فاخرة */
+@import url("https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap");
+
+/* خط مخصص للعناوين العربية */
+@font-face {
+  font-family: "KnouxArabic";
+  src: local("Cairo"), local("Tajawal"), local("Almarai");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* متغيرات الألوان الفاخرة */
+:root {
+  --knoux-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --knoux-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --knoux-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --knoux-gold: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  --knoux-diamond: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  --knoux-neon: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+
+  --knoux-glass: rgba(255, 255, 255, 0.08);
+  --knoux-glass-border: rgba(255, 255, 255, 0.2);
+  --knoux-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+  --knoux-glow: 0 0 40px rgba(139, 92, 246, 0.6);
+}
+
+/* الخط الأساسي العربي الفاخر */
+.luxury-arabic {
+  font-family:
+    "Cairo",
+    "Tajawal",
+    "Almarai",
+    "KnouxArabic",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* عنوان فاخر مع تأثير الذهب */
+.luxury-title {
+  font-family: "Lalezar", "Cairo", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: var(--knoux-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 8px 32px rgba(247, 151, 30, 0.4);
+  position: relative;
+  display: inline-block;
+}
+
+.luxury-title::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--knoux-gold);
+  border-radius: 16px;
+  opacity: 0.1;
+  filter: blur(20px);
+  z-index: -1;
+}
+
+/* نص عادي بتأثير الضوء */
+.luxury-text {
+  font-family: "Cairo", "Tajawal", sans-serif;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  line-height: 1.8;
+}
+
+/* أزرار فاخرة بتأثيرات مذهلة */
+.luxury-button {
+  position: relative;
+  padding: 16px 32px;
+  font-family: "Cairo", sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
+  background: var(--knoux-primary);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--knoux-shadow);
+}
+
+.luxury-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s;
+}
+
+.luxury-button:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.6),
+    var(--knoux-glow);
+}
+
+.luxury-button:hover::before {
+  left: 100%;
+}
+
+.luxury-button:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* بطاقات زجاجية فاخرة */
+.luxury-glass-card {
+  background: var(--knoux-glass);
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--knoux-glass-border);
+  border-radius: 24px;
+  box-shadow: var(--knoux-shadow);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luxury-glass-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+}
+
+.luxury-glass-card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 48px 96px rgba(0, 0, 0, 0.5),
+    var(--knoux-glow);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* تأثير الدخان والجسيمات */
+.smoke-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.smoke-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.8) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: smokeFloat 8s infinite linear;
+}
+
+@keyframes smokeFloat {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0.1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20vh) translateX(50px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* تأثير الجسيمات المتحركة */
+.floating-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.9),
+    rgba(0, 217, 255, 0.6)
+  );
+  border-radius: 50%;
+  animation: particleFloat 12s infinite linear;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* شريط تقدم فاخر */
+.luxury-progress {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.luxury-progress-bar {
+  height: 100%;
+  background: var(--knoux-accent);
+  border-radius: 16px;
+  position: relative;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luxury-progress-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* مدخلات فاخرة */
+.luxury-input {
+  width: 100%;
+  padding: 16px 24px;
+  font-family: "Cairo", sans-serif;
+  font-size: 1.1rem;
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 16px;
+  outline: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px);
+}
+
+.luxury-input:focus {
+  border-color: rgba(139, 92, 246, 0.8);
+  box-shadow: 0 0 32px rgba(139, 92, 246, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.luxury-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* تأثير التوهج النيوني */
+.neon-glow {
+  animation: neonPulse 3s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+  0%,
+  100% {
+    text-shadow:
+      0 0 5px rgba(139, 92, 246, 0.8),
+      0 0 10px rgba(139, 92, 246, 0.8),
+      0 0 15px rgba(139, 92, 246, 0.8),
+      0 0 20px rgba(139, 92, 246, 0.6);
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(139, 92, 246, 1),
+      0 0 20px rgba(139, 92, 246, 1),
+      0 0 30px rgba(139, 92, 246, 1),
+      0 0 40px rgba(139, 92, 246, 0.8);
+  }
+}
+
+/* تأثير الانعكاس المرآة */
+.mirror-effect {
+  position: relative;
+}
+
+.mirror-effect::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+  transform: scaleY(-1);
+  opacity: 0.3;
+  filter: blur(2px);
+}
+
+/* تأثير الموجات الصوتية */
+.sound-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wave-bar {
+  width: 4px;
+  background: var(--knoux-accent);
+  border-radius: 2px;
+  animation: waveAnimation 1.5s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) {
+  height: 20px;
+  animation-delay: 0s;
+}
+.wave-bar:nth-child(2) {
+  height: 30px;
+  animation-delay: 0.1s;
+}
+.wave-bar:nth-child(3) {
+  height: 25px;
+  animation-delay: 0.2s;
+}
+.wave-bar:nth-child(4) {
+  height: 35px;
+  animation-delay: 0.3s;
+}
+.wave-bar:nth-child(5) {
+  height: 28px;
+  animation-delay: 0.4s;
+}
+
+@keyframes waveAnimation {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* تأثير الكريستال الماسي */
+.diamond-effect {
+  background: var(--knoux-diamond);
+  position: relative;
+  overflow: hidden;
+}
+
+.diamond-effect::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: diamondRotate 4s linear infinite;
+}
+
+@keyframes diamondRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* تأثير الهولوجرام */
+.hologram-effect {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 0, 150, 0.3),
+    rgba(0, 255, 255, 0.3),
+    rgba(255, 255, 0, 0.3),
+    rgba(255, 0, 150, 0.3)
+  );
+  background-size: 400% 400%;
+  animation: hologramShift 6s ease-in-out infinite;
+}
+
+@keyframes hologramShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+/* تأثيرات الخلفية المتحركة */
+.luxury-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -10;
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(139, 92, 246, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(0, 217, 255, 0.3) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      #0a0a0a 0%,
+      #1a0a2e 25%,
+      #16213e 50%,
+      #0f0f23 75%,
+      #000000 100%
+    );
+  animation: backgroundShift 20s ease-in-out infinite;
+}
+
+@keyframes backgroundShift {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(0.5deg);
+  }
+}
+
+/* تحسينات الاستجابة */
+@media (max-width: 768px) {
+  .luxury-title {
+    font-size: 2.5rem;
+  }
+
+  .luxury-glass-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .luxury-button {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .luxury-title {
+    font-size: 2rem;
+  }
+
+  .luxury-glass-card {
+    padding: 16px;
+  }
+}
+
+/* تأثيرات التفاعل المتقدمة */
+.interactive-hover {
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.interactive-hover:hover {
+  transform: perspective(1000px) rotateX(5deg) rotateY(5deg) translateZ(20px);
+}
+
+/* تأثير البرق الكهربائي */
+.electric-effect {
+  position: relative;
+}
+
+.electric-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(0, 217, 255, 0.8) 50%,
+    transparent 60%
+  );
+  opacity: 0;
+  animation: electricPulse 3s infinite;
+}
+
+@keyframes electricPulse {
+  0%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+  5%,
+  10% {
+    opacity: 1;
+  }
+}

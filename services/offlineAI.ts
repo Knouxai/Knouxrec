@@ -2,6 +2,8 @@ import * as tf from "@tensorflow/tfjs";
 import { videoProcessor } from "./videoProcessor";
 import { audioProcessor } from "./audioProcessor";
 import { imageProcessor } from "./imageProcessor";
+import { enhancedModelManager, LoadingProgress } from "./enhancedModelManager";
+import { enhancedErrorHandler } from "./enhancedErrorHandler";
 
 export interface AIProcessingTask {
   id: string;
@@ -53,6 +55,26 @@ export class OfflineAI {
   constructor() {
     this.initializeModels();
     this.startProcessingQueue();
+    this.setupEnhancedFeatures();
+  }
+
+  // إعداد الميزات المحسنة
+  private setupEnhancedFeatures(): void {
+    // ربط معالج الأخطاء
+    enhancedErrorHandler.onError("offlineAI", (report) => {
+      console.log(`خطأ في النموذج: ${report.context.modelName}`, report);
+    });
+
+    // إعداد حد الذاكرة من الإعدادات المحفوظة
+    const savedSettings = localStorage.getItem("knoux_model_settings");
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings);
+        enhancedModelManager.setMemoryLimit(settings.memoryLimit || 4096);
+      } catch (error) {
+        console.warn("فشل في تحميل الإعدادات المحفوظة:", error);
+      }
+    }
   }
 
   // تهيئة النماذج
@@ -234,7 +256,7 @@ export class OfflineAI {
     }
   }
 
-  // تحميل نموذج محدد
+  // تحميل نموذج محدد مع النظام المحسن
   async loadModel(modelName: string): Promise<boolean> {
     const modelInfo = this.models.get(modelName);
     if (!modelInfo || modelInfo.loaded) {
@@ -242,28 +264,50 @@ export class OfflineAI {
     }
 
     try {
-      console.log(`تحميل نموذج ${modelName}...`);
+      // استخدام النظام المحسن للتحميل
+      const success = await enhancedModelManager.loadModelWithRetry(
+        modelName,
+        3,
+      );
 
-      // محاولة تحميل النموذج من عدة مصادر
-      let model: tf.GraphModel | tf.LayersModel | null = null;
-
-      try {
-        // محاولة تحميل من النماذج المحلية أولاً
-        model = await tf.loadGraphModel(`/models/${modelName}/model.json`);
-      } catch {
-        // إذا فشل، استخدم نماذج مدمجة
-        model = await this.createMockModel(modelName, modelInfo.type);
+      if (success) {
+        const loadedModel = enhancedModelManager.getModel(modelName);
+        if (loadedModel) {
+          modelInfo.model = loadedModel;
+          modelInfo.loaded = true;
+          console.log(`تم تحميل نموذج ${modelName} بنجاح`);
+          return true;
+        }
       }
 
-      modelInfo.model = model;
-      modelInfo.loaded = true;
-
-      console.log(`تم تحميل نموذج ${modelName} بنجاح`);
-      return true;
+      return false;
     } catch (error) {
-      console.error(`فشل تحميل نموذج ${modelName}:`, error);
+      // معالجة الخطأ باستخدام النظام المحسن
+      await enhancedErrorHandler.handleModelLoadingError(
+        error as Error,
+        modelName,
+        { stage: "loading" },
+      );
       return false;
     }
+  }
+
+  // الحصول على تقدم التحميل
+  getLoadingProgress(modelName: string): LoadingProgress | null {
+    return enhancedModelManager.getLoadingProgress(modelName);
+  }
+
+  // تسجيل مراقب التقدم
+  onLoadingProgress(
+    modelName: string,
+    callback: (progress: LoadingProgress) => void,
+  ): void {
+    enhancedModelManager.onProgress(modelName, callback);
+  }
+
+  // إلغاء مراقب التقدم
+  offLoadingProgress(modelName: string): void {
+    enhancedModelManager.offProgress(modelName);
   }
 
   // إنشاء نموذج مؤقت للاختبار
@@ -509,7 +553,7 @@ export class OfflineAI {
     }
   }
 
-  // معالجة مهام النص
+  // معالجة ��هام النص
   private async processTextTask(task: AIProcessingTask): Promise<void> {
     const text = task.input as string;
 
@@ -888,8 +932,30 @@ export class OfflineAI {
     };
   }
 
+  // الحصول على حالة الذاكرة
+  getMemoryStatus() {
+    return enhancedModelManager.getMemoryStatus();
+  }
+
+  // إلغاء تحميل نموذج
+  unloadModel(modelName: string): boolean {
+    const success = enhancedModelManager.unloadModel(modelName);
+    if (success) {
+      const modelInfo = this.models.get(modelName);
+      if (modelInfo) {
+        modelInfo.loaded = false;
+        modelInfo.model = undefined;
+      }
+    }
+    return success;
+  }
+
   // تنظيف الموارد
   cleanup(): void {
+    // تنظيف النظام المحسن
+    enhancedModelManager.cleanup();
+
+    // تنظيف النظام القديم
     this.models.forEach((model) => {
       if (model.model) {
         model.model.dispose();
@@ -897,6 +963,9 @@ export class OfflineAI {
     });
     this.models.clear();
     this.processingQueue = [];
+
+    // تنظيف معالج الأخطاء
+    enhancedErrorHandler.offError("offlineAI");
   }
 }
 

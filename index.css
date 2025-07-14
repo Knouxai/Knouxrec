@@ -630,3 +630,12 @@ video {
   backface-visibility: hidden;
   perspective: 1000px;
 }
+
+/* Visual Patch Lab Styles */
+@import "./src/visualPatchLab.css";
+
+/* Luxury Styles */
+@import "./src/luxuryStyles.css";
+
+/* Arabic Fonts */
+@import "./src/arabicFonts.css";
