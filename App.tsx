@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import Header from "./components/Header";
+import React from "react";
+import LuxuryApp from "./components/LuxuryApp";
 import Controls from "./components/Controls";
 import Features from "./components/Features";
 import Actions from "./components/Actions";
@@ -337,7 +337,7 @@ const App = () => {
     };
   }, [addNotification]);
 
-  // معالجة تحذيرات الذاكرة
+  // معالجة تحذيرات الذا��رة
   const handleMemoryWarning = useCallback(
     (status: MemoryStatus) => {
       const usagePercentage =
@@ -671,7 +671,7 @@ const App = () => {
         {loadingProgress.length > 0 && (
           <div className="mt-4 space-y-3">
             <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-              ⏳ جار تحميل النماذج
+              �� جار تحميل النماذج
             </h3>
             {loadingProgress.map((progress) => (
               <AdvancedProgressIndicator
