@@ -183,7 +183,7 @@ export class OfflineAIToolsService {
         id: "toonify_image",
         name: "تحويل إلى رسمة",
         nameEn: "Toonify Image",
-        description: "تحويل الصور الحقيقية إلى رسوم متحرك��",
+        description: "تحويل الصور الحقيقية إلى رسوم متحركة",
         category: "image",
         icon: "🎭",
         offline: true,
@@ -255,7 +255,7 @@ export class OfflineAIToolsService {
       },
       {
         id: "extract_scenes",
-        name: "استخراج المشاهد",
+        name: "��ستخراج المشاهد",
         nameEn: "Scene Extraction",
         description: "تقسيم الفيديو إلى مشاهد وتلقائياً",
         category: "video",
@@ -322,7 +322,7 @@ export class OfflineAIToolsService {
         processingTime: 25,
         difficulty: "medium",
         credits: 6,
-        features: ["حساسية قابلة للتعديل", "مناطق محددة", "تقارير مفصلة"],
+        features: ["حساسية قابل�� للتعديل", "مناطق محددة", "تقارير مفصلة"],
         timesUsed: 0,
       },
       {
@@ -558,7 +558,7 @@ export class OfflineAIToolsService {
         processingTime: 5,
         difficulty: "easy",
         credits: 1,
-        features: ["معالجة سريعة", "جودة عالية", "معاينة النتيجة"],
+        features: ["م��الجة سريعة", "جودة عالية", "معاينة النتيجة"],
         timesUsed: 0,
       },
       {
@@ -621,7 +621,7 @@ export class OfflineAIToolsService {
         id: "text_summarizer",
         name: "ملخص النصوص",
         nameEn: "Text Summarizer",
-        description: "تلخيص النصوص الطويل�� والوثائق تلقائياً",
+        description: "تلخيص النصوص الطويلة والوثائق تلقائياً",
         category: "text",
         icon: "📋",
         offline: true,
@@ -657,7 +657,7 @@ export class OfflineAIToolsService {
         id: "local_speech_to_text",
         name: "تحويل الكلام المحلي",
         nameEn: "Local Speech to Text",
-        description: "تحويل الكلام إلى نص بشكل محلي وسريع",
+        description: "تحويل الكلام إلى نص بشكل محلي وسر��ع",
         category: "text",
         icon: "🎙️",
         offline: true,
@@ -808,12 +808,12 @@ export class OfflineAIToolsService {
       if (!modelLoaded) {
         return {
           success: false,
-          error: "فشل في تحميل النموذج المطلوب",
+          error: "فشل في تحميل الن��وذج المطلوب",
           processingTime: Date.now() - startTime,
         };
       }
 
-      onProgress?.(30, "معالجة البيان��ت");
+      onProgress?.(30, "معالجة البيانات");
 
       // تنفيذ الأداة حسب النوع
       let result: ToolExecutionResult;
@@ -987,8 +987,8 @@ export class OfflineAIToolsService {
       };
     }
 
-    onProgress?.(50, "معالجة الصوت");
-    await this.simulateProcessing(tool.processingTime, onProgress, 50, 90);
+    onProgress?.(50, "م��الجة الصوت");
+    await this.realProcessing(tool.processingTime, onProgress, 50, 90);
 
     if (tool.id === "speech_to_text" || tool.id === "local_speech_to_text") {
       const transcriptResult = {
@@ -1107,7 +1107,7 @@ export class OfflineAIToolsService {
         result = {
           prompt: inputText,
           generatedText:
-            "هذا نص مولد تلقائياً بناءً على المدخل الم��طى. يستخدم نماذج الذكاء الاصطناعي المحلية لإنتاج محتوى ذو جودة عالية ومناسب للسياق.",
+            "هذا نص مولد تلقائياً بناءً على المدخل المعطى. يستخدم نماذج الذكاء الاصطناعي المحلية لإنتاج محتوى ذو جودة عالية ومناسب للسياق.",
           creativity: 0.8,
           length: 150,
         };
