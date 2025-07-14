@@ -90,7 +90,7 @@ export class EnhancedModelManager {
         type: "enhancement",
         requiredMemory: 30,
         maxConcurrent: 4,
-        fallbackAvailable: false,
+        fallbackAvailable: true,
       },
     ],
     [
@@ -547,7 +547,7 @@ export class EnhancedModelManager {
           dummyInput = tf.zeros([1, 128, 128, 3]);
           break;
         case "analysis":
-          dummyInput = tf.zeros([1, 16000]); // للصوت
+          dummyInput = tf.zeros([1, 16000]); // للصو��
           break;
         default:
           dummyInput = tf.zeros([1, 10]);
@@ -678,7 +678,7 @@ export class EnhancedModelManager {
   private async freeMemoryForModel(config: ModelConfig): Promise<void> {
     const sortedModels = Array.from(this.modelCache.entries()).sort(
       ([, a], [, b]) => {
-        // ترتيب حسب آخر استخدام وعدد مرات الاستخدام
+        // ترتيب حسب آخ�� استخدام وعدد مرات الاستخدام
         const scoreA = a.lastUsed + a.useCount * 10000;
         const scoreB = b.lastUsed + b.useCount * 10000;
         return scoreA - scoreB;
@@ -724,7 +724,7 @@ export class EnhancedModelManager {
     config: ModelConfig,
   ): number {
     try {
-      // حساب تقريبي بناءً على أوزان النموذج
+      // حساب تقريبي بناءً على أوزان ا��نموذج
       const numParams = model.countParams?.() || 0;
       const estimated = (numParams * 4) / (1024 * 1024); // 4 bytes per parameter
 
@@ -801,7 +801,9 @@ export class EnhancedModelManager {
   private async loadFallbackModel(modelName: string): Promise<boolean> {
     const config = this.modelConfigs.get(modelName);
     if (!config?.fallbackAvailable) {
-      console.error(`لا يوجد نموذج احتياطي لـ ${modelName}`);
+      console.warn(
+        `لا يوجد نموذج احتياطي لـ ${modelName} - سيتم تخطي هذا النموذج`,
+      );
       return false;
     }
 
@@ -849,7 +851,7 @@ export class EnhancedModelManager {
 
       if (usage > threshold) {
         console.warn(
-          `تحذير: استخدام الذاكرة مرتفع (${usage}MB/${this.maxMemoryUsage}MB)`,
+          `تحذير: استخدام الذا��رة مرتفع (${usage}MB/${this.maxMemoryUsage}MB)`,
         );
         this.optimizeMemoryUsage();
       }
@@ -941,7 +943,7 @@ export class EnhancedModelManager {
     this.maxMemoryUsage = limitMB;
   }
 
-  // تنظيف جميع النماذج
+  // تنظ��ف جميع النماذج
   cleanup(): void {
     for (const [modelName] of this.modelCache.entries()) {
       this.unloadModel(modelName);
