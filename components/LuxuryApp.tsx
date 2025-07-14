@@ -419,7 +419,7 @@ const LuxuryApp = () => {
       feedbackService.dismiss(loadingId);
 
       if (result.success) {
-        feedbackService.success(`تم التقاط ل��طة الشاشة بنجاح! 📸`, {
+        feedbackService.success(`تم التقاط لقطة الشاشة بنجاح! 📸`, {
           message: `الملف: ${result.filename}`,
           actions: [
             {
@@ -668,6 +668,21 @@ const LuxuryApp = () => {
             </div>
             <div className="luxury-text text-sm opacity-70">File Manager</div>
           </button>
+
+          <button
+            onClick={() => setCurrentView("ai-body-editor")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group electric-effect border-2 border-red-500/50"
+          >
+            <div className="mb-3">
+              <div className="text-5xl mx-auto text-red-400">🔞</div>
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1 text-red-300">
+              AI Body Editor
+            </div>
+            <div className="luxury-text text-sm opacity-70 text-red-400">
+              18+ محرر الجسم
+            </div>
+          </button>
         </div>
 
         {/* Memory Monitor */}
@@ -888,7 +903,7 @@ const LuxuryApp = () => {
         onClose={() => setIsAdvancedSettingsOpen(false)}
         onSave={(modelSettings) => {
           console.log("حُفظت إعدادات النماذج:", modelSettings);
-          addNotification("تم حفظ إعدادات ��لنماذج المتقدمة!", "success");
+          addNotification("تم حفظ إعدادات النماذج المتقدمة!", "success");
         }}
       />
 
