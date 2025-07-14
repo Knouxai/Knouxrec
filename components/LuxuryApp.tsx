@@ -144,7 +144,7 @@ const LuxuryApp = () => {
               ? {
                   ...r,
                   isProcessing: false,
-                  summary: "لم يتم اكتشاف كلام واضح.",
+                  summary: "لم يتم اك��شاف كلام واضح.",
                 }
               : r,
           ),
@@ -271,7 +271,7 @@ const LuxuryApp = () => {
         if (!transcript && settings.aiProcessingEnabled) {
           try {
             const audioLoadingId = feedbackService.loading(
-              "��ار استخراج الصوت وتحويله لنص...",
+              "جار استخراج الصوت وتحويله لنص...",
               0,
             );
             addNotification("جار استخراج الصوت وتحويله لنص...", "info");
@@ -624,7 +624,7 @@ const LuxuryApp = () => {
             <div className="luxury-text font-bold text-lg mb-1 neon-glow">
               أدوات أوفلاين
             </div>
-            <div className="luxury-text text-sm opacity-70">38 أداة ذكية</div>
+            <div className="luxury-text text-sm opacity-70">38 أدا�� ذكية</div>
           </button>
 
           <button
@@ -822,6 +822,12 @@ const LuxuryApp = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative luxury-arabic">
+      {/* التأثيرات البصرية الفاخرة */}
+      <LuxuryBackgroundEffects
+        effects={["starfield", "orbs", "waves"]}
+        intensity={recorderState.isRecording ? 0.8 : 0.4}
+      />
+
       {/* الجسيمات المتحركة */}
       <FloatingParticles />
 
