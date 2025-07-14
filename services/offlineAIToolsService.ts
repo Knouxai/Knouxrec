@@ -255,7 +255,7 @@ export class OfflineAIToolsService {
       },
       {
         id: "extract_scenes",
-        name: "��ستخراج المشاهد",
+        name: "است��راج المشاهد",
         nameEn: "Scene Extraction",
         description: "تقسيم الفيديو إلى مشاهد وتلقائياً",
         category: "video",
@@ -322,7 +322,7 @@ export class OfflineAIToolsService {
         processingTime: 25,
         difficulty: "medium",
         credits: 6,
-        features: ["حساسية قابل�� للتعديل", "مناطق محددة", "تقارير مفصلة"],
+        features: ["حساسية قابلة للتعديل", "مناطق محددة", "تقارير مفصلة"],
         timesUsed: 0,
       },
       {
@@ -558,7 +558,7 @@ export class OfflineAIToolsService {
         processingTime: 5,
         difficulty: "easy",
         credits: 1,
-        features: ["م��الجة سريعة", "جودة عالية", "معاينة النتيجة"],
+        features: ["معال��ة سريعة", "جودة عالية", "معاينة النتيجة"],
         timesUsed: 0,
       },
       {
@@ -657,7 +657,7 @@ export class OfflineAIToolsService {
         id: "local_speech_to_text",
         name: "تحويل الكلام المحلي",
         nameEn: "Local Speech to Text",
-        description: "تحويل الكلام إلى نص بشكل محلي وسر��ع",
+        description: "تحويل الكلام إلى نص بشكل محلي وسريع",
         category: "text",
         icon: "🎙️",
         offline: true,
@@ -808,7 +808,7 @@ export class OfflineAIToolsService {
       if (!modelLoaded) {
         return {
           success: false,
-          error: "فشل في تحميل الن��وذج المطلوب",
+          error: "فشل في تحميل النموذ�� المطلوب",
           processingTime: Date.now() - startTime,
         };
       }
@@ -987,7 +987,7 @@ export class OfflineAIToolsService {
       };
     }
 
-    onProgress?.(50, "م��الجة الصوت");
+    onProgress?.(50, "معال��ة الصوت");
     await this.realProcessing(tool.processingTime, onProgress, 50, 90);
 
     if (tool.id === "speech_to_text" || tool.id === "local_speech_to_text") {
@@ -1063,7 +1063,7 @@ export class OfflineAIToolsService {
     }
 
     onProgress?.(50, "معالجة النص");
-    await this.simulateProcessing(tool.processingTime, onProgress, 50, 90);
+    await this.realProcessing(tool.processingTime, onProgress, 50, 90);
 
     let result: any;
 
@@ -1107,7 +1107,7 @@ export class OfflineAIToolsService {
         result = {
           prompt: inputText,
           generatedText:
-            "هذا نص مولد تلقائياً بناءً على المدخل المعطى. يستخدم نماذج الذكاء الاصطناعي المحلية لإنتاج محتوى ذو جودة عالية ومناسب للسياق.",
+            "هذا نص مولد تلقائياً بناءً على المدخل المعطى. يستخدم نماذج الذكاء الاصطناعي المحلية لإنتاج محتوى ذو جودة عا��ية ومناسب للسياق.",
           creativity: 0.8,
           length: 150,
         };
