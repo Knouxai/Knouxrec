@@ -307,6 +307,79 @@ const App = () => {
     document.documentElement.classList.add(theme);
   }, [theme]);
 
+  // إعداد مراقبة النظام المحسن
+  useEffect(() => {
+    // مراقبة أخطاء النماذج
+    enhancedErrorHandler.onError("app", (report) => {
+      setErrorReports((prev) => [report, ...prev].slice(0, 10));
+      addNotification(
+        `خطأ في النموذج ${report.context.modelName}: ${report.solution.title}`,
+        "error",
+      );
+    });
+
+    // تحديث حالة الذاكرة
+    const updateMemoryStatus = () => {
+      const status = enhancedModelManager.getMemoryStatus();
+      setMemoryStatus(status);
+    };
+
+    updateMemoryStatus();
+    const memoryInterval = setInterval(updateMemoryStatus, 10000);
+
+    return () => {
+      enhancedErrorHandler.offError("app");
+      clearInterval(memoryInterval);
+    };
+  }, [addNotification]);
+
+  // معالجة تحذيرات الذاكرة
+  const handleMemoryWarning = useCallback(
+    (status: MemoryStatus) => {
+      const usagePercentage =
+        (status.totalUsed / (status.totalUsed + status.available)) * 100;
+
+      if (usagePercentage > 90) {
+        addNotification(
+          "تحذير: الذاكرة ممتلئة تقريباً! قد يتم إلغاء تحميل بعض النماذج تلقائياً.",
+          "warning",
+        );
+      } else if (usagePercentage > 80) {
+        addNotification(
+          "تحذير: استخدام الذاكرة مرتفع. يُنصح بتحسين الاستخدام.",
+          "warning",
+        );
+      }
+    },
+    [addNotification],
+  );
+
+  // معالجة تقدم التحميل
+  const handleLoadingProgress = useCallback(
+    (modelName: string, progress: LoadingProgress) => {
+      setLoadingProgress((prev) => {
+        const existing = prev.findIndex((p) => p.modelName === modelName);
+        if (existing >= 0) {
+          const updated = [...prev];
+          updated[existing] = progress;
+          return updated;
+        } else {
+          return [...prev, progress];
+        }
+      });
+
+      // إزالة المكتملة بعد 3 ثوان
+      if (progress.stage === "ready" || progress.stage === "error") {
+        setTimeout(() => {
+          setLoadingProgress((prev) =>
+            prev.filter((p) => p.modelName !== modelName),
+          );
+        }, 3000);
+      }
+    },
+    [],
+  );
+
   const handleSettingsChange = (newSettings: RecordingSettings) => {
     setSettings(newSettings);
   };
