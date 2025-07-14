@@ -16,6 +16,7 @@ import ToolboxPanel from "./ToolboxPanel";
 import OfflineAIToolsPanel from "./OfflineAIToolsPanel";
 import VisualPatchLabPanel from "./VisualPatchLabPanel";
 import AIBodyEditorPanel from "./AIBodyEditorPanel";
+import KnouxMorphCorePanel from "./KnouxMorphCorePanel";
 import ElysianCanvas from "../elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./AdvancedProgressIndicator";
 import AdvancedModelSettings from "./AdvancedModelSettings";
