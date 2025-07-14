@@ -61,6 +61,7 @@ const LuxuryApp = () => {
     | "toolbox"
     | "offline-tools"
     | "visual-patch-lab"
+    | "ai-body-editor"
     | "elysian"
   >("main");
 
@@ -701,7 +702,7 @@ const LuxuryApp = () => {
         {errorReports.length > 0 && (
           <div className="luxury-glass-card space-y-3">
             <h3 className="luxury-text font-semibold text-lg flex items-center gap-2">
-              ���️ ت��ارير الأخطاء
+              ���️ تقارير الأخطاء
             </h3>
             {errorReports.slice(0, 3).map((report) => (
               <div
@@ -898,7 +899,7 @@ const LuxuryApp = () => {
           onSaveFull={(rec) => {
             setRecordings((prev) => [rec, ...prev]);
             addNotification(`Recording "${rec.name}" saved.`, "success");
-            feedbackService.success("��م حفظ التسجيل كاملاً! 🎬");
+            feedbackService.success("تم حفظ التسجيل كاملاً! 🎬");
             if (rec.isProcessing) runAiProcessing(rec);
             setPendingRecording(null);
           }}
