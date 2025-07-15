@@ -1,0 +1,418 @@
+/* خطوط عربية فاخرة محسنة */
+
+/* استيراد خطوط Google الفاخرة للعربية */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amiri+Quran:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Markazi+Text:wght@400;500;600;700&display=swap");
+
+/* خط مخصص فاخر للعناوين العربية */
+@font-face {
+  font-family: "KnouxFancy";
+  src: local("Noto Kufi Arabic"), local("Reem Kufi"), local("Markazi Text");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* خط للنصوص العادية */
+@font-face {
+  font-family: "KnouxBody";
+  src: local("Noto Kufi Arabic"), local("Amiri"), local("Scheherazade New");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* إعادة تعريف الخطوط الأساسية */
+.luxury-arabic {
+  font-family:
+    "KnouxBody", "Noto Kufi Arabic", "Segoe UI", Tahoma, Geneva, Verdana,
+    sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+.luxury-arabic * {
+  font-family: inherit;
+}
+
+/* عناوين فاخرة */
+.luxury-title-ar {
+  font-family: "KnouxFancy", "Reem Kufi", "Markazi Text", serif;
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 1.2;
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 50%, #f7971e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 20px rgba(247, 151, 30, 0.4);
+  letter-spacing: 0.02em;
+  text-rendering: optimizeLegibility;
+  position: relative;
+}
+
+.luxury-title-ar::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  border-radius: 12px;
+  opacity: 0.1;
+  filter: blur(15px);
+  z-index: -1;
+}
+
+/* نصوص فرعية فاخرة */
+.luxury-subtitle-ar {
+  font-family: "KnouxBody", "Noto Kufi Arabic", sans-serif;
+  font-weight: 500;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+  line-height: 1.6;
+}
+
+/* نصوص عادية محسنة */
+.luxury-text-ar {
+  font-family: "KnouxBody", "Noto Kufi Arabic", sans-serif;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* أزرار عربية فاخرة */
+.luxury-button-ar {
+  font-family: "KnouxBody", "Noto Kufi Arabic", sans-serif;
+  font-weight: 600;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 4px 15px rgba(102, 126, 234, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.luxury-button-ar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.6s;
+}
+
+.luxury-button-ar:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 30px rgba(102, 126, 234, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.luxury-button-ar:hover::before {
+  left: 100%;
+}
+
+.luxury-button-ar:active {
+  transform: translateY(0);
+}
+
+/* مدخلات نصوص عربية */
+.luxury-input-ar {
+  font-family: "KnouxBody", "Noto Kufi Arabic", sans-serif;
+  direction: rtl;
+  text-align: right;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.luxury-input-ar:focus {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.luxury-input-ar::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* بطاقات فاخرة */
+.luxury-card-ar {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.luxury-card-ar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+}
+
+.luxury-card-ar:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* تأثيرات النص المتقدمة */
+.glow-text-ar {
+  text-shadow:
+    0 0 5px currentColor,
+    0 0 10px currentColor,
+    0 0 15px currentColor,
+    0 0 20px currentColor;
+  animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+  from {
+    text-shadow:
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 15px currentColor,
+      0 0 20px currentColor;
+  }
+  to {
+    text-shadow:
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      0 0 30px currentColor,
+      0 0 40px currentColor;
+  }
+}
+
+/* تأثير الكتابة المتدرجة */
+.gradient-text-ar {
+  background: linear-gradient(135deg, #8b5cf6, #06d6a0, #f093fb, #4facfe);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+/* قوائم عربية فاخرة */
+.luxury-menu-ar {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.luxury-menu-ar li {
+  padding: 12px 20px;
+  margin: 4px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-right: 3px solid transparent;
+}
+
+.luxury-menu-ar li:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-right-color: #8b5cf6;
+  transform: translateX(-5px);
+}
+
+/* تأثيرات التحميل */
+.loading-dots-ar::after {
+  content: "...";
+  animation: loadingDots 1.5s infinite;
+  color: #8b5cf6;
+}
+
+@keyframes loadingDots {
+  0%,
+  20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60%,
+  100% {
+    content: "...";
+  }
+}
+
+/* شريط التقدم العربي */
+.progress-bar-ar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-ar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #06d6a0);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+/* إصلاحات خاصة بالعربية */
+.rtl-fix {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltr-numbers {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* تحسينات الاستجابة للعربية */
+@media (max-width: 768px) {
+  .luxury-title-ar {
+    font-size: 2.5rem;
+  }
+
+  .luxury-subtitle-ar {
+    font-size: 1.1rem;
+  }
+
+  .luxury-button-ar {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  .luxury-card-ar {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .luxury-title-ar {
+    font-size: 2rem;
+  }
+
+  .luxury-subtitle-ar {
+    font-size: 1rem;
+  }
+
+  .luxury-button-ar {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+}
+
+/* أنماط خاصة للأيقونات مع النصوص العربية */
+.icon-text-ar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  direction: rtl;
+}
+
+.icon-text-ar .icon {
+  order: 2;
+}
+
+.icon-text-ar .text {
+  order: 1;
+}
+
+/* تأثيرات تفاعلية للعناصر العربية */
+.interactive-ar {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-ar:hover {
+  transform: scale(1.02) translateY(-2px);
+}
+
+.interactive-ar:active {
+  transform: scale(0.98);
+}
+
+/* تخصيص scrollbar للنصوص العربية */
+.arabic-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.arabic-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.arabic-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8b5cf6, #06d6a0);
+  border-radius: 10px;
+}
+
+.arabic-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #7c3aed, #059669);
+}

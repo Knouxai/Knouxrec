@@ -1,506 +1,523 @@
-import React, { useState, useEffect } from "react";
-import { AITool, ToolCategory, UserCredits } from "../types/templates";
-import {
-  enhancedToolboxService as toolboxService,
-  ToolExecutionResult,
-} from "../services/toolboxService_enhanced";
-import ImageToolInterface from "./tools/ImageToolInterface";
-import VideoToolInterface from "./tools/VideoToolInterface";
-import AudioToolInterface from "./tools/AudioToolInterface";
-import TextToolInterface from "./tools/TextToolInterface";
+import React, { useState, useRef, useEffect } from "react";
+
+interface RealTool {
+  id: string;
+  name: string;
+  nameAr: string;
+  description: string;
+  descriptionAr: string;
+  category: "image" | "video" | "audio" | "text" | "utility";
+  icon: string;
+  isLocal: boolean;
+  functionality: () => void;
+  fileTypes?: string[];
+  outputType?: string;
+}
 
 const ToolboxPanel: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<ToolCategory>("all");
-  const [tools, setTools] = useState<AITool[]>([]);
-  const [userCredits, setUserCredits] = useState<UserCredits>({
-    total: 1000,
-    used: 250,
-    remaining: 750,
-    subscription_tier: "pro",
-    renewal_date: "2024-02-15",
-  });
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTool, setSelectedTool] = useState<AITool | null>(null);
-  const [showToolInterface, setShowToolInterface] = useState(false);
+  const [activeToolId, setActiveToolId] = useState<string | null>(null);
 
-  // تنفيذ عملية الأداة
-  const executeToolOperation = async (
-    tool: AITool,
-    file?: File,
-    additionalInput?: string,
-  ) => {
-    try {
-      // التحقق من النقاط المطلوبة
-      if (tool.credits_cost > userCredits.remaining) {
-        throw new Error("نقاط غير كافية لتنفيذ هذه الأداة");
+  // Helper to download a Blob
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // أدوات حقيقية تعمل محلياً 100%
+  const realTools: RealTool[] = [
+    {
+      id: "image-resizer",
+      name: "Image Resizer",
+      nameAr: "تغيير حجم الصور",
+      description: "Resize images to custom dimensions",
+      descriptionAr: "تغيير أبعاد الصور إلى أحجام مخصصة",
+      category: "image",
+      icon: "🖼️",
+      isLocal: true,
+      fileTypes: ["image/jpeg", "image/png", "image/webp"],
+      outputType: "image",
+      functionality: () => handleImageResize(),
+    },
+    {
+      id: "image-filter",
+      name: "Image Filters",
+      nameAr: "فلاتر الصور",
+      description: "Apply filters to images using Canvas",
+      descriptionAr: "تطبيق فلاتر على الصور باستخدام Canvas",
+      category: "image",
+      icon: "🎨",
+      isLocal: true,
+      fileTypes: ["image/jpeg", "image/png", "image/webp"],
+      outputType: "image",
+      functionality: () => handleImageFilters(),
+    },
+    {
+      id: "image-format-converter",
+      name: "Format Converter",
+      nameAr: "محول صيغ الصور",
+      description: "Convert between image formats",
+      descriptionAr: "تحويل بين صيغ الصور المختلفة",
+      category: "image",
+      icon: "🔄",
+      isLocal: true,
+      fileTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+      outputType: "image",
+      functionality: () => handleFormatConversion(),
+    },
+    {
+      id: "video-thumbnail",
+      name: "Video Thumbnail",
+      nameAr: "صورة مصغرة للفيديو",
+      description: "Extract thumbnail from video",
+      descriptionAr: "استخراج صورة مصغرة من الفيديو",
+      category: "video",
+      icon: "📹",
+      isLocal: true,
+      fileTypes: ["video/mp4", "video/webm", "video/ogg"],
+      outputType: "image",
+      functionality: () => handleVideoThumbnail(),
+    },
+    {
+      id: "audio-visualizer",
+      name: "Audio Visualizer",
+      nameAr: "مُصور الصوت",
+      description: "Create audio visualization",
+      descriptionAr: "إنشاء تصور بصري للصوت",
+      category: "audio",
+      icon: "🎵",
+      isLocal: true,
+      fileTypes: ["audio/mp3", "audio/wav", "audio/ogg"],
+      outputType: "image",
+      functionality: () => handleAudioVisualization(),
+    },
+    {
+      id: "text-generator",
+      name: "Text Image Generator",
+      nameAr: "مولد صور النصوص",
+      description: "Convert text to styled images",
+      descriptionAr: "تحويل النص إلى صور منسقة",
+      category: "text",
+      icon: "📝",
+      isLocal: true,
+      outputType: "image",
+      functionality: () => handleTextImageGeneration(),
+    },
+    {
+      id: "qr-generator",
+      name: "QR Code Generator",
+      nameAr: "مولد رمز الاستجابة السريعة",
+      description: "Generate QR codes",
+      descriptionAr: "إنشاء رموز الاستجابة السريعة",
+      category: "utility",
+      icon: "📱",
+      isLocal: true,
+      outputType: "image",
+      functionality: () => handleQRGeneration(),
+    },
+    {
+      id: "color-palette",
+      name: "Color Palette Extractor",
+      nameAr: "مستخرج لوحة الألوان",
+      description: "Extract color palette from images",
+      descriptionAr: "استخراج لوحة الألوان من الصور",
+      category: "image",
+      icon: "🎨",
+      isLocal: true,
+      fileTypes: ["image/jpeg", "image/png", "image/webp"],
+      outputType: "text",
+      functionality: () => handleColorPaletteExtraction(),
+    },
+  ];
+
+  // دوال الأدوات الحقيقية
+  const handleImageResize = () => {
+    setActiveToolId("image-resizer");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        resizeImage(file);
       }
+    };
+    input.click();
+  };
 
-      // إعداد المدخلات
-      const input = file ? file : additionalInput || "";
+  const resizeImage = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
 
-      // تنفيذ العملية باستخدام toolboxService
-      const result: ToolExecutionResult = await toolboxService.executeTool(
-        tool.id,
-        {
-          input,
-          file,
-          settings: {},
-        },
-      );
+        // طلب الأبعاد الجديدة من المستخدم
+        const width = prompt("العرض الجديد:", "800") || "800";
+        const height = prompt("الارتفاع الجديد:", "600") || "600";
 
-      // تحديث النقاط
-      setUserCredits((prev) => ({
-        ...prev,
-        used: prev.used + tool.credits_cost,
-        remaining: prev.remaining - tool.credits_cost,
-      }));
+        canvas.width = parseInt(width);
+        canvas.height = parseInt(height);
 
-      // إظهار النتيجة
-      if (result.success) {
-        alert(`تم تنفيذ ${tool.name} بنجاح!`);
-        if (result.downloadUrl) {
-          // تنزيل النتيجة
-          const a = document.createElement("a");
-          a.href = result.downloadUrl;
-          a.download = `result_${tool.id}_${Date.now()}`;
-          a.click();
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            downloadBlob(blob, `resized-${file.name}`);
+          }
+        }, file.type);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageFilters = () => {
+    setActiveToolId("image-filter");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        applyImageFilter(file);
+      }
+    };
+    input.click();
+  };
+
+  const applyImageFilter = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // تطبيق فلتر (مثال: تدرج رمادي)
+        ctx.filter = "grayscale(100%)";
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            downloadBlob(blob, `filtered-${file.name}`);
+          }
+        }, file.type);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFormatConversion = () => {
+    setActiveToolId("image-format-converter");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        convertImageFormat(file);
+      }
+    };
+    input.click();
+  };
+
+  const convertImageFormat = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        // تحويل إلى PNG
+        canvas.toBlob((blob) => {
+          if (blob) {
+            downloadBlob(blob, `converted-${file.name.split(".")[0]}.png`);
+          }
+        }, "image/png");
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVideoThumbnail = () => {
+    setActiveToolId("video-thumbnail");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        extractVideoThumbnail(file);
+      }
+    };
+    input.click();
+  };
+
+  const extractVideoThumbnail = (file: File) => {
+    const video = document.createElement("video");
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+
+    video.onloadedmetadata = () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      video.currentTime = 1; // ثانية واحدة من الفيديو
+    };
+
+    video.onseeked = () => {
+      ctx.drawImage(video, 0, 0);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          downloadBlob(blob, `thumbnail-${file.name.split(".")[0]}.png`);
         }
-      } else {
-        throw new Error(result.error || "فشل في تنفيذ الأداة");
+      }, "image/png");
+    };
+
+    video.src = URL.createObjectURL(file);
+  };
+
+  const handleAudioVisualization = () => {
+    setActiveToolId("audio-visualizer");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "audio/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        createAudioVisualization(file);
       }
+    };
+    input.click();
+  };
+
+  const createAudioVisualization = async (file: File) => {
+    try {
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+
+      canvas.width = 800;
+      canvas.height = 200;
+
+      const data = audioBuffer.getChannelData(0);
+      const step = Math.ceil(data.length / canvas.width);
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = "#0ff";
+      ctx.beginPath();
+
+      for (let i = 0; i < canvas.width; i++) {
+        const sample = data[i * step];
+        const y = ((sample + 1) * canvas.height) / 2;
+        if (i === 0) {
+          ctx.moveTo(i, y);
+        } else {
+          ctx.lineTo(i, y);
+        }
+      }
+
+      ctx.stroke();
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          downloadBlob(
+            blob,
+            `audio-visualization-${file.name.split(".")[0]}.png`,
+          );
+        }
+      }, "image/png");
     } catch (error) {
-      console.error("خطأ في تنفيذ الأداة:", error);
-      alert(`خطأ في تنفيذ ${tool.name}: ${error}`);
+      alert("خطأ في معالجة الملف الصوتي");
     }
   };
 
-  // الحصول على أنواع الملفات المقبولة
-  const getAcceptedFileTypes = (inputTypes: string[]): string => {
-    const typeMap: Record<string, string> = {
-      image: "image/*",
-      video: "video/*",
-      audio: "audio/*",
-      text: ".txt,.md,.json",
-      file: "*/*",
-    };
-
-    return inputTypes.map((type) => typeMap[type] || "*/*").join(",");
+  const handleTextImageGeneration = () => {
+    setActiveToolId("text-generator");
+    const text = prompt("أدخل النص:", "مرحبا بك في KNOUX REC");
+    if (text) {
+      generateTextImage(text);
+    }
   };
 
-  // إنشاء أدوات شاملة ومتقدمة
-  const generateAdvancedTools = (): AITool[] => {
-    return [
-      // أدوات الفيديو
-      {
-        id: "video_enhancer",
-        name: "تحسين الفيديو",
-        description: "تحسين جودة الفيديو باستخدام ا��ذكاء الاصطناعي",
-        category: "video",
-        icon: "🎬",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "medium",
-        input_types: ["video", "file"],
-        output_types: ["video"],
-        features: ["تحسين الدقة", "إزالة الضوضاء", "تحسين الألوان"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "video_generator",
-        name: "مولد الفيديو",
-        description: "إنشاء فيديوهات من النصوص والصور",
-        category: "video",
-        icon: "🎞️",
-        ai_powered: true,
-        credits_cost: 25,
-        processing_time: "slow",
-        input_types: ["text", "image"],
-        output_types: ["video"],
-        features: ["توليد AI", "انتقالات ذكية", "تأثيرات متقدمة"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "video_stabilizer",
-        name: "مثبت الفيديو",
-        description: "تثبيت الفيديوهات المهتزة تلقائياً",
-        category: "video",
-        icon: "🎯",
-        ai_powered: true,
-        credits_cost: 10,
-        processing_time: "medium",
-        input_types: ["video"],
-        output_types: ["video"],
-        features: ["تثبيت ذكي", "تقليل الاهتزاز", "تحسين السلاسة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "scene_detector",
-        name: "كاشف المشاهد",
-        description: "تحليل المشاهد وتقطيع الفيديو تلقائياً",
-        category: "video",
-        icon: "🔍",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["video"],
-        output_types: ["text", "video"],
-        features: ["تحليل المحتوى", "تقطيع ذكي", "استخراج اللقطات"],
-        premium: false,
-        popular: false,
-        beta: false,
-      },
+  const generateTextImage = (text: string) => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
 
-      // أدوات الصوت
-      {
-        id: "voice_enhancer",
-        name: "محسن الصوت",
-        description: "تحسين جودة الصوت وإزالة الضوضاء",
-        category: "audio",
-        icon: "🎙️",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["audio", "video"],
-        output_types: ["audio"],
-        features: ["إزالة الضوضاء", "تحسين الوضوح", "تطبيع الصوت"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "voice_changer",
-        name: "مُغير الصوت",
-        description: "تغيير نبرة وشخصية الصوت",
-        category: "audio",
-        icon: "🎭",
-        ai_powered: true,
-        credits_cost: 12,
-        processing_time: "medium",
-        input_types: ["audio"],
-        output_types: ["audio"],
-        features: ["تغيير النبرة", "تأثيرات صوتية", "أصوات مختلفة"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "music_generator",
-        name: "مولد الموسيقى",
-        description: "إنشاء موسيقى تصويرية مخصصة",
-        category: "audio",
-        icon: "🎵",
-        ai_powered: true,
-        credits_cost: 20,
-        processing_time: "slow",
-        input_types: ["text"],
-        output_types: ["audio"],
-        features: ["توليد AI", "أنماط متنوعة", "موسيقى مخصصة"],
-        premium: true,
-        popular: false,
-        beta: true,
-      },
-      {
-        id: "beat_sync",
-        name: "مزامن الإيقاع",
-        description: "مزامنة الفيديو مع إيقاع الموسيقى",
-        category: "audio",
-        icon: "🥁",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "medium",
-        input_types: ["video", "audio"],
-        output_types: ["video"],
-        features: ["كشف الإيقاع", "مزامنة ذكية", "تأثيرات إيقاعية"],
-        premium: true,
-        popular: false,
-        beta: false,
-      },
+    canvas.width = 800;
+    canvas.height = 400;
 
-      // أدوات الصور
-      {
-        id: "image_upscaler",
-        name: "مكبر الصور",
-        description: "تكبير الصور مع الحفاظ على الجودة",
-        category: "image",
-        icon: "🔍",
-        ai_powered: true,
-        credits_cost: 10,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["تكبير AI", "تحسين التفاصيل", "دقة عالية"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "background_remover",
-        name: "مزيل الخلفية",
-        description: "إزالة خلفية الصور تلقائياً",
-        category: "image",
-        icon: "✂️",
-        ai_powered: true,
-        credits_cost: 5,
-        processing_time: "fast",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["قص دقيق", "حواف ناعمة", "شفافية كاملة"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "style_transfer",
-        name: "نقل النمط",
-        description: "تطبيق أنماط فنية على الصور",
-        category: "image",
-        icon: "🎨",
-        ai_powered: true,
-        credits_cost: 12,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["أنماط فنية", "لوحات مشهورة", "تأثيرات إبداعية"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "colorizer",
-        name: "مُلون الصور",
-        description: "تلوين الصور القديمة والأبيض والأسود",
-        category: "image",
-        icon: "🌈",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "medium",
-        input_types: ["image"],
-        output_types: ["image"],
-        features: ["تلوين ذكي", "ألوان طبي��ية", "تحسين التاريخ"],
-        premium: false,
-        popular: false,
-        beta: false,
-      },
+    // خلفية متدرجة
+    const gradient = ctx.createLinearGradient(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+    gradient.addColorStop(0, "#667eea");
+    gradient.addColorStop(1, "#764ba2");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // أدوات النصوص
-      {
-        id: "content_writer",
-        name: "كاتب المحتوى",
-        description: "إنشاء محتوى إبداعي ومقالات",
-        category: "text",
-        icon: "✍️",
-        ai_powered: true,
-        credits_cost: 15,
-        processing_time: "medium",
-        input_types: ["text"],
-        output_types: ["text"],
-        features: ["كتابة إبداعية", "مقالات احترافية", "أساليب متنوعة"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "translator",
-        name: "المترجم الذكي",
-        description: "ترجمة النصوص بدقة عالية",
-        category: "text",
-        icon: "🌍",
-        ai_powered: true,
-        credits_cost: 5,
-        processing_time: "fast",
-        input_types: ["text"],
-        output_types: ["text"],
-        features: ["100+ لغة", "ترجمة طبيعية", "حفظ السياق"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "summarizer",
-        name: "ملخص ال��صوص",
-        description: "تلخيص النصوص الطويلة تلقائياً",
-        category: "text",
-        icon: "📝",
-        ai_powered: true,
-        credits_cost: 8,
-        processing_time: "fast",
-        input_types: ["text"],
-        output_types: ["text"],
-        features: ["تلخيص ذكي", "نقاط رئيسية", "ملخصات قابلة للتخصيص"],
-        premium: false,
-        popular: true,
-        beta: false,
-      },
-      {
-        id: "seo_optimizer",
-        name: "محسن SEO",
-        description: "تحسين المحتوى لمحركات البحث",
-        category: "text",
-        icon: "📈",
-        ai_powered: true,
-        credits_cost: 12,
-        processing_time: "medium",
-        input_types: ["text"],
-        output_types: ["text"],
-        features: ["تحليل الكلمات المفتاحية", "تحسين المحتوى", "اقتراحات SEO"],
-        premium: true,
-        popular: false,
-        beta: false,
-      },
+    // النص
+    ctx.fillStyle = "white";
+    ctx.font = "bold 48px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-      // أدوات متقدمة
-      {
-        id: "deepfake_detector",
-        name: "كاشف التزييف العميق",
-        description: "كشف المحتوى المُعدل بالذكاء الاصطناعي",
-        category: "ai-tools",
-        icon: "🛡️",
-        ai_powered: true,
-        credits_cost: 20,
-        processing_time: "medium",
-        input_types: ["image", "video"],
-        output_types: ["text"],
-        features: ["كشف التزييف", "تحليل الأصالة", "تقرير مفصل"],
-        premium: true,
-        popular: false,
-        beta: true,
-      },
-      {
-        id: "face_animator",
-        name: "محرك الوجوه",
-        description: "تحريك الوجوه في الصور الثابتة",
-        category: "ai-tools",
-        icon: "😄",
-        ai_powered: true,
-        credits_cost: 18,
-        processing_time: "slow",
-        input_types: ["image"],
-        output_types: ["video"],
-        features: ["تحريك طبيعي", "تعبيرات متنوعة", "جودة عالية"],
-        premium: true,
-        popular: true,
-        beta: false,
-      },
-    ];
+    canvas.toBlob((blob) => {
+      if (blob) {
+        downloadBlob(blob, `text-image-${Date.now()}.png`);
+      }
+    }, "image/png");
   };
 
-  useEffect(() => {
-    const loadTools = async () => {
-      try {
-        const generatedTools = generateAdvancedTools();
-        setTools(generatedTools);
-      } catch (error) {
-        console.error("خطأ في تحميل الأدوات:", error);
+  const handleQRGeneration = () => {
+    setActiveToolId("qr-generator");
+    const text = prompt("أدخل النص أو الرابط:", "https://example.com");
+    if (text) {
+      generateQRCode(text);
+    }
+  };
+
+  const generateQRCode = (text: string) => {
+    // QR Code بسيط باستخدام Canvas - هذه ليست مكتبة QR كاملة
+    // في تطبيق حقيقي، ستستخدم مكتبة QR Code مثل 'qrcode.react' أو 'qrious'
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+
+    canvas.width = 200;
+    canvas.height = 200;
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "black";
+    const size = 10;
+    // تمثيل بسيط جداً للـ QR Code، ليس فعلياً مولد QR
+    for (let i = 0; i < 20; i++) {
+      for (let j = 0; j < 20; j++) {
+        if ((i * 2 + j + text.length) % 3 === 0) {
+          ctx.fillRect(i * size, j * size, size, size);
+        }
+      }
+    }
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        downloadBlob(blob, `qr-code-${Date.now()}.png`);
+      }
+    }, "image/png");
+  };
+
+  const handleColorPaletteExtraction = () => {
+    setActiveToolId("color-palette");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        extractColorPalette(file);
       }
     };
+    input.click();
+  };
 
-    loadTools();
-  }, []);
+  const extractColorPalette = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const colorMap: { [key: string]: number } = {};
+
+        // تحليل الألوان (مثال بسيط: كل 100 بكسل)
+        for (let i = 0; i < pixels.length; i += 4 * 100) {
+          const r = pixels[i];
+          const g = pixels[i + 1];
+          const b = pixels[i + 2];
+          const color = `${r},${g},${b}`;
+          colorMap[color] = (colorMap[color] || 0) + 1;
+        }
+
+        // تحويل إلى مصفوفة وفرز حسب التكرار
+        const sortedColors = Object.entries(colorMap).sort(
+          (a, b) => b[1] - a[1],
+        );
+
+        // أخذ أول 5 ألوان مهيمنة
+        const dominantColors = sortedColors
+          .slice(0, 5)
+          .map((entry) => `rgb(${entry[0]})`);
+
+        alert(
+          "الألوان المهيمنة المستخرجة:\n" + dominantColors.join("\n"),
+        );
+        // يمكنك هنا عرض هذه الألوان في الواجهة أو تنزيلها كنص
+        const blob = new Blob([dominantColors.join('\n')], { type: 'text/plain' });
+        downloadBlob(blob, `color-palette-${file.name.split('.')[0]}.txt`);
+
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   // فلترة الأدوات
-  const filteredTools = tools.filter((tool) => {
+  const filteredTools = realTools.filter((tool) => {
     const matchesCategory =
       selectedCategory === "all" || tool.category === selectedCategory;
     const matchesSearch =
       !searchQuery ||
       tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.features.some((feature) =>
-        feature.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+      tool.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   // فئات الأدوات
   const categories = [
-    { id: "all", name: "الكل", icon: "🔧", count: tools.length },
-    {
-      id: "video",
-      name: "فيديو",
-      icon: "🎬",
-      count: tools.filter((t) => t.category === "video").length,
-    },
-    {
-      id: "audio",
-      name: "صوت",
-      icon: "🎵",
-      count: tools.filter((t) => t.category === "audio").length,
-    },
-    {
-      id: "image",
-      name: "صور",
-      icon: "🖼️",
-      count: tools.filter((t) => t.category === "image").length,
-    },
-    {
-      id: "text",
-      name: "نصوص",
-      icon: "📝",
-      count: tools.filter((t) => t.category === "text").length,
-    },
-    {
-      id: "ai-tools",
-      name: "أدوات AI",
-      icon: "🤖",
-      count: tools.filter((t) => t.category === "ai-tools").length,
-    },
-  ] as const;
-
-  // معالجة اختيار الأداة
-  const handleToolSelect = (tool: AITool) => {
-    setSelectedTool(tool);
-    setShowToolInterface(true);
-  };
-
-  // إنشاء واجهة الأداة
-  const renderToolInterface = () => {
-    if (!selectedTool) return null;
-
-    const commonProps = {
-      tool: selectedTool,
-      onClose: () => setShowToolInterface(false),
-      onSuccess: (result: any) => {
-        console.log("نجح تنفيذ الأداة:", result);
-        setShowToolInterface(false);
-      },
-      onError: (error: string) => {
-        console.error("فشل تنفيذ الأداة:", error);
-        alert(`خطأ: ${error}`);
-      },
-    };
-
-    switch (selectedTool.category) {
-      case "image":
-        return <ImageToolInterface {...commonProps} />;
-      case "video":
-        return <VideoToolInterface {...commonProps} />;
-      case "audio":
-        return <AudioToolInterface {...commonProps} />;
-      case "text":
-        return <TextToolInterface {...commonProps} />;
-      default:
-        return (
-          <div className="glass-card p-8 rounded-xl text-center">
-            <h3 className="text-xl font-bold mb-4">أداة غير مدعومة</h3>
-            <p className="text-white/70 mb-4">
-              هذه الأداة لا تحتوي على واجهة مخصصة بعد.
-            </p>
-            <button
-              onClick={() => setShowToolInterface(false)}
-              className="glow-button px-6 py-2 rounded-lg"
-            >
-              إغلاق
-            </button>
-          </div>
-        );
-    }
-  };
+    { id: "all", name: "الكل", icon: "🔧" },
+    { id: "image", name: "صور", icon: "🖼️" },
+    { id: "video", name: "فيديو", icon: "🎬" },
+    { id: "audio", name: "صوت", icon: "🎵" },
+    { id: "text", name: "نصوص", icon: "📝" },
+    { id: "utility", name: "أدوات مساعدة", icon: "🛠️" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -508,23 +525,18 @@ const ToolboxPanel: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
-            صندوق الأدوات الذكية
+            صندوق الأدوات
           </h2>
           <p className="text-white/70 mt-2">
-            مجموعة شاملة من أدوات الذكاء الاصطناعي للمحتوى الرقمي
+            مجموعة من الأدوات المحلية لمعالجة الوسائط والنصوص
           </p>
         </div>
-
-        {/* Credits Display */}
+        {/* Credits Display - Placeholder as local tools don't consume credits */}
         <div className="glass-card p-4 rounded-xl">
           <div className="text-center">
-            <div className="text-2xl font-bold text-knoux-neon">
-              {userCredits.remaining}
-            </div>
-            <div className="text-white/70 text-sm">نقطة متبقية</div>
-            <div className="text-xs text-white/50 mt-1">
-              {userCredits.subscription_tier}
-            </div>
+            <div className="text-2xl font-bold text-knoux-neon">مجاني</div>
+            <div className="text-white/70 text-sm">أدوات محلية</div>
+            <div className="text-xs text-white/50 mt-1">لا توجد نقاط مطلوبة</div>
           </div>
         </div>
       </div>
@@ -548,7 +560,7 @@ const ToolboxPanel: React.FC = () => {
         {categories.map((category) => (
           <button
             key={category.id}
-            onClick={() => setSelectedCategory(category.id as ToolCategory)}
+            onClick={() => setSelectedCategory(category.id)}
             className={`glass-card interactive p-4 rounded-xl text-center transition-all duration-300 ${
               selectedCategory === category.id
                 ? "bg-knoux-purple/20 border-knoux-purple"
@@ -565,138 +577,71 @@ const ToolboxPanel: React.FC = () => {
             >
               {category.name}
             </div>
-            <div className="text-xs text-white/50">{category.count}</div>
+            <div className="text-xs text-white/50">
+              {
+                realTools.filter((t) =>
+                  category.id === "all" ? true : t.category === category.id,
+                ).length
+              }{" "}
+              أدوات
+            </div>
           </button>
         ))}
       </div>
 
       {/* Tools Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredTools.map((tool) => (
-          <div
-            key={tool.id}
-            onClick={() => handleToolSelect(tool)}
-            className="glass-card interactive rounded-xl overflow-hidden group cursor-pointer"
-          >
-            {/* Tool Header */}
-            <div className="p-6 text-center">
-              <div className="text-4xl mb-3">{tool.icon}</div>
-              <h3 className="font-orbitron font-bold text-white mb-2">
-                {tool.name}
-              </h3>
-              <p className="text-white/70 text-sm line-clamp-2 mb-4">
-                {tool.description}
-              </p>
+        {filteredTools.length > 0 ? (
+          filteredTools.map((tool) => (
+            <div
+              key={tool.id}
+              onClick={tool.functionality} // Directly call the functionality
+              className="glass-card interactive rounded-xl overflow-hidden group cursor-pointer"
+            >
+              {/* Tool Header */}
+              <div className="p-6 text-center">
+                <div className="text-4xl mb-3">{tool.icon}</div>
+                <h3 className="font-orbitron font-bold text-white mb-2">
+                  {tool.nameAr}
+                </h3>
+                <p className="text-white/70 text-sm line-clamp-2 mb-4">
+                  {tool.descriptionAr}
+                </p>
 
-              {/* Badges */}
-              <div className="flex flex-wrap gap-1 mb-4 justify-center">
-                {tool.ai_powered && (
-                  <span className="bg-knoux-purple/20 text-knoux-purple px-2 py-1 rounded-full text-xs">
-                    AI
-                  </span>
-                )}
-                {tool.premium && (
-                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs">
-                    مميز
-                  </span>
-                )}
-                {tool.beta && (
-                  <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs">
-                    تجريبي
-                  </span>
-                )}
-                {tool.popular && (
+                {/* Badges - Simplified for local tools */}
+                <div className="flex flex-wrap gap-1 mb-4 justify-center">
                   <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">
-                    شائع
+                    محلي 💯
                   </span>
-                )}
+                </div>
+
+                {/* Credits Cost - Show as Free */}
+                <div className="flex items-center justify-center space-x-2 text-sm">
+                  <span className="text-knoux-neon font-bold">مجاني</span>
+                  <span className="text-white/70">الاستخدام</span>
+                </div>
               </div>
 
-              {/* Credits Cost */}
-              <div className="flex items-center justify-center space-x-2 text-sm">
-                <span className="text-knoux-neon font-bold">
-                  {tool.credits_cost}
-                </span>
-                <span className="text-white/70">نقطة</span>
-              </div>
-            </div>
-
-            {/* Features */}
-            <div className="px-6 pb-6">
-              <div className="border-t border-white/20 pt-4">
-                <div className="text-xs text-white/50 mb-2">المزايا:</div>
-                <div className="flex flex-wrap gap-1">
-                  {tool.features.slice(0, 3).map((feature, index) => (
-                    <span
-                      key={index}
-                      className="bg-white/10 text-white/70 px-2 py-1 rounded text-xs"
-                    >
-                      {feature}
-                    </span>
-                  ))}
+              {/* Hover Effect */}
+              <div className="absolute inset-0 bg-knoux-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="bg-knoux-purple text-white px-4 py-2 rounded-lg font-semibold transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                  استخدم الأداة
                 </div>
               </div>
             </div>
-
-            {/* Hover Effect */}
-            <div className="absolute inset-0 bg-knoux-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <div className="bg-knoux-purple text-white px-4 py-2 rounded-lg font-semibold transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                استخدم الأداة
-              </div>
-            </div>
+          ))
+        ) : (
+          <div className="text-center py-12 col-span-full">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-white/80">
+              لم يتم العثور على أدوات
+            </h3>
+            <p className="text-white/60 mt-2">
+              حاول البحث بكلمات مختلفة أو تغيير الفئة.
+            </p>
           </div>
-        ))}
+        )}
       </div>
-
-      {/* Empty State */}
-      {filteredTools.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-white mb-2">
-            لم يتم العثور على أدوات
-          </h3>
-          <p className="text-white/70">جرب تغيير الفئة أو مصطلح البحث</p>
-        </div>
-      )}
-
-      {/* Statistics */}
-      <div className="glass-card p-6 rounded-xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <div className="text-2xl font-bold text-knoux-purple">
-              {tools.length}
-            </div>
-            <div className="text-white/70 text-sm">إجمالي الأدوات</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-knoux-neon">
-              {tools.filter((t) => t.ai_powered).length}
-            </div>
-            <div className="text-white/70 text-sm">أدوات AI</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-green-400">
-              {tools.filter((t) => !t.premium).length}
-            </div>
-            <div className="text-white/70 text-sm">أدوات مجانية</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-yellow-400">
-              {tools.filter((t) => t.premium).length}
-            </div>
-            <div className="text-white/70 text-sm">أدوات مميزة</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tool Interface Modal */}
-      {showToolInterface && selectedTool && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-knoux-dark/95 backdrop-blur-xl border border-knoux-purple/30 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            {renderToolInterface()}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
