@@ -144,7 +144,7 @@ const LuxuryApp = () => {
     async (recording: Recording) => {
       if (!recording.transcript || recording.transcript.trim().length < 10) {
         addNotification(
-          `تم ��خطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
+          `تم ���خطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
           "info",
         );
         setRecordings((prev) =>
@@ -876,6 +876,8 @@ const LuxuryApp = () => {
             <AIBodyEditorPanel />
           </div>
         );
+      case "arabic-ai-tools":
+        return <ArabicAIToolsPanel />;
       case "knoux-morph-core":
         return <KnouxMorphCorePanel onClose={() => setCurrentView("main")} />;
       case "elysian":
