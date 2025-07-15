@@ -93,8 +93,28 @@ export interface AITool {
   ai_powered: boolean;
   credits_cost: number;
   processing_time: "fast" | "medium" | "slow"; // <30s, 30s-2min, >2min
-  input_types: ("text" | "image" | "video" | "audio")[];
-  output_types: ("text" | "image" | "video" | "audio")[];
+  input_types: (
+    | "text"
+    | "image"
+    | "video"
+    | "audio"
+    | "file"
+    | "screen"
+    | "url"
+    | "data"
+    | "auto"
+  )[];
+  output_types: (
+    | "text"
+    | "image"
+    | "video"
+    | "audio"
+    | "file"
+    | "screen"
+    | "url"
+    | "data"
+    | "auto"
+  )[];
   features: string[];
   premium: boolean;
   popular: boolean;

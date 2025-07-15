@@ -5,7 +5,6 @@ import {
   MoonIcon,
   SparklesIcon,
   WorkflowIcon,
-  KeyboardIcon,
   FilterIcon,
 } from "./icons";
 import { Theme, RecordingSettings, Hotkeys } from "../types";

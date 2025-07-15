@@ -16,6 +16,10 @@ import ToolboxPanel from "./ToolboxPanel";
 import OfflineAIToolsPanel from "./OfflineAIToolsPanel";
 import VisualPatchLabPanel from "./VisualPatchLabPanel";
 import AIBodyEditorPanel from "./AIBodyEditorPanel";
+import KnouxMorphCorePanel from "./KnouxMorphCorePanel"; // New import
+import ArabicAIToolsPanel from "./ArabicAIToolsPanel"; // New import
+import AutoAllocationCoordinator from "./AutoAllocationCoordinator"; // New import
+import RealContentManager from "./RealContentManager"; // New import
 import ElysianCanvas from "../elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./AdvancedProgressIndicator";
 import AdvancedModelSettings from "./AdvancedModelSettings";
@@ -34,11 +38,9 @@ import UIEnhancer from "./UIEnhancer";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
-import { videoProcessor } from "../services/videoProcessor";
 import { audioProcessor } from "../services/audioProcessor";
-import { imageProcessor } from "../services/imageProcessor";
 import { feedbackService } from "../services/feedbackService";
-import { systemTester } from "../services/systemTester";
+// Removed: videoProcessor, imageProcessor, systemTester as per merge conflict resolution
 import {
   enhancedModelManager,
   LoadingProgress,
@@ -62,7 +64,10 @@ const LuxuryApp = () => {
     | "offline-tools"
     | "visual-patch-lab"
     | "ai-body-editor"
+    | "knoux-morph-core" // New view
+    | "arabic-ai-tools" // New view
     | "elysian"
+    | "real-content" // New view
   >("main");
 
   const [settings, setSettings] = useState<RecordingSettings>({
@@ -107,6 +112,8 @@ const LuxuryApp = () => {
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress[]>([]);
   const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
   const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
+  const [showAutoAllocation, setShowAutoAllocation] = useState(false); // New state
+  const [showRealContent, setShowRealContent] = useState(false); // New state
 
   const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
@@ -138,7 +145,7 @@ const LuxuryApp = () => {
     async (recording: Recording) => {
       if (!recording.transcript || recording.transcript.trim().length < 10) {
         addNotification(
-          `تم ��خطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
+          `تم تخطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`, // Resolved conflict
           "info",
         );
         setRecordings((prev) =>
@@ -209,7 +216,7 @@ const LuxuryApp = () => {
                 ),
               );
               feedbackService.dismiss(loadingId);
-              addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
+              addNotification(`فشل التحليل الذكي: ${task.error}`, "error"); // Resolved conflict
             } else if (task.status === "processing") {
               setTimeout(checkTaskStatus, 2000);
             }
@@ -220,7 +227,7 @@ const LuxuryApp = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
-        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
+        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error"); // Resolved conflict
         setRecordings((prev) =>
           prev.map((r) =>
             r.id === recording.id
@@ -257,7 +264,7 @@ const LuxuryApp = () => {
       } else {
         setRecordings((prev) => [newRecording, ...prev]);
         addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
-        feedbackService.success(`��م حفظ التسجيل بنجاح! 🎬`, {
+        feedbackService.success(`تم حفظ التسجيل بنجاح! 🎬`, { // Resolved conflict
           actions: [
             {
               label: "عرض",
@@ -414,7 +421,7 @@ const LuxuryApp = () => {
 
   const handleScreenshot = useCallback(async () => {
     try {
-      const loadingId = feedbackService.loading("جار التقاط لقطة الشاشة...", 0);
+      const loadingId = feedbackService.loading("جار التقاط لقطة الشاشة...", 0); // Resolved conflict
       const result = await recorderActions.takeScreenshot();
       feedbackService.dismiss(loadingId);
 
@@ -664,9 +671,40 @@ const LuxuryApp = () => {
               <FilesIcon size={48} className="mx-auto" />
             </div>
             <div className="luxury-text font-bold text-lg mb-1">
-              إدارة الملف��ت
+              إدارة الملفات
             </div>
             <div className="luxury-text text-sm opacity-70">File Manager</div>
+          </button>
+
+          {/* New buttons from main branch */}
+          <button
+            onClick={() => setCurrentView("arabic-ai-tools")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group hologram-effect border-2 border-yellow-500/50"
+          >
+            <div className="mb-3">
+              <div className="text-5xl mx-auto text-yellow-400">🤖</div>
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1 text-yellow-300">
+              أدوات الذكاء الاصطناعي
+            </div>
+            <div className="luxury-text text-sm opacity-70 text-yellow-400">
+              38 أداة عربية • محلياً
+            </div>
+          </button>
+
+          <button
+            onClick={() => setCurrentView("knoux-morph-core")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group cosmic-glow border-2 border-purple-500/50"
+          >
+            <div className="mb-3">
+              <div className="text-5xl mx-auto text-purple-400">🧱</div>
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1 text-purple-300">
+              Knoux MorphCore™
+            </div>
+            <div className="luxury-text text-sm opacity-70 text-purple-400">
+              50 أداة محلية • بدون AI
+            </div>
           </button>
 
           <button
@@ -717,7 +755,7 @@ const LuxuryApp = () => {
         {errorReports.length > 0 && (
           <div className="luxury-glass-card space-y-3">
             <h3 className="luxury-text font-semibold text-lg flex items-center gap-2">
-              ���️ تقارير الأخطاء
+              ⚠️ تقارير الأخطاء
             </h3>
             {errorReports.slice(0, 3).map((report) => (
               <div
@@ -837,8 +875,26 @@ const LuxuryApp = () => {
             <AIBodyEditorPanel />
           </div>
         );
+      case "arabic-ai-tools": // New case
+        return <ArabicAIToolsPanel />;
+      case "knoux-morph-core": // New case
+        return <KnouxMorphCorePanel onClose={() => setCurrentView("main")} />;
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
+      case "real-content": // New case
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <RealContentManager
+              onContentUpdate={(stats) => {
+                console.log("تم تحديث المحتوى الحقيقي:", stats);
+                addNotification(
+                  `تم تفعيل ${stats.total} عنصر محتوى حقيقي!`,
+                  "success",
+                );
+              }}
+            />
+          </div>
+        );
       default:
         return renderMainView();
     }
@@ -858,78 +914,111 @@ const LuxuryApp = () => {
       {/* الجسيمات المتحركة */}
       <FloatingParticles />
 
-      {/* Navigation */}
+      {/* الرأسية الفاخرة */}
+      <LuxuryHeader
+        onSettingsClick={() => setIsSettingsOpen(true)}
+        onNotificationsClick={() => setIsNotificationsOpen(true)}
+        onThemeToggle={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+        currentTheme={theme}
+        notificationCount={notifications.length}
+        onAdvancedSettingsClick={() => setIsAdvancedSettingsOpen(true)}
+        onAutoAllocationClick={() => setShowAutoAllocation(true)} // New prop
+        onRealContentClick={() => setShowRealContent(true)} // New prop
+      />
+
+      {/* التنقل الخلفي */}
       {currentView !== "main" && (
-        <BackNavigation
-          currentView={currentView}
-          onBack={() => setCurrentView("main")}
-          onNavigate={setCurrentView}
-        />
+        <BackNavigation onBack={() => setCurrentView("main")} />
       )}
 
-      {/* Header */}
-      <LuxuryHeader
-        isRecording={recorderState.isRecording}
-        onSettingsClick={() => setIsSettingsOpen(true)}
-        onNotificationsClick={() => setIsNotificationsOpen((p) => !p)}
-        notificationCount={notifications.length}
-        currentView={currentView}
-        onViewChange={setCurrentView}
-      />
+      {/* المحتوى الرئيسي بناءً على currentView */}
+      {renderContent()}
 
-      {/* Notifications */}
-      <NotificationsDropdown
-        isOpen={isNotificationsOpen}
-        notifications={notifications}
-        onClose={() => setIsNotificationsOpen(false)}
-        onDismiss={(id) =>
-          setNotifications((p) => p.filter((n) => n.id !== id))
-        }
-      />
-
-      {/* Settings Modal */}
+      {/* إعدادات التسجيل */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        theme={theme}
-        setTheme={setTheme}
         settings={settings}
         onSave={onSettingsSave}
       />
 
-      {/* Advanced Model Settings */}
+      {/* إعدادات النموذج المتقدمة */}
       <AdvancedModelSettings
         isOpen={isAdvancedSettingsOpen}
         onClose={() => setIsAdvancedSettingsOpen(false)}
-        onSave={(modelSettings) => {
-          console.log("حُفظت إعدادات النماذج:", modelSettings);
-          addNotification("تم حفظ إعدادات النماذج المتقدمة!", "success");
-        }}
+        loadingProgress={loadingProgress}
+        memoryStatus={memoryStatus}
+        errorReports={errorReports}
+        onLoadingProgress={handleLoadingProgress} // Pass handler
+        onMemoryStatusChange={setMemoryStatus} // Pass handler
+      />
+
+      {/* Notifications Dropdown */}
+      <NotificationsDropdown
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+        notifications={notifications}
+        onClearNotification={(id) => setNotifications(prev => prev.filter(n => n.id !== id))}
+        onClearAll={() => setNotifications([])}
       />
 
       {/* Trim Modal */}
       {pendingRecording && (
         <TrimModal
           recording={pendingRecording}
-          onSave={(rec, trimData) => {
-            addNotification("تم قص الفيديو بنجاح! ✂️", "success");
-            feedbackService.success("تم قص الفيديو بنجاح! ✂️");
-            setRecordings((prev) => [{ ...rec, trim: trimData }, ...prev]);
-            setPendingRecording(null);
-          }}
-          onSaveFull={(rec) => {
-            setRecordings((prev) => [rec, ...prev]);
-            addNotification(`Recording "${rec.name}" saved.`, "success");
-            feedbackService.success("تم حفظ التسجيل كاملاً! 🎬");
-            if (rec.isProcessing) runAiProcessing(rec);
-            setPendingRecording(null);
-          }}
           onClose={() => setPendingRecording(null)}
+          onTrimComplete={(trimmedBlob) => {
+            const trimmedRecording = {
+              ...pendingRecording,
+              blob: trimmedBlob,
+              url: URL.createObjectURL(trimmedBlob),
+              size: trimmedBlob.size,
+            };
+            setRecordings((prev) => [trimmedRecording, ...prev]);
+            addNotification(
+              `تم قص التسجيل "${trimmedRecording.name}" وحفظه.`,
+              "success",
+            );
+            if (trimmedRecording.isProcessing && trimmedRecording.transcript) {
+              runAiProcessing(trimmedRecording);
+            }
+            setPendingRecording(null);
+          }}
         />
       )}
 
-      {/* Main Content */}
-      {renderContent()}
+      {/* Auto Allocation Coordinator Modal */}
+      {showAutoAllocation && (
+        <Modal
+          isOpen={showAutoAllocation}
+          onClose={() => setShowAutoAllocation(false)}
+          title="تنسيق التخصيص التلقائي"
+        >
+          <AutoAllocationCoordinator
+            onAllocationUpdate={(stats) => {
+              addNotification(`تم تخصيص ${stats.totalAllocated} مورد تلقائياً.`, "info");
+              console.log("Auto Allocation Stats:", stats);
+            }}
+            onClose={() => setShowAutoAllocation(false)}
+          />
+        </Modal>
+      )}
+
+      {/* Real Content Manager Modal (if needed, or directly rendered) */}
+      {showRealContent && (
+        <Modal
+          isOpen={showRealContent}
+          onClose={() => setShowRealContent(false)}
+          title="إدارة المحتوى الحقيقي"
+        >
+          <RealContentManager
+            onContentUpdate={(stats) => {
+              addNotification(`تم تفعيل ${stats.total} عنصر محتوى حقيقي!`, "success");
+              console.log("Real Content Stats:", stats);
+            }}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

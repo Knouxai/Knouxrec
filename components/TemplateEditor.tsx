@@ -13,7 +13,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   onClose,
 }) => {
   const [customizations, setCustomizations] = useState<Record<string, any>>({});
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl] = useState<string | null>(null);
   const [isRendering, setIsRendering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

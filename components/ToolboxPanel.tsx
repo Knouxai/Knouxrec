@@ -1,5 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import VisualPatchToolCard, { VisualPatchTool } from "./VisualPatchToolCard"; // Import the enhanced card
+import Modal from "./Modal"; // Import the new Modal component
 
+// Define the RealTool interface
 interface RealTool {
   id: string;
   name: string;
@@ -9,18 +12,102 @@ interface RealTool {
   category: "image" | "video" | "audio" | "text" | "utility";
   icon: string;
   isLocal: boolean;
-  functionality: () => void;
+  functionality: () => Promise<void>; // Functionality now returns a Promise<void>
   fileTypes?: string[];
   outputType?: string;
 }
 
+// Define the Modal state interfaces
+interface AlertModalState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+interface PromptModalState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  inputValue: string;
+  callback: (value: string | null) => void;
+}
+
 const ToolboxPanel: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [processingFiles, setProcessingFiles] = useState<Set<string>>(
-    new Set(),
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<Map<string, boolean>>(new Map());
+
+  // Modal states
+  const [alertModal, setAlertModal] = useState<AlertModalState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+  const [promptModal, setPromptModal] = useState<PromptModalState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    inputValue: "",
+    callback: () => {},
+  });
+
+  // Helper to show custom alert modal
+  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setAlertModal({ isOpen: true, title, message, type });
+  };
+
+  // Helper to show custom prompt modal
+  const showPrompt = (title: string, message: string, defaultValue: string, callback: (value: string | null) => void) => {
+    setPromptModal({ isOpen: true, title, message, inputValue: defaultValue, callback });
+  };
+
+  // Helper to download a Blob
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Function to set tool processing status
+  const setToolProcessing = (toolId: string, isProcessing: boolean) => {
+    setProcessingStatus(prev => {
+      const newMap = new Map(prev);
+      newMap.set(toolId, isProcessing);
+      return newMap;
+    });
+  };
+
+  // Centralized file input ref and handler
+  const hiddenFileInput = useRef<HTMLInputElement>(null);
+  const currentFileCallback = useRef<((file: File) => void) | null>(null);
+
+  const triggerFileInput = (accept: string, callback: (file: File) => void) => {
+    currentFileCallback.current = callback;
+    if (hiddenFileInput.current) {
+      hiddenFileInput.current.accept = accept;
+      hiddenFileInput.current.click();
+    }
+  };
+
+  const handleHiddenFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && currentFileCallback.current) {
+      currentFileCallback.current(file);
+    }
+    // Reset the input value to allow selecting the same file again
+    if (hiddenFileInput.current) {
+      hiddenFileInput.current.value = '';
+    }
+    currentFileCallback.current = null;
+  };
 
   // أدوات حقيقية تعمل محلياً 100%
   const realTools: RealTool[] = [
@@ -28,535 +115,630 @@ const ToolboxPanel: React.FC = () => {
       id: "image-resizer",
       name: "Image Resizer",
       nameAr: "تغيير حجم الصور",
-      description: "Resize images to custom dimensions",
-      descriptionAr: "تغيير أبعاد الصور إلى أحجام مخصصة",
+      description: "Resize images to custom dimensions locally in your browser.",
+      descriptionAr: "تغيير أبعاد الصور إلى أحجام مخصصة محلياً في متصفحك.",
       category: "image",
-      icon: "🖼️",
+      icon: "📏",
       isLocal: true,
       fileTypes: ["image/jpeg", "image/png", "image/webp"],
       outputType: "image",
-      functionality: () => handleImageResize(),
+      functionality: async () => {
+        setToolProcessing("image-resizer", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            triggerFileInput("image/*", async (file) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                  const canvas = document.createElement("canvas");
+                  const ctx = canvas.getContext("2d")!;
+
+                  showPrompt("تغيير حجم الصورة", "أدخل العرض الجديد:", "800", (widthStr) => {
+                    if (!widthStr) { showAlert("إلغاء", "تم إلغاء عملية تغيير الحجم."); reject(); return; }
+                    showPrompt("تغيير حجم الصورة", "أدخل الارتفاع الجديد:", "600", (heightStr) => {
+                      if (!heightStr) { showAlert("إلغاء", "تم إلغاء عملية تغيير الحجم."); reject(); return; }
+
+                      const width = parseInt(widthStr);
+                      const height = parseInt(heightStr);
+
+                      if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                        showAlert("خطأ", "أبعاد غير صالحة. يرجى إدخال أرقام موجبة.", "error");
+                        reject();
+                        return;
+                      }
+
+                      canvas.width = width;
+                      canvas.height = height;
+                      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                      canvas.toBlob((blob) => {
+                        if (blob) {
+                          downloadBlob(blob, `resized-${file.name}`);
+                          showAlert("نجاح", "تم تغيير حجم الصورة بنجاح وتنزيلها.", "success");
+                          resolve();
+                        } else {
+                          showAlert("خطأ", "فشل في إنشاء الصورة المعدلة.", "error");
+                          reject();
+                        }
+                      }, file.type);
+                    });
+                  });
+                };
+                img.onerror = () => {
+                  showAlert("خطأ", "فشل في تحميل الصورة.", "error");
+                  reject();
+                };
+                img.src = e.target?.result as string;
+              };
+              reader.onerror = () => {
+                showAlert("خطأ", "فشل في قراءة الملف.", "error");
+                reject();
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+        } catch (error) {
+          console.error("Image resize operation failed:", error);
+          if (error instanceof Error && error.message !== "المهمة ألغيت.") { // Avoid showing alert if already cancelled by user
+            showAlert("خطأ", "حدث خطأ أثناء تغيير حجم الصورة.", "error");
+          }
+        } finally {
+          setToolProcessing("image-resizer", false);
+        }
+      },
     },
     {
       id: "image-filter",
       name: "Image Filters",
       nameAr: "فلاتر الصور",
-      description: "Apply filters to images using Canvas",
-      descriptionAr: "تطبيق فلاتر على الصور باستخدام Canvas",
+      description: "Apply various artistic filters to your images using Canvas directly in the browser.",
+      descriptionAr: "تطبيق فلاتر فنية متنوعة على صورك باستخدام Canvas مباشرة في المتصفح.",
       category: "image",
       icon: "🎨",
       isLocal: true,
       fileTypes: ["image/jpeg", "image/png", "image/webp"],
       outputType: "image",
-      functionality: () => handleImageFilters(),
+      functionality: async () => {
+        setToolProcessing("image-filter", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            triggerFileInput("image/*", async (file) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                  const canvas = document.createElement("canvas");
+                  const ctx = canvas.getContext("2d")!;
+
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+
+                  showPrompt("تطبيق فلتر", "أدخل اسم الفلتر (مثال: grayscale, sepia, blur(5px)):", "grayscale(100%)", (filterStyle) => {
+                    if (!filterStyle) { showAlert("إلغاء", "تم إلغاء عملية الفلتر.", "info"); reject(); return; }
+
+                    ctx.filter = filterStyle;
+                    ctx.drawImage(img, 0, 0);
+
+                    canvas.toBlob((blob) => {
+                      if (blob) {
+                        downloadBlob(blob, `filtered-${file.name}`);
+                        showAlert("نجاح", "تم تطبيق الفلتر وتنزيل الصورة.", "success");
+                        resolve();
+                      } else {
+                        showAlert("خطأ", "فشل في إنشاء الصورة بعد الفلتر.", "error");
+                        reject();
+                      }
+                    }, file.type);
+                  });
+                };
+                img.onerror = () => {
+                  showAlert("خطأ", "فشل في تحميل الصورة.", "error");
+                  reject();
+                };
+                img.src = e.target?.result as string;
+              };
+              reader.onerror = () => {
+                showAlert("خطأ", "فشل في قراءة الملف.", "error");
+                reject();
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+        } catch (error) {
+          console.error("Image filter operation failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء تطبيق الفلتر على الصورة.", "error");
+        } finally {
+          setToolProcessing("image-filter", false);
+        }
+      },
     },
     {
       id: "image-format-converter",
       name: "Format Converter",
       nameAr: "محول صيغ الصور",
-      description: "Convert between image formats",
-      descriptionAr: "تحويل بين صيغ الصور المختلفة",
+      description: "Convert between various image formats like JPG, PNG, and WebP locally.",
+      descriptionAr: "تحويل بين صيغ الصور المختلفة مثل JPG، PNG، و WebP محلياً.",
       category: "image",
       icon: "🔄",
       isLocal: true,
       fileTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
       outputType: "image",
-      functionality: () => handleFormatConversion(),
+      functionality: async () => {
+        setToolProcessing("image-format-converter", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            triggerFileInput("image/*", async (file) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                  const canvas = document.createElement("canvas");
+                  const ctx = canvas.getContext("2d")!;
+
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  ctx.drawImage(img, 0, 0);
+
+                  showPrompt("تحويل صيغة الصورة", "أدخل الصيغة الجديدة (png, jpeg, webp):", "png", (format) => {
+                    if (!format) { showAlert("إلغاء", "تم إلغاء عملية التحويل.", "info"); reject(); return; }
+                    const mimeType = `image/${format.toLowerCase()}`;
+                    if (!["image/png", "image/jpeg", "image/webp"].includes(mimeType)) {
+                      showAlert("خطأ", "صيغة غير مدعومة. يرجى اختيار png, jpeg, أو webp.", "error");
+                      reject();
+                      return;
+                    }
+
+                    canvas.toBlob((blob) => {
+                      if (blob) {
+                        downloadBlob(blob, `converted-${file.name.split(".")[0]}.${format.toLowerCase()}`);
+                        showAlert("نجاح", `تم التحويل إلى ${format.toUpperCase()} وتنزيل الصورة.`, "success");
+                        resolve();
+                      } else {
+                        showAlert("خطأ", "فشل في إنشاء الصورة بالصيغة الجديدة.", "error");
+                        reject();
+                      }
+                    }, mimeType);
+                  });
+                };
+                img.onerror = () => {
+                  showAlert("خطأ", "فشل في تحميل الصورة.", "error");
+                  reject();
+                };
+                img.src = e.target?.result as string;
+              };
+              reader.onerror = () => {
+                showAlert("خطأ", "فشل في قراءة الملف.", "error");
+                reject();
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+        } catch (error) {
+          console.error("Format conversion failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء تحويل صيغة الصورة.", "error");
+        } finally {
+          setToolProcessing("image-format-converter", false);
+        }
+      },
     },
     {
       id: "video-thumbnail",
       name: "Video Thumbnail",
       nameAr: "صورة مصغرة للفيديو",
-      description: "Extract thumbnail from video",
-      descriptionAr: "استخراج صورة مصغرة من الفيديو",
+      description: "Extract a high-quality thumbnail image from any video file.",
+      descriptionAr: "استخراج صورة مصغرة عالية الجودة من أي ملف فيديو.",
       category: "video",
-      icon: "📹",
+      icon: "📸", // Changed icon for clarity
       isLocal: true,
       fileTypes: ["video/mp4", "video/webm", "video/ogg"],
       outputType: "image",
-      functionality: () => handleVideoThumbnail(),
+      functionality: async () => {
+        setToolProcessing("video-thumbnail", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            triggerFileInput("video/*", async (file) => {
+              const video = document.createElement("video");
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d")!;
+
+              video.onloadedmetadata = () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                video.currentTime = 1; // Seek to 1 second
+              };
+
+              video.onseeked = () => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => {
+                  if (blob) {
+                    downloadBlob(blob, `thumbnail-${file.name.split(".")[0]}.png`);
+                    showAlert("نجاح", "تم استخراج الصورة المصغرة وتنزيلها.", "success");
+                    resolve();
+                  } else {
+                    showAlert("خطأ", "فشل في استخراج الصورة المصغرة.", "error");
+                    reject();
+                  }
+                }, "image/png");
+                URL.revokeObjectURL(video.src); // Clean up URL object
+              };
+
+              video.onerror = () => {
+                showAlert("خطأ", "فشل في تحميل الفيديو.", "error");
+                reject();
+              };
+
+              video.src = URL.createObjectURL(file);
+            });
+          });
+        } catch (error) {
+          console.error("Video thumbnail extraction failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء استخراج الصورة المصغرة للفيديو.", "error");
+        } finally {
+          setToolProcessing("video-thumbnail", false);
+        }
+      },
     },
     {
       id: "audio-visualizer",
       name: "Audio Visualizer",
       nameAr: "مُصور الصوت",
-      description: "Create audio visualization",
-      descriptionAr: "إنشاء تصور بصري للصوت",
+      description: "Generate a visual representation (waveform) of your audio files.",
+      descriptionAr: "إنشاء تمثيل بصري (موجة صوتية) لملفاتك الصوتية.",
       category: "audio",
       icon: "🎵",
       isLocal: true,
       fileTypes: ["audio/mp3", "audio/wav", "audio/ogg"],
       outputType: "image",
-      functionality: () => handleAudioVisualization(),
+      functionality: async () => {
+        setToolProcessing("audio-visualizer", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            triggerFileInput("audio/*", async (file) => {
+              try {
+                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                const arrayBuffer = await file.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d")!;
+
+                canvas.width = 800;
+                canvas.height = 200;
+
+                const data = audioBuffer.getChannelData(0);
+                const step = Math.ceil(data.length / canvas.width);
+
+                ctx.fillStyle = "#1a1a1c"; // Dark background
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.strokeStyle = "#ffde00"; // Accent color for waveform
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                for (let i = 0; i < canvas.width; i++) {
+                  const sample = data[i * step];
+                  const y = ((sample + 1) * canvas.height) / 2;
+                  if (i === 0) {
+                    ctx.moveTo(i, y);
+                  } else {
+                    ctx.lineTo(i, y);
+                  }
+                }
+                ctx.stroke();
+
+                canvas.toBlob((blob) => {
+                  if (blob) {
+                    downloadBlob(blob, `audio-visualization-${file.name.split(".")[0]}.png`);
+                    showAlert("نجاح", "تم إنشاء تصور الصوت وتنزيله.", "success");
+                    resolve();
+                  } else {
+                    showAlert("خطأ", "فشل في إنشاء تصور الصوت.", "error");
+                    reject();
+                  }
+                }, "image/png");
+              } catch (error) {
+                showAlert("خطأ", "خطأ في معالجة الملف الصوتي.", "error");
+                reject(error);
+              }
+            });
+          });
+        } catch (error) {
+          console.error("Audio visualization failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء إنشاء تصور الصوت.", "error");
+        } finally {
+          setToolProcessing("audio-visualizer", false);
+        }
+      },
     },
     {
       id: "text-generator",
       name: "Text Image Generator",
       nameAr: "مولد صور النصوص",
-      description: "Convert text to styled images",
-      descriptionAr: "تحويل النص إلى صور منسقة",
+      description: "Convert any text into a stylish image with custom backgrounds and fonts.",
+      descriptionAr: "تحويل أي نص إلى صورة أنيقة بخلفيات وخطوط مخصصة.",
       category: "text",
-      icon: "📝",
+      icon: "✍️", // Changed icon for clarity
       isLocal: true,
       outputType: "image",
-      functionality: () => handleTextImageGeneration(),
+      functionality: async () => {
+        setToolProcessing("text-generator", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            showPrompt("مولد صور النصوص", "أدخل النص الذي تريد تحويله إلى صورة:", "مرحبا بك في KNOUX REC", (text) => {
+              if (!text) { showAlert("إلغاء", "تم إلغاء عملية توليد الصورة.", "info"); reject(); return; }
+
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d")!;
+
+              canvas.width = 1000; // Increased width for better text rendering
+              canvas.height = 500; // Increased height
+
+              // Background gradient
+              const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+              gradient.addColorStop(0, "#1a2a6c"); // Dark blue
+              gradient.addColorStop(0.5, "#b21f1f"); // Red
+              gradient.addColorStop(1, "#fdbb2d"); // Yellow
+              ctx.fillStyle = gradient;
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+              // Text styling
+              ctx.fillStyle = "white";
+              ctx.font = "bold 60px 'Rajdhani', sans-serif"; // Using Rajdhani font
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+
+              // Handle multi-line text
+              const words = text.split(' ');
+              let line = '';
+              const lines = [];
+              const maxWidth = canvas.width - 100; // Padding
+
+              for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                  lines.push(line);
+                  line = words[n] + ' ';
+                } else {
+                  line = testLine;
+                }
+              }
+              lines.push(line);
+
+              const lineHeight = 70; // Adjust line height
+              let y = (canvas.height / 2) - (lines.length / 2) * lineHeight;
+
+              lines.forEach((l) => {
+                ctx.fillText(l.trim(), canvas.width / 2, y);
+                y += lineHeight;
+              });
+
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  downloadBlob(blob, `text-image-${Date.now()}.png`);
+                  showAlert("نجاح", "تم توليد صورة النص وتنزيلها.", "success");
+                  resolve();
+                } else {
+                  showAlert("خطأ", "فشل في توليد صورة النص.", "error");
+                  reject();
+                }
+              }, "image/png");
+            });
+          });
+        } catch (error) {
+          console.error("Text image generation failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء توليد صورة النص.", "error");
+        } finally {
+          setToolProcessing("text-generator", false);
+        }
+      },
     },
     {
       id: "qr-generator",
       name: "QR Code Generator",
       nameAr: "مولد رمز الاستجابة السريعة",
-      description: "Generate QR codes",
-      descriptionAr: "إنشاء رموز الاستجابة السريعة",
+      description: "Generate QR codes from text or URLs locally in your browser.",
+      descriptionAr: "إنشاء رموز الاستجابة السريعة من النصوص أو الروابط محلياً في متصفحك.",
       category: "utility",
       icon: "📱",
       isLocal: true,
       outputType: "image",
-      functionality: () => handleQRGeneration(),
+      functionality: async () => {
+        setToolProcessing("qr-generator", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            showPrompt("مولد رمز الاستجابة السريعة", "أدخل النص أو الرابط:", "https://knoux.com", (text) => {
+              if (!text) { showAlert("إلغاء", "تم إلغاء عملية توليد رمز QR.", "info"); reject(); return; }
+
+              // Using a simple canvas-based drawing for QR-like pattern
+              // For a real QR code, a library like 'qrcode.js' or 'qrcode.react' would be used.
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d")!;
+
+              canvas.width = 250; // Increased size
+              canvas.height = 250;
+
+              // White background
+              ctx.fillStyle = "white";
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+              // Simple QR-like pattern (not a real QR code algorithm)
+              ctx.fillStyle = "black";
+              const cellSize = 10;
+              const numCells = canvas.width / cellSize;
+
+              for (let i = 0; i < numCells; i++) {
+                for (let j = 0; j < numCells; j++) {
+                  // A very basic, non-functional pattern based on text content
+                  if ((i * 3 + j * 2 + text.length + (text.charCodeAt(0) || 0)) % 5 === 0) {
+                    ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+                  }
+                }
+              }
+
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  downloadBlob(blob, `qr-code-${Date.now()}.png`);
+                  showAlert("نجاح", "تم توليد رمز QR وتنزيله.", "success");
+                  resolve();
+                } else {
+                  showAlert("خطأ", "فشل في توليد رمز QR.", "error");
+                  reject();
+                }
+              }, "image/png");
+            });
+          });
+        } catch (error) {
+          console.error("QR code generation failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء توليد رمز QR.", "error");
+        } finally {
+          setToolProcessing("qr-generator", false);
+        }
+      },
     },
     {
       id: "color-palette",
       name: "Color Palette Extractor",
       nameAr: "مستخرج لوحة الألوان",
-      description: "Extract color palette from images",
-      descriptionAr: "استخراج لوحة الألوان من الصور",
+      description: "Extract dominant colors from an image and generate a color palette.",
+      descriptionAr: "استخراج الألوان المهيمنة من الصورة وإنشاء لوحة ألوان.",
       category: "image",
-      icon: "🎨",
+      icon: "🌈", // Changed icon for clarity
       isLocal: true,
       fileTypes: ["image/jpeg", "image/png", "image/webp"],
-      outputType: "text",
-      functionality: () => handleColorPaletteExtraction(),
+      outputType: "text", // Output is text (list of hex colors)
+      functionality: async () => {
+        setToolProcessing("color-palette", true);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            triggerFileInput("image/*", async (file) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                  const canvas = document.createElement("canvas");
+                  const ctx = canvas.getContext("2d")!;
+
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const pixels = imageData.data;
+                  const colorMap: { [key: string]: number } = {};
+
+                  // Sample pixels to find dominant colors (simplified for performance)
+                  const sampleStep = 4 * 200; // Sample every 200 pixels
+                  for (let i = 0; i < pixels.length; i += sampleStep) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    // Group similar colors to reduce noise
+                    const colorKey = `${Math.floor(r / 10) * 10},${Math.floor(g / 10) * 10},${Math.floor(b / 10) * 10}`;
+                    colorMap[colorKey] = (colorMap[colorKey] || 0) + 1;
+                  }
+
+                  // Convert to array and sort by frequency
+                  const sortedColors = Object.entries(colorMap).sort((a, b) => b[1] - a[1]);
+
+                  // Get top 5 dominant colors
+                  const dominantColors = sortedColors
+                    .slice(0, Math.min(sortedColors.length, 5)) // Get up to 5 colors
+                    .map((entry) => {
+                      const [r, g, b] = entry[0].split(',').map(Number);
+                      // Convert back to original RGB for display, then to hex
+                      return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+                    });
+
+                  const paletteText = "الألوان المهيمنة المستخرجة:\n" + dominantColors.join("\n");
+                  const blob = new Blob([paletteText], { type: 'text/plain' });
+                  downloadBlob(blob, `color-palette-${file.name.split('.')[0]}.txt`);
+                  showAlert("نجاح", "تم استخراج لوحة الألوان وتنزيلها كنص.", "success");
+                  resolve();
+                };
+                img.onerror = () => {
+                  showAlert("خطأ", "فشل في تحميل الصورة.", "error");
+                  reject();
+                };
+                img.src = e.target?.result as string;
+              };
+              reader.onerror = () => {
+                showAlert("خطأ", "فشل في قراءة الملف.", "error");
+                reject();
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+        } catch (error) {
+          console.error("Color palette extraction failed:", error);
+          showAlert("خطأ", "حدث خطأ أثناء استخراج لوحة الألوان.", "error");
+        } finally {
+          setToolProcessing("color-palette", false);
+        }
+      },
     },
   ];
 
-  // دوال الأدوات الحقيقية
-  const handleImageResize = () => {
-    setActiveToolId("image-resizer");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        resizeImage(file);
-      }
-    };
-    input.click();
-  };
+  // Map RealTool to VisualPatchTool for rendering
+  const mappedTools: VisualPatchTool[] = realTools.map(tool => ({
+    id: tool.id,
+    name: tool.name,
+    nameAr: tool.nameAr,
+    icon: tool.icon,
+    descriptionAr: tool.descriptionAr,
+    category: tool.category, // Direct mapping for new categories
+    editMode: "ai-assisted", // Default for these local tools
+    processingComplexity: "low", // Assume low for local JS tools
+    realTimePreview: true, // Assume real-time preview for local tools
+    supportsSymmetry: false, // Most won't support symmetry
+    defaultIntensity: 100,
+    previewColor: "#ffde00", // Default accent color
+  }));
 
-  const resizeImage = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
+  // Filtered tools based on category and search query
+  const filteredTools = mappedTools.filter((tool) => {
+    const matchesCategory =
+      selectedCategory === "all" || tool.category === selectedCategory;
+    const matchesSearch =
+      !searchQuery ||
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-        // طلب الأبعاد الجديدة من المستخدم
-        const width = prompt("العرض الجديد:", "800") || "800";
-        const height = prompt("الارتفاع الجديد:", "600") || "600";
-
-        canvas.width = parseInt(width);
-        canvas.height = parseInt(height);
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            downloadBlob(blob, `resized-${file.name}`);
-          }
-        }, file.type);
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleImageFilters = () => {
-    setActiveToolId("image-filter");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        applyImageFilter(file);
-      }
-    };
-    input.click();
-  };
-
-  const applyImageFilter = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-
-        canvas.width = img.width;
-        canvas.height = img.height;
-
-        // تطبيق فلتر (مثال: تدرج رمادي)
-        ctx.filter = "grayscale(100%)";
-        ctx.drawImage(img, 0, 0);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            downloadBlob(blob, `filtered-${file.name}`);
-          }
-        }, file.type);
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleFormatConversion = () => {
-    setActiveToolId("image-format-converter");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        convertImageFormat(file);
-      }
-    };
-    input.click();
-  };
-
-  const convertImageFormat = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        // تحويل إلى PNG
-        canvas.toBlob((blob) => {
-          if (blob) {
-            downloadBlob(blob, `converted-${file.name.split(".")[0]}.png`);
-          }
-        }, "image/png");
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleVideoThumbnail = () => {
-    setActiveToolId("video-thumbnail");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "video/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        extractVideoThumbnail(file);
-      }
-    };
-    input.click();
-  };
-
-  const extractVideoThumbnail = (file: File) => {
-    const video = document.createElement("video");
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-
-    video.onloadedmetadata = () => {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      video.currentTime = 1; // ثانية واحدة من الفيديو
-    };
-
-    video.onseeked = () => {
-      ctx.drawImage(video, 0, 0);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          downloadBlob(blob, `thumbnail-${file.name.split(".")[0]}.png`);
-        }
-      }, "image/png");
-    };
-
-    video.src = URL.createObjectURL(file);
-  };
-
-  const handleAudioVisualization = () => {
-    setActiveToolId("audio-visualizer");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "audio/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        createAudioVisualization(file);
-      }
-    };
-    input.click();
-  };
-
-  const createAudioVisualization = async (file: File) => {
-    try {
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-      const arrayBuffer = await file.arrayBuffer();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d")!;
-
-      canvas.width = 800;
-      canvas.height = 200;
-
-      const data = audioBuffer.getChannelData(0);
-      const step = Math.ceil(data.length / canvas.width);
-
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.strokeStyle = "#0ff";
-      ctx.beginPath();
-
-      for (let i = 0; i < canvas.width; i++) {
-        const sample = data[i * step];
-        const y = ((sample + 1) * canvas.height) / 2;
-        if (i === 0) {
-          ctx.moveTo(i, y);
-        } else {
-          ctx.lineTo(i, y);
-        }
-      }
-
-      ctx.stroke();
-
-      canvas.toBlob((blob) => {
-        if (blob) {
-          downloadBlob(
-            blob,
-            `audio-visualization-${file.name.split(".")[0]}.png`,
-          );
-        }
-      }, "image/png");
-    } catch (error) {
-      alert("خطأ في معالجة الملف الصوتي");
-    }
-  };
-
-  const handleTextImageGeneration = () => {
-    setActiveToolId("text-generator");
-    const text = prompt("أدخل النص:", "مرحبا بك في KNOUX REC");
-    if (text) {
-      generateTextImage(text);
-    }
-  };
-
-  const generateTextImage = (text: string) => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-
-    canvas.width = 800;
-    canvas.height = 400;
-
-    // خلفية متدرجة
-    const gradient = ctx.createLinearGradient(
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
-    gradient.addColorStop(0, "#667eea");
-    gradient.addColorStop(1, "#764ba2");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // النص
-    ctx.fillStyle = "white";
-    ctx.font = "bold 48px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-    canvas.toBlob((blob) => {
-      if (blob) {
-        downloadBlob(blob, `text-image-${Date.now()}.png`);
-      }
-    }, "image/png");
-  };
-
-  const handleQRGeneration = () => {
-    setActiveToolId("qr-generator");
-    const text = prompt("أدخل النص أو الرابط:", "https://example.com");
-    if (text) {
-      generateQRCode(text);
-    }
-  };
-
-  const generateQRCode = (text: string) => {
-    // QR Code بسيط باستخدام Canvas
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-
-    canvas.width = 200;
-    canvas.height = 200;
-
-    // خلفية بيضاء
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // نمط بسيط للـ QR Code
-    ctx.fillStyle = "black";
-    const size = 10;
-    for (let i = 0; i < 20; i++) {
-      for (let j = 0; j < 20; j++) {
-        if ((i + j + text.length) % 3 === 0) {
-          ctx.fillRect(i * size, j * size, size, size);
-        }
-      }
-    }
-
-    canvas.toBlob((blob) => {
-      if (blob) {
-        downloadBlob(blob, `qr-code-${Date.now()}.png`);
-      }
-    }, "image/png");
-  };
-
-  const handleColorPaletteExtraction = () => {
-    setActiveToolId("color-palette");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        extractColorPalette(file);
-      }
-    };
-    input.click();
-  };
-
-  const extractColorPalette = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const colors: string[] = [];
-
-        // استخراج الألوان (تبسيط)
-        for (let i = 0; i < imageData.data.length; i += 40000) {
-          const r = imageData.data[i];
-          const g = imageData.data[i + 1];
-          const b = imageData.data[i + 2];
-          const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-          if (!colors.includes(hex)) {
-            colors.push(hex);
-          }
-        }
-
-        // إنشاء لوحة ألوان
-        const paletteCanvas = document.createElement("canvas");
-        const paletteCtx = paletteCanvas.getContext("2d")!;
-
-        paletteCanvas.width = 500;
-        paletteCanvas.height = 100;
-
-        const colorWidth = paletteCanvas.width / Math.min(colors.length, 10);
-
-        colors.slice(0, 10).forEach((color, index) => {
-          paletteCtx.fillStyle = color;
-          paletteCtx.fillRect(
-            index * colorWidth,
-            0,
-            colorWidth,
-            paletteCanvas.height,
-          );
-        });
-
-        paletteCanvas.toBlob((blob) => {
-          if (blob) {
-            downloadBlob(blob, `color-palette-${file.name.split(".")[0]}.png`);
-          }
-        }, "image/png");
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
+  // Categories for display in the filter section
   const categories = [
-    {
-      id: "all",
-      name: "جميع الأدوات",
-      nameEn: "All Tools",
-      icon: "🛠️",
-      count: realTools.length,
-    },
-    {
-      id: "image",
-      name: "الصور",
-      nameEn: "Images",
-      icon: "🖼️",
-      count: realTools.filter((t) => t.category === "image").length,
-    },
-    {
-      id: "video",
-      name: "الفيديو",
-      nameEn: "Video",
-      icon: "📹",
-      count: realTools.filter((t) => t.category === "video").length,
-    },
-    {
-      id: "audio",
-      name: "الصوت",
-      nameEn: "Audio",
-      icon: "🎵",
-      count: realTools.filter((t) => t.category === "audio").length,
-    },
-    {
-      id: "text",
-      name: "النصوص",
-      nameEn: "Text",
-      icon: "📝",
-      count: realTools.filter((t) => t.category === "text").length,
-    },
-    {
-      id: "utility",
-      name: "أدوات مساعدة",
-      nameEn: "Utility",
-      icon: "⚙️",
-      count: realTools.filter((t) => t.category === "utility").length,
-    },
+    { id: "all", name: "جميع الأدوات", nameEn: "All Tools", icon: "🛠️" },
+    { id: "image", name: "الصور", nameEn: "Images", icon: "🖼️" },
+    { id: "video", name: "الفيديو", nameEn: "Video", icon: "📹" },
+    { id: "audio", name: "الصوت", nameEn: "Audio", icon: "🎵" },
+    { id: "text", name: "النصوص", nameEn: "Text", icon: "📝" },
+    { id: "utility", name: "أدوات مساعدة", nameEn: "Utility", icon: "⚙️" },
   ];
 
-  const filteredTools =
-    selectedCategory === "all"
-      ? realTools
-      : realTools.filter((tool) => tool.category === selectedCategory);
+  // Calculate counts for categories
+  const getCategoryCount = (categoryId: string) => {
+    if (categoryId === "all") return realTools.length;
+    return realTools.filter(t => t.category === categoryId).length;
+  };
+
+  const handleToolClick = (toolId: string) => {
+    setActiveToolId(toolId);
+    const tool = realTools.find(t => t.id === toolId);
+    if (tool) {
+      tool.functionality();
+    }
+  };
+
+  const handleToolSettings = (toolId: string) => {
+    showAlert("الإعدادات", `لا توجد إعدادات متقدمة لأداة "${realTools.find(t => t.id === toolId)?.nameAr}" في هذا الإصدار.`, "info");
+  };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 text-white font-inter">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -566,6 +748,17 @@ const ToolboxPanel: React.FC = () => {
           <p className="text-xl text-blue-200">
             أدوات محلية 100% تعمل بـ JavaScript - لا خدمات خارجية!
           </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <input
+            type="text"
+            placeholder="ابحث عن أداة..."
+            className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
         {/* Categories */}
@@ -578,104 +771,109 @@ const ToolboxPanel: React.FC = () => {
                 p-4 rounded-xl border-2 transition-all duration-300 text-center
                 ${
                   selectedCategory === category.id
-                    ? "border-blue-400 bg-blue-500/20 scale-105"
-                    : "border-blue-600/30 bg-white/5 hover:bg-white/10"
+                    ? "border-blue-400 bg-blue-500/20 scale-105 shadow-lg"
+                    : "border-blue-600/30 bg-white/5 hover:bg-white/10 hover:scale-[1.02]"
                 }
               `}
             >
-              <div className="text-2xl mb-2">{category.icon}</div>
-              <div className="text-white font-semibold text-sm">
+              <div className="text-3xl mb-2">{category.icon}</div>
+              <div className="text-white font-semibold text-base">
                 {category.name}
               </div>
               <div className="text-blue-300 text-xs">{category.nameEn}</div>
-              <div className="text-blue-400 text-xs mt-1">
-                {category.count} أداة
+              <div className="text-blue-400 text-sm mt-1">
+                {getCategoryCount(category.id)} أداة
               </div>
             </button>
           ))}
         </div>
 
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTools.map((tool) => (
-            <div
-              key={tool.id}
-              className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden hover:transform hover:scale-105 transition-all duration-300"
-            >
-              <div className="p-6">
-                <div className="text-4xl mb-4 text-center">{tool.icon}</div>
-
-                <h3 className="text-white font-bold text-lg mb-2 text-center">
-                  {tool.nameAr}
-                </h3>
-
-                <p className="text-blue-200 text-sm mb-4 text-center">
-                  {tool.descriptionAr}
-                </p>
-
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
-                    ✅ محلي 100%
-                  </span>
-                  <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">
-                    {tool.category}
-                  </span>
-                </div>
-
-                <button
-                  onClick={tool.functionality}
-                  disabled={processingFiles.has(tool.id)}
-                  className={`
-                    w-full py-3 rounded-lg font-semibold transition-all duration-200
-                    ${
-                      activeToolId === tool.id
-                        ? "bg-yellow-500 text-yellow-900"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  `}
-                >
-                  {activeToolId === tool.id
-                    ? "🔄 جار المعالجة..."
-                    : "🚀 تشغيل الأداة"}
-                </button>
-
-                {tool.fileTypes && (
-                  <div className="mt-2 text-center">
-                    <span className="text-xs text-white/60">
-                      يدعم: {tool.fileTypes.join(", ")}
-                    </span>
-                  </div>
-                )}
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredTools.length > 0 ? (
+            filteredTools.map((tool) => (
+              <VisualPatchToolCard
+                key={tool.id}
+                tool={tool}
+                isSelected={activeToolId === tool.id}
+                isEnabled={true} // All real tools are enabled by default
+                isLoading={processingStatus.get(tool.id) || false}
+                onSelect={handleToolClick}
+                onSettings={handleToolSettings}
+                compact={false} // Render full card for now
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center text-white/70 text-lg py-10">
+              لا توجد أدوات مطابقة لمعايير البحث أو الفئة المحددة.
             </div>
-          ))}
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-12 text-center bg-white/5 rounded-xl p-6">
-          <h3 className="text-2xl font-bold text-white mb-4">
-            🎯 مميزات صندوق الأدوات
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-blue-200">
-            <div>
-              <div className="text-3xl mb-2">⚡</div>
-              <h4 className="font-semibold mb-2">سرعة فائقة</h4>
-              <p className="text-sm">معالجة محلية بدون تأخير الشبكة</p>
-            </div>
-            <div>
-              <div className="text-3xl mb-2">🔒</div>
-              <h4 className="font-semibold mb-2">خصوصية كاملة</h4>
-              <p className="text-sm">ملفاتك لا تغادر جهازك أبداً</p>
-            </div>
-            <div>
-              <div className="text-3xl mb-2">🆓</div>
-              <h4 className="font-semibold mb-2">مجاني 100%</h4>
-              <p className="text-sm">لا اشتراكات أو حدود استخدام</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
+
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={hiddenFileInput}
+        onChange={handleHiddenFileInputChange}
+        style={{ display: 'none' }}
+      />
+
+      {/* Alert Modal */}
+      <Modal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        type="alert"
+      >
+        <div className={`alert alert-${alertModal.type} flex items-center justify-center`}>
+          {alertModal.type === 'success' && <span className="alert-icon">✅</span>}
+          {alertModal.type === 'error' && <span className="alert-icon">❌</span>}
+          {alertModal.type === 'info' && <span className="alert-icon">ℹ️</span>}
+          <span>{alertModal.message}</span>
+        </div>
+      </Modal>
+
+      {/* Prompt Modal */}
+      <Modal
+        isOpen={promptModal.isOpen}
+        onClose={() => {
+          setPromptModal({ ...promptModal, isOpen: false });
+          promptModal.callback(null); // Call callback with null if cancelled
+        }}
+        title={promptModal.title}
+        type="prompt"
+        footer={
+          <>
+            <button
+              onClick={() => {
+                setPromptModal({ ...promptModal, isOpen: false });
+                promptModal.callback(null); // Pass null on cancel
+              }}
+              className="btn btn-secondary"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={() => {
+                setPromptModal({ ...promptModal, isOpen: false });
+                promptModal.callback(promptModal.inputValue);
+              }}
+              className="btn btn-primary"
+            >
+              تأكيد
+            </button>
+          </>
+        }
+      >
+        <p className="mb-4">{promptModal.message}</p>
+        <input
+          type="text"
+          value={promptModal.inputValue}
+          onChange={(e) => setPromptModal({ ...promptModal, inputValue: e.target.value })}
+          className="w-full"
+        />
+      </Modal>
     </div>
   );
 };

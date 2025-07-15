@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KNOUX REC - Auto-Allocation Demo</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+        color: white;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.8;
+        margin-bottom: 30px;
+      }
+
+      .demo-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .demo-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 50px;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 25px;
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(168, 85, 247, 0.3);
+      }
+
+      .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+      }
+
+      .feature-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .feature-description {
+        opacity: 0.8;
+        line-height: 1.6;
+      }
+
+      .console-output {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 30px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        max-height: 400px;
+        overflow-y: auto;
+        display: none;
+      }
+
+      .console-line {
+        margin-bottom: 5px;
+      }
+
+      .success {
+        color: #10b981;
+      }
+      .error {
+        color: #ef4444;
+      }
+      .warning {
+        color: #f59e0b;
+      }
+      .info {
+        color: #06b6d4;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 20px 0;
+        display: none;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .allocation-results {
+        display: none;
+        margin-top: 30px;
+      }
+
+      .result-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .result-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #06b6d4;
+      }
+
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .result-item:last-child {
+        border-bottom: none;
+      }
+
+      .status-success {
+        color: #10b981;
+      }
+
+      .status-failed {
+        color: #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 class="title">🤖 KNOUX REC</h1>
+        <p class="subtitle">نظام التخصيص التلقائي الذكي</p>
+        <p style="opacity: 0.7; margin-bottom: 30px">
+          سيقوم النظام بفحص جميع الأقسام والخدمات وتخصيص المحتوى المناسب
+          تلقائياً
+        </p>
+
+        <button id="runAllocation" class="demo-button">
+          🚀 بدء التخصيص التلقائي الذكي
+        </button>
+      </div>
+
+      <div id="progressContainer" class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <div id="consoleOutput" class="console-output"></div>
+
+      <div id="allocationResults" class="allocation-results"></div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3 class="feature-title">الفحص الذكي</h3>
+          <p class="feature-description">
+            يفحص جميع الأقسام والخدمات ويحدد المكونات الفارغة أو غير المكتملة
+            تلقائياً
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h3 class="feature-title">التخصيص التلقائي</h3>
+          <p class="feature-description">
+            يملأ المحتوى المناسب تلقائياً مثل الإعدادات الافتراضية والملفات
+            النموذجية
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🧪</div>
+          <h3 class="feature-title">الاختبار والتحقق</h3>
+          <p class="feature-description">
+            يختبر صحة تشغيل جميع الأدوات والخدمات المخصصة تلقائياً
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3 class="feature-title">التقارير التفصيلية</h3>
+          <p class="feature-description">
+            يُنشئ تقارير شاملة عن كل عملية تخصيص ونتائج الاختبارات
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3 class="feature-title">التغليف التلقائي</h3>
+          <p class="feature-description">
+            يُحضّر جميع المكونات للتغليف في ملف EXE جاهز للتثبيت
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 class="feature-title">الذكاء الاصطناعي</h3>
+          <p class="feature-description">
+            يستخدم خوارزميات ذكية لتحديد أفضل المحتويات والإعدادات لكل مكون
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // محاكاة نظام التخصيص التلقائي
+      class AutoAllocationDemo {
+        constructor() {
+          this.sections = [
+            { name: "AI Models", type: "model", time: 2000 },
+            { name: "Toolbox Services", type: "service", time: 1500 },
+            { name: "Template Data", type: "template", time: 1000 },
+            { name: "User Settings", type: "config", time: 800 },
+            { name: "Recording Configurations", type: "config", time: 1200 },
+            { name: "Image Processing Filters", type: "data", time: 900 },
+            { name: "Audio Processing Settings", type: "config", time: 700 },
+            { name: "Video Effects Library", type: "data", time: 1100 },
+            { name: "System Optimizations", type: "config", time: 600 },
+            { name: "Security Settings", type: "config", time: 500 },
+            { name: "Export Formats", type: "data", time: 400 },
+            { name: "Hotkey Bindings", type: "config", time: 300 },
+            { name: "Theme Customizations", type: "config", time: 500 },
+            { name: "Analytics Configuration", type: "config", time: 300 },
+            { name: "Backup Settings", type: "config", time: 400 },
+          ];
+
+          this.testSections = [
+            { name: "AI Models", score: 85, passed: true },
+            { name: "Services", score: 92, passed: true },
+            { name: "Configurations", score: 88, passed: true },
+            { name: "Templates", score: 75, passed: true },
+            { name: "Tools", score: 90, passed: true },
+            { name: "Data Integrity", score: 94, passed: true },
+            { name: "Performance", score: 82, passed: true },
+            { name: "Compatibility", score: 96, passed: true },
+          ];
+        }
+
+        async run() {
+          const consoleEl = document.getElementById("consoleOutput");
+          const progressEl = document.getElementById("progressContainer");
+          const progressFill = document.getElementById("progressFill");
+          const resultsEl = document.getElementById("allocationResults");
+          const runBtn = document.getElementById("runAllocation");
+
+          // إخفاء الزر وإظهار شريط التقدم
+          runBtn.style.display = "none";
+          progressEl.style.display = "block";
+          consoleEl.style.display = "block";
+
+          this.log("🔍 بدء الفحص الذكي ��لأقسام والخدمات...", "info");
+
+          // مرحلة التخصيص
+          for (let i = 0; i < this.sections.length; i++) {
+            const section = this.sections[i];
+            const progress = ((i + 1) / this.sections.length) * 50; // 50% للتخصيص
+
+            progressFill.style.width = progress + "%";
+
+            this.log(`⚙️ تخصيص ${section.name}...`, "info");
+            await this.delay(section.time);
+
+            const success = Math.random() > 0.1; // 90% نجاح
+
+            if (success) {
+              this.log(
+                `✅ تم تخصيص ${section.name} بنجاح (${section.type})`,
+                "success",
+              );
+            } else {
+              this.log(`❌ فشل في تخصيص ${section.name}`, "error");
+            }
+          }
+
+          this.log("🧪 بدء اختبار المكونات المخصصة...", "info");
+
+          // مرحلة الاختبار
+          for (let i = 0; i < this.testSections.length; i++) {
+            const test = this.testSections[i];
+            const progress = 50 + ((i + 1) / this.testSections.length) * 50; // 50% للاختبار
+
+            progressFill.style.width = progress + "%";
+
+            this.log(`🔍 اختبار ${test.name}...`, "info");
+            await this.delay(800);
+
+            if (test.passed) {
+              this.log(`✅ ${test.name}: ${test.score}/100 - نجح`, "success");
+            } else {
+              this.log(`❌ ${test.name}: ${test.score}/100 - فشل`, "error");
+            }
+          }
+
+          // النتائج النهائية
+          this.log("", "info");
+          this.log("=".repeat(80), "info");
+          this.log("📊 تقرير التخصيص التلقائي الذكي - KNOUX REC", "info");
+          this.log("=".repeat(80), "info");
+          this.log("", "info");
+
+          const totalScore = Math.round(
+            this.testSections.reduce((sum, t) => sum + t.score, 0) /
+              this.testSections.length,
+          );
+          const successfulSections = this.sections.filter(
+            () => Math.random() > 0.1,
+          ).length;
+          const passedTests = this.testSections.filter((t) => t.passed).length;
+
+          this.log("🎯 النتائج العامة:", "info");
+          this.log(`   النقاط الإجمالية: ${totalScore}/100`, "success");
+          this.log(`   الحالة العامة: ✅ نجح`, "success");
+          this.log(`   إجمالي الاختبارات: ${this.testSections.length}`, "info");
+          this.log(`   الاختبارات الناجحة: ${passedTests}`, "success");
+          this.log(`   وقت التنفيذ: 25.3 ثانية`, "info");
+          this.log("", "info");
+
+          this.log("📋 ملخص العمليات المنجزة:", "info");
+          this.sections.forEach((section) => {
+            const success = Math.random() > 0.1;
+            this.log(
+              `   ${success ? "✅" : "❌"} ${section.name} (${section.type})`,
+              success ? "success" : "error",
+            );
+          });
+          this.log("", "info");
+
+          this.log("📝 الملخص:", "info");
+          this.log(
+            `   🟢 ممتاز: جميع المكونات تعمل بكفاءة عالية. تم اجتياز ${passedTests} من ${this.testSections.length} اختبار بنجاح.`,
+            "success",
+          );
+          this.log("", "info");
+
+          this.log("📋 عناصر ال��مل المطلوبة:", "info");
+          this.log(
+            "   📌 جميع الأنظمة تعمل بشكل صحيح - لا يوجد إجراءات مطلوبة",
+            "success",
+          );
+          this.log("", "info");
+
+          this.log("📊 إحصائيات التخصيص:", "info");
+          this.log(`   إجمالي العمليات: ${this.sections.length}`, "info");
+          this.log(`   العمليات الناجحة: ${successfulSections}`, "success");
+          this.log(
+            `   معدل النجاح: ${Math.round((successfulSections / this.sections.length) * 100)}%`,
+            "success",
+          );
+          this.log("", "info");
+
+          this.log("=".repeat(80), "info");
+          this.log("🎉 تم إنجاز التخصيص التلقائي الذكي بنجاح!", "success");
+          this.log(
+            "📦 جميع المكونات جاهزة للتشغيل والتغليف في ملف EXE",
+            "success",
+          );
+          this.log("=".repeat(80), "info");
+
+          // إظهار النتائج
+          this.showResults(totalScore, successfulSections, passedTests);
+        }
+
+        log(message, type = "info") {
+          const consoleEl = document.getElementById("consoleOutput");
+          const line = document.createElement("div");
+          line.className = `console-line ${type}`;
+          line.textContent = message;
+          consoleEl.appendChild(line);
+          consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        delay(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
+        showResults(totalScore, successfulSections, passedTests) {
+          const resultsEl = document.getElementById("allocationResults");
+
+          resultsEl.innerHTML = `
+                    <div class="result-section">
+                        <div class="result-title">📊 النتائج الإجمالية</div>
+                        <div class="result-item">
+                            <span>النقاط الإجمالية</span>
+                            <span class="status-success">${totalScore}/100</span>
+                        </div>
+                        <div class="result-item">
+                            <span>حالة النظام</span>
+                            <span class="status-success">✅ نجح</span>
+                        </div>
+                        <div class="result-item">
+                            <span>المكونات المخصصة</span>
+                            <span class="status-success">${successfulSections}/${this.sections.length}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>الاختبارات الناجحة</span>
+                            <span class="status-success">${passedTests}/${this.testSections.length}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <div class="result-title">🏆 حالة الجاهزية</div>
+                        <div class="result-item">
+                            <span>نماذج الذكاء الاصطناعي</span>
+                            <span class="status-success">✅ جاهزة</span>
+                        </div>
+                        <div class="result-item">
+                            <span>خدمات صندوق الأدوات</span>
+                            <span class="status-success">✅ جاهزة</span>
+                        </div>
+                        <div class="result-item">
+                            <span>القوالب والتخصيصات</span>
+                            <span class="status-success">✅ جاهزة</span>
+                        </div>
+                        <div class="result-item">
+                            <span>الإعدادات والتحسينات</span>
+                            <span class="status-success">✅ جاهزة</span>
+                        </div>
+                        <div class="result-item">
+                            <span>جاهز للتغليف في EXE</span>
+                            <span class="status-success">🎉 نعم</span>
+                        </div>
+                    </div>
+                `;
+
+          resultsEl.style.display = "block";
+
+          // إظهار زر إعادة التشغيل
+          setTimeout(() => {
+            const runBtn = document.getElementById("runAllocation");
+            runBtn.textContent = "🔄 إعادة تشغيل التخصيص";
+            runBtn.style.display = "inline-flex";
+          }, 2000);
+        }
+      }
+
+      // تشغيل النظام
+      document.getElementById("runAllocation").addEventListener("click", () => {
+        new AutoAllocationDemo().run();
+      });
+    </script>
+  </body>
+</html>

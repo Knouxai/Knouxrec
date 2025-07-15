@@ -1,39 +1,143 @@
 import React, { useState, useEffect } from "react";
+import Modal from "./Modal"; // Assuming Modal.tsx is in the same directory
+import { VisualPatchTool } from "./VisualPatchToolCard"; // Re-using VisualPatchTool for category types
 
+// Define the RealTemplate interface
 interface RealTemplate {
   id: string;
   name: string;
   nameAr: string;
   description: string;
   descriptionAr: string;
-  category: string;
+  category: TemplateCategory;
   icon: string;
   cssTemplate: string;
   htmlTemplate: string;
   jsCode?: string;
-  duration: number;
+  duration: number; // in seconds
   difficulty: "easy" | "medium" | "hard";
   tags: string[];
   isActive: boolean;
-  previewCode: string;
+  previewCode: string; // A CSS snippet for the card's background preview
+}
+
+// Define the extended VideoTemplate interface for detailed template data
+interface VideoTemplate extends RealTemplate {
+  template_id: string; // Unique ID for the template instance
+  aspect_ratio: "16:9" | "9:16" | "1:1" | "4:3";
+  preview_thumbnail: string; // URL for a thumbnail image
+  premium: boolean;
+  popular: boolean;
+  trending: boolean;
+  created_at: string;
+  updated_at: string;
+  elements: {
+    id: string;
+    type: "text" | "image" | "logo";
+    placeholder_key: string;
+    default_value: string;
+    position: { x: number; y: number; width: number; height: number };
+    config: Record<string, any>; // e.g., font_size, color, animation
+  }[];
+}
+
+// Define valid template categories
+type TemplateCategory =
+  | "for-you"
+  | "intro"
+  | "outro"
+  | "education"
+  | "birthday"
+  | "festival"
+  | "vlog"
+  | "business"
+  | "social-media";
+
+// Define the Modal state interfaces (re-using from ToolboxPanel)
+interface AlertModalState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+interface PromptModalState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  inputValue: string;
+  callback: (value: string | null) => void;
 }
 
 const TemplatesPanel: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("intro");
-  const [selectedTemplate, setSelectedTemplate] = useState<RealTemplate | null>(
-    null,
-  );
-  const [showPreview, setShowPreview] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>("for-you");
+  const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false); // Renamed to avoid confusion with showPreview prop
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [templates, setTemplates] = useState<VideoTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // قوالب CSS/HTML حقيقية وفعالة
-  const realTemplates: RealTemplate[] = [
+  // Modal states
+  const [alertModal, setAlertModal] = useState<AlertModalState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+  const [promptModal, setPromptModal] = useState<PromptModalState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    inputValue: "",
+    callback: () => {},
+  });
+
+  // Helper to show custom alert modal
+  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setAlertModal({ isOpen: true, title, message, type });
+  };
+
+  // Helper to show custom prompt modal
+  const showPrompt = (title: string, message: string, defaultValue: string, callback: (value: string | null) => void) => {
+    setPromptModal({ isOpen: true, title, message, inputValue: defaultValue, callback });
+  };
+
+  // Helper function to convert CSS string to React style object
+  const getPreviewStyle = (cssString: string): React.CSSProperties => {
+    const styles: React.CSSProperties = {};
+    const declarations = cssString.split(";").filter((d) => d.trim());
+
+    declarations.forEach((declaration) => {
+      const [property, value] = declaration.split(":").map((s) => s.trim());
+      if (property && value) {
+        const camelCaseProperty = property.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        styles[camelCaseProperty as keyof React.CSSProperties] = value;
+      }
+    });
+    return styles;
+  };
+
+  // Definition of categories for the navigation bar
+  const categories: { id: TemplateCategory; name: string; icon: string }[] = [
+    { id: "for-you", name: "لك", icon: "✨" },
+    { id: "intro", name: "مقدمات", icon: "🎬" },
+    { id: "outro", name: "خاتمات", icon: "👋" },
+    { id: "education", name: "تعليمي", icon: "📚" },
+    { id: "birthday", name: "عيد ميلاد", icon: "🎂" },
+    { id: "festival", name: "مهرجانات", icon: "🎉" },
+    { id: "vlog", name: "فلوج", icon: "📹" },
+    { id: "business", name: "أعمال", icon: "💼" },
+    { id: "social-media", name: "سوشيال ميديا", icon: "📱" },
+  ];
+
+  // Base templates with minimal data, category will be assigned in generateComprehensiveTemplates
+  const baseRealTemplates: Omit<RealTemplate, 'category'>[] = [
     {
       id: "modern-intro-1",
       name: "Modern Intro",
       nameAr: "مقدمة عصرية",
       description: "Clean modern introduction with gradient background",
       descriptionAr: "مقدمة عصرية نظيفة مع خلفية متدرجة",
-      category: "intro",
       icon: "🎬",
       duration: 3,
       difficulty: "easy",
@@ -80,8 +184,7 @@ const TemplatesPanel: React.FC = () => {
           </div>
         </div>
       `,
-      previewCode:
-        "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      previewCode: "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     },
     {
       id: "neon-intro-2",
@@ -89,7 +192,6 @@ const TemplatesPanel: React.FC = () => {
       nameAr: "مقدمة نيونية",
       description: "Futuristic neon glow effect introduction",
       descriptionAr: "مقدمة مستقبلية بتأثير الضوء النيوني",
-      category: "intro",
       icon: "⚡",
       duration: 4,
       difficulty: "medium",
@@ -110,7 +212,7 @@ const TemplatesPanel: React.FC = () => {
           font-size: 5rem;
           font-weight: bold;
           text-align: center;
-          text-shadow: 
+          text-shadow:
             0 0 5px currentColor,
             0 0 10px currentColor,
             0 0 15px currentColor,
@@ -121,7 +223,7 @@ const TemplatesPanel: React.FC = () => {
           border: 2px solid #00ff88;
           padding: 2rem;
           border-radius: 10px;
-          box-shadow: 
+          box-shadow:
             0 0 20px #00ff88,
             inset 0 0 20px rgba(0,255,136,0.1);
           animation: borderGlow 3s ease-in-out infinite;
@@ -142,7 +244,7 @@ const TemplatesPanel: React.FC = () => {
           </div>
         </div>
       `,
-      previewCode: "text-shadow: 0 0 20px #00ff88; border: 2px solid #00ff88;",
+      previewCode: "background: #0a0a0a; color: #00ff88; text-shadow: 0 0 20px #00ff88",
     },
     {
       id: "minimalist-outro-1",
@@ -150,8 +252,7 @@ const TemplatesPanel: React.FC = () => {
       nameAr: "خاتمة بسيطة",
       description: "Clean and simple outro with subscribe button",
       descriptionAr: "خاتمة نظيفة وبسيطة مع زر الاشتراك",
-      category: "outro",
-      icon: "🎭",
+      icon: "👋", // Changed icon for outro
       duration: 5,
       difficulty: "easy",
       tags: ["minimalist", "clean", "subscribe"],
@@ -241,7 +342,6 @@ const TemplatesPanel: React.FC = () => {
       nameAr: "شريحة تعليمية",
       description: "Professional educational slide template",
       descriptionAr: "قالب شريحة تعليمية احترافية",
-      category: "education",
       icon: "📚",
       duration: 8,
       difficulty: "easy",
@@ -331,7 +431,6 @@ const TemplatesPanel: React.FC = () => {
       nameAr: "إعلان تجاري",
       description: "Professional business promotion template",
       descriptionAr: "قالب ترويجي تجاري احترافي",
-      category: "business",
       icon: "💼",
       duration: 6,
       difficulty: "medium",
@@ -363,102 +462,206 @@ const TemplatesPanel: React.FC = () => {
           animation: zoomIn 1s ease-out;
         }
         .business-title {
-          font-size: 3.5rem;
-          font-weight: bold;
-          margin-bottom: 1rem;
-          animation: slideInUp 1s ease-out 0.3s both;
+          font-size: 3.5rem; /* Adjusted for better appearance */
+          margin-bottom: 0.5rem;
+          animation: slideInDown 1.2s ease-out;
         }
-        .business-tagline {
-          font-size: 1.5rem;
-          margin-bottom: 2rem;
-          opacity: 0.9;
-          animation: slideInUp 1s ease-out 0.6s both;
+        .business-slogan {
+          font-size: 1.8rem;
+          opacity: 0.8;
+          animation: slideInUp 1.2s ease-out 0.3s both;
         }
-        .business-cta {
-          padding: 1rem 3rem;
-          background: #f59e0b;
-          color: #1f2937;
-          border: none;
-          border-radius: 50px;
-          font-size: 1.3rem;
-          font-weight: bold;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          animation: slideInUp 1s ease-out 0.9s both;
-        }
-        .business-cta:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 30px rgba(245,158,11,0.3);
-        }
-        .business-bg-pattern {
+        /* Simple background animation for dynamism */
+        .business-promo::before {
+          content: '';
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          opacity: 0.1;
-          background-image: 
-            radial-gradient(circle at 25% 25%, white 2px, transparent 2px),
-            radial-gradient(circle at 75% 75%, white 2px, transparent 2px);
-          background-size: 50px 50px;
-          animation: patternMove 20s linear infinite;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+          animation: rotateBackground 20s linear infinite;
         }
         @keyframes zoomIn {
           from { transform: scale(0); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
         }
+        @keyframes slideInDown {
+          from { transform: translateY(-50px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
         @keyframes slideInUp {
           from { transform: translateY(50px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
-        @keyframes patternMove {
-          from { transform: translateX(0) translateY(0); }
-          to { transform: translateX(50px) translateY(50px); }
+        @keyframes rotateBackground {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `,
       htmlTemplate: `
         <div class="business-promo">
-          <div class="business-bg-pattern"></div>
           <div class="business-content">
-            <div class="business-logo">🚀</div>
-            <h1 class="business-title">شركتك هنا</h1>
-            <p class="business-tagline">نحن نقدم أفضل الحلول</p>
-            <button class="business-cta">اتصل بنا الآن</button>
+            <div class="business-logo">🏢</div>
+            <h1 class="business-title">اسم شركتك</h1>
+            <p class="business-slogan">شعار يصف رؤيتك</p>
           </div>
         </div>
       `,
-      previewCode:
-        "background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+      previewCode: "background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
     },
   ];
 
-  const categories = [
-    { id: "intro", name: "مقدمات", nameEn: "Intros", icon: "🎬", count: 2 },
-    { id: "outro", name: "خاتمات", nameEn: "Outros", icon: "🎭", count: 1 },
-    {
-      id: "education",
-      name: "تعليمية",
-      nameEn: "Education",
-      icon: "📚",
-      count: 1,
-    },
-    { id: "business", name: "أعمال", nameEn: "Business", icon: "💼", count: 1 },
-  ];
+  // Function to generate comprehensive templates with dummy data for various categories
+  const generateComprehensiveTemplates = (): VideoTemplate[] => {
+    const comprehensiveTemplates: VideoTemplate[] = [];
 
-  const filteredTemplates = realTemplates.filter(
-    (template) => template.category === selectedCategory,
-  );
+    // Helper to convert RealTemplate to VideoTemplate with dummy data
+    const convertToVideoTemplate = (
+      baseTemplate: Omit<RealTemplate, 'category'>,
+      category: TemplateCategory,
+      index: number
+    ): VideoTemplate => {
+      return {
+        ...baseTemplate,
+        id: baseTemplate.id,
+        template_id: `${baseTemplate.id}-${index}`, // Unique ID for each instance
+        category: category,
+        aspect_ratio: ["16:9", "9:16", "1:1", "4:3"][Math.floor(Math.random() * 4)] as any,
+        preview_thumbnail: `https://placehold.co/400x300/${Math.floor(Math.random()*16777215).toString(16)}/ffffff?text=${encodeURIComponent(baseTemplate.name)}`,
+        premium: Math.random() > 0.5,
+        popular: Math.random() > 0.5,
+        trending: Math.random() > 0.3,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        elements: [
+          {
+            id: "main-title",
+            type: "text",
+            placeholder_key: "main_title",
+            default_value: baseTemplate.name,
+            position: { x: 50, y: 20, width: 200, height: 40 },
+            config: { font_size: 32, color: "#ffffff", font_weight: "bold" },
+          },
+          {
+            id: "description-text",
+            type: "text",
+            placeholder_key: "description",
+            default_value: baseTemplate.description,
+            position: { x: 50, y: 60, width: 200, height: 40 },
+            config: { font_size: 18, color: "#cccccc" },
+          },
+        ],
+      };
+    };
 
-  const handleUseTemplate = (template: RealTemplate) => {
-    // إنشاء ملف HTML كامل مع القالب
+    // Add base templates with their explicit categories
+    baseRealTemplates.forEach((template, index) => {
+      let category: TemplateCategory;
+      if (template.id.includes("intro")) {
+        category = "intro";
+      } else if (template.id.includes("outro")) {
+        category = "outro";
+      } else if (template.id.includes("education")) {
+        category = "education";
+      } else if (template.id.includes("business")) {
+        category = "business";
+      } else {
+        category = "for-you"; // Fallback
+      }
+      comprehensiveTemplates.push(convertToVideoTemplate(template, category, index));
+    });
+
+    // Generate additional templates for other categories
+    const generateDummyTemplate = (cat: TemplateCategory, baseName: string, icon: string, count: number): VideoTemplate[] => {
+      const dummyTemplates: VideoTemplate[] = [];
+      for (let i = 1; i <= count; i++) {
+        dummyTemplates.push({
+          id: `${cat}-${i}`,
+          template_id: `${cat}-${i}`,
+          name: `${baseName} ${i}`,
+          nameAr: `${baseName} ${i}`,
+          description: `A dynamic template for ${cat} content.`,
+          descriptionAr: `قالب ديناميكي لمحتوى ${baseName}.`,
+          category: cat,
+          icon: icon,
+          cssTemplate: `/* Basic CSS for ${baseName} ${i} */ .container { background: #${Math.floor(Math.random()*16777215).toString(16)}; color: white; padding: 20px; }`,
+          htmlTemplate: `<div><h1>${baseName} ${i}</h1><p>This is a dummy template.</p></div>`,
+          duration: 10 + Math.floor(Math.random() * 20),
+          difficulty: ["easy", "medium", "hard"][Math.floor(Math.random() * 3)] as any,
+          tags: [cat, "dummy", "generated"],
+          isActive: true,
+          previewCode: `background: #${Math.floor(Math.random()*16777215).toString(16)};`,
+          aspect_ratio: ["16:9", "9:16", "1:1"][Math.floor(Math.random() * 3)] as any,
+          preview_thumbnail: `https://placehold.co/400x300/${Math.floor(Math.random()*16777215).toString(16)}/ffffff?text=${encodeURIComponent(baseName.replace(' ', '+'))}+${i}`,
+          premium: Math.random() > 0.7,
+          popular: Math.random() > 0.5,
+          trending: Math.random() > 0.3,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          elements: [
+            {
+              id: "gen-title",
+              type: "text",
+              placeholder_key: "gen_title",
+              default_value: `${baseName} Title`,
+              position: { x: 50, y: 20, width: 200, height: 40 },
+              config: { font_size: 32, color: "#ffffff" },
+            },
+          ],
+        });
+      }
+      return dummyTemplates;
+    };
+
+    comprehensiveTemplates.push(...generateDummyTemplate("for-you", "قالب مقترح", "✨", 15));
+    comprehensiveTemplates.push(...generateDummyTemplate("birthday", "قالب عيد ميلاد", "🎂", 8));
+    comprehensiveTemplates.push(...generateDummyTemplate("festival", "قالب مهرجان", "🎉", 6));
+    comprehensiveTemplates.push(...generateDummyTemplate("vlog", "قالب فلوج", "📹", 10));
+    comprehensiveTemplates.push(...generateDummyTemplate("social-media", "قالب سوشيال ميديا", "📱", 12));
+
+    return comprehensiveTemplates;
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    // Simulate API call or heavy computation
+    const allTemplates = generateComprehensiveTemplates();
+    setTemplates(allTemplates);
+    setLoading(false);
+  }, []);
+
+  // Filtered templates based on category and search query
+  const filteredTemplates = templates.filter((template) => {
+    const matchesCategory =
+      selectedCategory === "for-you" || template.category === selectedCategory; // "for-you" shows all initially
+    const matchesSearch =
+      !searchQuery ||
+      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
+
+  // Calculate counts for categories
+  const getCategoryCount = (categoryId: TemplateCategory) => {
+    if (categoryId === "for-you") return templates.length; // "For You" shows total count
+    return templates.filter(t => t.category === categoryId).length;
+  };
+
+  const handleUseTemplate = (template: VideoTemplate) => {
+    // Generate full HTML file with the template's CSS, HTML, and optional JS
     const fullHTML = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${template.nameAr} - KNOUX REC</title>
+    <title>${template.nameAr} - KNOUX REC Template</title>
     <style>
+        /* Basic reset and base styles */
         * {
             margin: 0;
             padding: 0;
@@ -466,8 +669,15 @@ const TemplatesPanel: React.FC = () => {
         }
         body {
             font-family: 'Arial', sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Important for animations */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        /* Template specific CSS */
         ${template.cssTemplate}
     </style>
 </head>
@@ -477,25 +687,133 @@ const TemplatesPanel: React.FC = () => {
 </body>
 </html>`;
 
-    // إنشاء ملف وتحميل��
+    // Create a Blob and trigger download
     const blob = new Blob([fullHTML], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `${template.id}-template.html`;
+    document.body.appendChild(a); // Append to body to make it clickable
     a.click();
+    document.body.removeChild(a); // Clean up
     URL.revokeObjectURL(url);
 
-    alert(`تم تحميل قالب "${template.nameAr}" كملف HTML جاهز للاستخدام!`);
+    showAlert("نجاح", `تم تحميل قالب "${template.nameAr}" كملف HTML جاهز للاستخدام!`, "success");
   };
 
-  const handlePreviewTemplate = (template: RealTemplate) => {
+  const handlePreviewTemplate = (template: VideoTemplate) => {
     setSelectedTemplate(template);
-    setShowPreview(true);
+    setShowPreviewModal(true);
+  };
+
+  const TemplateCard: React.FC<{ template: VideoTemplate; onSelect: (template: VideoTemplate) => void; onPreview: (template: VideoTemplate) => void }> = ({ template, onSelect, onPreview }) => {
+    const cardClasses = `
+      relative rounded-xl overflow-hidden shadow-lg transition-all duration-300
+      hover:scale-[1.03] hover:shadow-xl cursor-pointer
+      bg-gray-800 border border-gray-700
+      flex flex-col h-full
+    `;
+
+    const getDifficultyColor = (difficulty: string): string => {
+      switch (difficulty) {
+        case "easy": return "text-green-400";
+        case "medium": return "text-yellow-400";
+        case "hard": return "text-red-400";
+        default: return "text-gray-400";
+      }
+    };
+
+    const getCategoryAccentColor = (category: TemplateCategory): string => {
+      switch (category) {
+        case "for-you": return "bg-purple-500";
+        case "intro": return "bg-blue-500";
+        case "outro": return "bg-indigo-500";
+        case "education": return "bg-green-500";
+        case "birthday": return "bg-pink-500";
+        case "festival": return "bg-orange-500";
+        case "vlog": return "bg-teal-500";
+        case "business": return "bg-red-500";
+        case "social-media": return "bg-cyan-500";
+        default: return "bg-gray-500";
+      }
+    };
+
+    return (
+      <div className={cardClasses}>
+        {/* Premium/Popular/Trending Badges */}
+        <div className="absolute top-2 left-2 z-10 flex gap-1">
+          {template.premium && <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full shadow">PREMIUM</span>}
+          {template.popular && <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">POPULAR</span>}
+          {template.trending && <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">TRENDING</span>}
+        </div>
+
+        {/* Thumbnail or Preview */}
+        <div className="relative w-full h-48 bg-gray-700 flex items-center justify-center overflow-hidden">
+          {template.preview_thumbnail ? (
+            <img src={template.preview_thumbnail} alt={template.nameAr} className="w-full h-full object-cover" />
+          ) : (
+            <div className="text-6xl text-white/50">{template.icon}</div>
+          )}
+          {/* Overlay for hover actions */}
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={(e) => { e.stopPropagation(); onPreview(template); }}
+              className="btn btn-secondary mx-2"
+            >
+              معاينة
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(template); }}
+              className="btn btn-primary mx-2"
+            >
+              استخدام
+            </button>
+          </div>
+        </div>
+
+        {/* Card Content */}
+        <div className="p-4 flex-grow flex flex-col">
+          <h3 className="text-lg font-bold text-white mb-1">{template.nameAr}</h3>
+          <p className="text-sm text-gray-400 mb-3 truncate-2">{template.descriptionAr}</p>
+
+          <div className="flex-grow"></div> {/* Spacer */}
+
+          {/* Specs */}
+          <div className="text-xs text-gray-500 space-y-1 mt-auto">
+            <div className="flex justify-between items-center">
+              <span>المدة:</span>
+              <span className="text-white font-medium">{template.duration} ثواني</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>الصعوبة:</span>
+              <span className={`font-medium ${getDifficultyColor(template.difficulty)} capitalize`}>
+                {template.difficulty === "easy" ? "سهل" : template.difficulty === "medium" ? "متوسط" : "صعب"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>النسبة:</span>
+              <span className="text-white font-medium">{template.aspect_ratio}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>العلامات:</span>
+              <div className="flex flex-wrap gap-1">
+                {template.tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">#{tag}</span>
+                ))}
+                {template.tags.length > 3 && <span className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">...</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Accent Bar at the bottom */}
+        <div className={`h-1 w-full ${getCategoryAccentColor(template.category)} rounded-b-xl`}></div>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 text-white font-inter">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -507,153 +825,170 @@ const TemplatesPanel: React.FC = () => {
           </p>
         </div>
 
-        {/* Categories */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {/* Search Bar */}
+        <div className="mb-8">
+          <input
+            type="text"
+            placeholder="ابحث عن قالب..."
+            className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Categories Navigation */}
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               className={`
-                p-4 rounded-xl border-2 transition-all duration-300 text-center
+                px-5 py-2 rounded-full border-2 transition-all duration-300 flex items-center gap-2
                 ${
                   selectedCategory === category.id
-                    ? "border-purple-400 bg-purple-500/20 scale-105"
-                    : "border-purple-600/30 bg-white/5 hover:bg-white/10"
+                    ? "border-purple-400 bg-purple-500/20 text-purple-200 shadow-lg"
+                    : "border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:border-purple-500/50"
                 }
               `}
             >
-              <div className="text-3xl mb-2">{category.icon}</div>
-              <div className="text-white font-semibold">{category.name}</div>
-              <div className="text-purple-300 text-sm">{category.nameEn}</div>
-              <div className="text-purple-400 text-xs mt-1">
-                {filteredTemplates.length} قالب
-              </div>
+              <span className="text-xl">{category.icon}</span>
+              <span className="font-semibold">{category.name}</span>
+              <span className="text-sm bg-gray-700/50 px-2 py-0.5 rounded-full">
+                {getCategoryCount(category.id)}
+              </span>
             </button>
           ))}
         </div>
 
-        {/* Templates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template) => (
-            <div
-              key={template.id}
-              className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden hover:transform hover:scale-105 transition-all duration-300"
-            >
-              {/* Preview */}
-              <div
-                className="h-48 relative overflow-hidden"
-                style={{ background: template.previewCode }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="text-4xl mb-2">{template.icon}</div>
-                    <div className="text-lg font-bold">{template.nameAr}</div>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2">
-                  <span
-                    className={`
-                    px-2 py-1 rounded-full text-xs font-semibold
-                    ${
-                      template.difficulty === "easy"
-                        ? "bg-green-500"
-                        : template.difficulty === "medium"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                    }
-                  `}
-                  >
-                    {template.difficulty}
-                  </span>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="text-white font-bold text-lg mb-2">
-                  {template.nameAr}
-                </h3>
-                <p className="text-purple-200 text-sm mb-3">
-                  {template.descriptionAr}
-                </p>
-
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {template.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-purple-600/30 text-purple-200 text-xs rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePreviewTemplate(template)}
-                    className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200"
-                  >
-                    👁️ معاينة
-                  </button>
-                  <button
-                    onClick={() => handleUseTemplate(template)}
-                    className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200"
-                  >
-                    📥 تحميل
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Preview Modal */}
-        {showPreview && selectedTemplate && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="text-xl font-bold text-gray-800">
-                  معاينة: {selectedTemplate.nameAr}
-                </h3>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="p-4 max-h-96 overflow-auto">
-                <h4 className="font-semibold mb-2 text-gray-700">كود CSS:</h4>
-                <pre className="bg-gray-100 p-4 rounded-lg text-sm overflow-auto mb-4">
-                  <code>{selectedTemplate.cssTemplate}</code>
-                </pre>
-                <h4 className="font-semibold mb-2 text-gray-700">كود HTML:</h4>
-                <pre className="bg-gray-100 p-4 rounded-lg text-sm overflow-auto">
-                  <code>{selectedTemplate.htmlTemplate}</code>
-                </pre>
-              </div>
-              <div className="p-4 border-t text-center">
-                <button
-                  onClick={() => handleUseTemplate(selectedTemplate)}
-                  className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
-                >
-                  📥 تحميل القالب
-                </button>
-              </div>
-            </div>
+        {/* Loading Indicator */}
+        {loading && (
+          <div className="text-center py-10">
+            <div className="animate-spin-fast inline-block w-8 h-8 border-4 border-t-4 border-purple-500 border-solid rounded-full"></div>
+            <p className="mt-4 text-purple-300">جاري تحميل القوالب...</p>
           </div>
         )}
 
-        {/* Footer Info */}
-        <div className="mt-12 text-center text-purple-300">
-          <p className="text-lg">
-            ✅ جميع القوالب حقيقية وجاهزة للاستخدام الفوري
-          </p>
-          <p className="text-sm mt-2">
-            لا توجد أي قوالب وهمية أو محتوى افتراضي - كل شيء يعمل 100%
-          </p>
-        </div>
+        {/* Templates Grid */}
+        {!loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredTemplates.length > 0 ? (
+              filteredTemplates.map((template) => (
+                <TemplateCard
+                  key={template.template_id} // Use template_id for key
+                  template={template}
+                  onSelect={handleUseTemplate}
+                  onPreview={handlePreviewTemplate}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center text-white/70 text-lg py-10">
+                لا توجد قوالب مطابقة لمعايير البحث أو الفئة المحددة.
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        title={selectedTemplate?.nameAr || "معاينة القالب"}
+        type="preview"
+        footer={
+          <button onClick={() => {
+            if (selectedTemplate) handleUseTemplate(selectedTemplate);
+            setShowPreviewModal(false);
+          }} className="btn btn-primary">
+            استخدام هذا القالب
+          </button>
+        }
+      >
+        {selectedTemplate && (
+          <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-lg">
+            {/* Using an iframe to render the template's HTML/CSS/JS */}
+            <iframe
+              title="Template Preview"
+              srcDoc={`
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Preview</title>
+                    <style>
+                        body { margin: 0; padding: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
+                        ${selectedTemplate.cssTemplate}
+                    </style>
+                </head>
+                <body>
+                    ${selectedTemplate.htmlTemplate}
+                    ${selectedTemplate.jsCode ? `<script>${selectedTemplate.jsCode}</script>` : ""}
+                </body>
+                </html>
+              `}
+              style={{ width: '100%', height: '500px', border: 'none', borderRadius: '8px' }}
+              sandbox="allow-scripts allow-same-origin" // Security sandbox for iframe
+            ></iframe>
+          </div>
+        )}
+      </Modal>
+
+      {/* Alert Modal */}
+      <Modal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        type="alert"
+      >
+        <div className={`alert alert-${alertModal.type} flex items-center justify-center`}>
+          {alertModal.type === 'success' && <span className="alert-icon">✅</span>}
+          {alertModal.type === 'error' && <span className="alert-icon">❌</span>}
+          {alertModal.type === 'info' && <span className="alert-icon">ℹ️</span>}
+          <span>{alertModal.message}</span>
+        </div>
+      </Modal>
+
+      {/* Prompt Modal */}
+      <Modal
+        isOpen={promptModal.isOpen}
+        onClose={() => {
+          setPromptModal({ ...promptModal, isOpen: false });
+          promptModal.callback(null); // Call callback with null if cancelled
+        }}
+        title={promptModal.title}
+        type="prompt"
+        footer={
+          <>
+            <button
+              onClick={() => {
+                setPromptModal({ ...promptModal, isOpen: false });
+                promptModal.callback(null); // Pass null on cancel
+              }}
+              className="btn btn-secondary"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={() => {
+                setPromptModal({ ...promptModal, isOpen: false });
+                promptModal.callback(promptModal.inputValue);
+              }}
+              className="btn btn-primary"
+            >
+              تأكيد
+            </button>
+          </>
+        }
+      >
+        <p className="mb-4">{promptModal.message}</p>
+        <input
+          type="text"
+          value={promptModal.inputValue}
+          onChange={(e) => setPromptModal({ ...promptModal, inputValue: e.target.value })}
+          className="w-full"
+        />
+      </Modal>
     </div>
   );
 };
