@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import LuxuryHeader from "./LuxuryHeader";
 import Controls from "./Controls";
 import Features from "./Features";
@@ -16,6 +16,8 @@ import ToolboxPanel from "./ToolboxPanel";
 import OfflineAIToolsPanel from "./OfflineAIToolsPanel";
 import VisualPatchLabPanel from "./VisualPatchLabPanel";
 import AIBodyEditorPanel from "./AIBodyEditorPanel";
+import KnouxMorphCorePanel from "./KnouxMorphCorePanel";
+import ArabicAIToolsPanel from "./ArabicAIToolsPanel";
 import ElysianCanvas from "../elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./AdvancedProgressIndicator";
 import AdvancedModelSettings from "./AdvancedModelSettings";
@@ -31,14 +33,13 @@ import {
 } from "./LuxuryIcons";
 import { LuxuryBackgroundEffects } from "./LuxuryEffects";
 import UIEnhancer from "./UIEnhancer";
+import AutoAllocationCoordinator from "./AutoAllocationCoordinator";
+import RealContentManager from "./RealContentManager";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
-import { videoProcessor } from "../services/videoProcessor";
 import { audioProcessor } from "../services/audioProcessor";
-import { imageProcessor } from "../services/imageProcessor";
 import { feedbackService } from "../services/feedbackService";
-import { systemTester } from "../services/systemTester";
 import {
   enhancedModelManager,
   LoadingProgress,
@@ -62,7 +63,10 @@ const LuxuryApp = () => {
     | "offline-tools"
     | "visual-patch-lab"
     | "ai-body-editor"
+    | "knoux-morph-core"
+    | "arabic-ai-tools"
     | "elysian"
+    | "real-content"
   >("main");
 
   const [settings, setSettings] = useState<RecordingSettings>({
@@ -107,6 +111,8 @@ const LuxuryApp = () => {
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress[]>([]);
   const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
   const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
+  const [showAutoAllocation, setShowAutoAllocation] = useState(false);
+  const [showRealContent, setShowRealContent] = useState(false);
 
   const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
@@ -138,7 +144,7 @@ const LuxuryApp = () => {
     async (recording: Recording) => {
       if (!recording.transcript || recording.transcript.trim().length < 10) {
         addNotification(
-          `تم ��خطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
+          `تم ���خطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
           "info",
         );
         setRecordings((prev) =>
@@ -209,7 +215,7 @@ const LuxuryApp = () => {
                 ),
               );
               feedbackService.dismiss(loadingId);
-              addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
+              addNotification(`فشل التحليل ال��كي: ${task.error}`, "error");
             } else if (task.status === "processing") {
               setTimeout(checkTaskStatus, 2000);
             }
@@ -220,7 +226,7 @@ const LuxuryApp = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
-        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
+        addNotification(`��شل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
             r.id === recording.id
@@ -414,7 +420,10 @@ const LuxuryApp = () => {
 
   const handleScreenshot = useCallback(async () => {
     try {
-      const loadingId = feedbackService.loading("جار التقاط لقطة الشاشة...", 0);
+      const loadingId = feedbackService.loading(
+        "جار التقا�� لقطة الشاشة...",
+        0,
+      );
       const result = await recorderActions.takeScreenshot();
       feedbackService.dismiss(loadingId);
 
@@ -670,6 +679,36 @@ const LuxuryApp = () => {
           </button>
 
           <button
+            onClick={() => setCurrentView("arabic-ai-tools")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group hologram-effect border-2 border-yellow-500/50"
+          >
+            <div className="mb-3">
+              <div className="text-5xl mx-auto text-yellow-400">🤖</div>
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1 text-yellow-300">
+              أدوات الذكاء الاصطناعي
+            </div>
+            <div className="luxury-text text-sm opacity-70 text-yellow-400">
+              38 أداة عربية • محلياً
+            </div>
+          </button>
+
+          <button
+            onClick={() => setCurrentView("knoux-morph-core")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group cosmic-glow border-2 border-purple-500/50"
+          >
+            <div className="mb-3">
+              <div className="text-5xl mx-auto text-purple-400">🧱</div>
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1 text-purple-300">
+              Knoux MorphCore™
+            </div>
+            <div className="luxury-text text-sm opacity-70 text-purple-400">
+              50 أداة محلية • بدون AI
+            </div>
+          </button>
+
+          <button
             onClick={() => setCurrentView("ai-body-editor")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group electric-effect border-2 border-red-500/50"
           >
@@ -837,8 +876,26 @@ const LuxuryApp = () => {
             <AIBodyEditorPanel />
           </div>
         );
+      case "arabic-ai-tools":
+        return <ArabicAIToolsPanel />;
+      case "knoux-morph-core":
+        return <KnouxMorphCorePanel onClose={() => setCurrentView("main")} />;
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
+      case "real-content":
+        return (
+          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
+            <RealContentManager
+              onContentUpdate={(stats) => {
+                console.log("تم تحديث المحتوى الحقيقي:", stats);
+                addNotification(
+                  `تم تفعيل ${stats.total} عنصر محتوى حقيقي!`,
+                  "success",
+                );
+              }}
+            />
+          </div>
+        );
       default:
         return renderMainView();
     }
@@ -849,7 +906,7 @@ const LuxuryApp = () => {
       {/* تحسينات الواجهة الشاملة */}
       <UIEnhancer />
 
-      {/* التأثيرات البصرية الفاخرة */}
+      {/* التأثيرات البصرية الفاخر�� */}
       <LuxuryBackgroundEffects
         effects={["starfield", "orbs", "waves"]}
         intensity={recorderState.isRecording ? 0.8 : 0.4}
@@ -874,7 +931,7 @@ const LuxuryApp = () => {
         onNotificationsClick={() => setIsNotificationsOpen((p) => !p)}
         notificationCount={notifications.length}
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={(view: string) => setCurrentView(view as any)}
       />
 
       {/* Notifications */}
@@ -926,6 +983,67 @@ const LuxuryApp = () => {
           }}
           onClose={() => setPendingRecording(null)}
         />
+      )}
+
+      {/* Auto-Allocation Modal */}
+      {showAutoAllocation && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-6xl max-h-[90vh] overflow-auto">
+            <AutoAllocationCoordinator
+              autoStart={true}
+              onComplete={(report) => {
+                console.log("تم الانتهاء من التخصيص التلقائي:", report);
+                addNotification(
+                  "تم إنجاز التخصيص التلقائي الذكي بنجاح!",
+                  "success",
+                );
+              }}
+            />
+            <div className="text-center mt-4">
+              <button
+                onClick={() => setShowAutoAllocation(false)}
+                className="px-6 py-3 bg-gray-500/20 hover:bg-gray-500/40 rounded-xl text-white font-medium transition-all"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Buttons */}
+      {currentView === "main" && (
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col space-y-3">
+          {/* Real Content Button */}
+          <button
+            onClick={() => setCurrentView("real-content")}
+            className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full text-white font-bold shadow-lg hover:scale-110 transition-all duration-300 group"
+            title="المحتوى الحقيقي للمستخدم"
+          >
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">🎆</span>
+              <span className="hidden group-hover:block text-sm whitespace-nowrap">
+                محتوى حقيقي
+              </span>
+            </div>
+          </button>
+
+          {/* Auto-Allocation Button */}
+          {!showAutoAllocation && (
+            <button
+              onClick={() => setShowAutoAllocation(true)}
+              className="p-4 bg-gradient-to-r from-knoux-purple to-knoux-neon rounded-full text-white font-bold shadow-lg hover:scale-110 transition-all duration-300 group"
+              title="التخصيص التلقائي الذكي"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl">🤖</span>
+                <span className="hidden group-hover:block text-sm whitespace-nowrap">
+                  تخصيص ذكي
+                </span>
+              </div>
+            </button>
+          )}
+        </div>
       )}
 
       {/* Main Content */}
