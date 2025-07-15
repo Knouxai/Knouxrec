@@ -15,7 +15,8 @@ interface BackNavigationProps {
       | "offline-tools"
       | "visual-patch-lab"
       | "ai-body-editor"
-      | "knoux-morph-core",
+      | "knoux-morph-core"
+      | "arabic-ai-tools",
   ) => void;
 }
 
@@ -46,6 +47,8 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
         return "🔞 AI Body Editor (18+)";
       case "knoux-morph-core":
         return "🧱 Knoux MorphCore™ - Offline Visual Patch Lab";
+      case "arabic-ai-tools":
+        return "🤖 أدوات الذكاء الاصطناعي العربية";
       default:
         return "🏠 KNOUX REC";
     }
@@ -56,6 +59,7 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
     { id: "templates", icon: "📽️", label: "القوالب" },
     { id: "toolbox", icon: "🛠️", label: "Toolbox" },
     { id: "offline-tools", icon: "🧠", label: "أدوات أوفلاين" },
+    { id: "arabic-ai-tools", icon: "🤖", label: "أدوات عربية" },
     { id: "visual-patch-lab", icon: "🧩", label: "Visual Patch" },
     { id: "ai-body-editor", icon: "🔞", label: "AI Body Editor" },
     { id: "recordings", icon: "🎬", label: "Recordings" },
