@@ -1,5 +1,3 @@
-import React from "react";
-
 interface ToggleSwitchProps {
   enabled: boolean;
   onChange: (enabled: boolean) => void;

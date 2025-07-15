@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface RealTool {
   id: string;
@@ -16,11 +16,20 @@ interface RealTool {
 
 const ToolboxPanel: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [processingFiles, setProcessingFiles] = useState<Set<string>>(
-    new Set(),
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
+
+  // Helper to download a Blob
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   // أدوات حقيقية تعمل محلياً 100%
   const realTools: RealTool[] = [
@@ -397,23 +406,23 @@ const ToolboxPanel: React.FC = () => {
   };
 
   const generateQRCode = (text: string) => {
-    // QR Code بسيط باستخدام Canvas
+    // QR Code بسيط باستخدام Canvas - هذه ليست مكتبة QR كاملة
+    // في تطبيق حقيقي، ستستخدم مكتبة QR Code مثل 'qrcode.react' أو 'qrious'
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
 
     canvas.width = 200;
     canvas.height = 200;
 
-    // خلفية بيضاء
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // نمط بسيط للـ QR Code
     ctx.fillStyle = "black";
     const size = 10;
+    // تمثيل بسيط جداً للـ QR Code، ليس فعلياً مولد QR
     for (let i = 0; i < 20; i++) {
       for (let j = 0; j < 20; j++) {
-        if ((i + j + text.length) % 3 === 0) {
+        if ((i * 2 + j + text.length) % 3 === 0) {
           ctx.fillRect(i * size, j * size, size, size);
         }
       }
@@ -447,234 +456,191 @@ const ToolboxPanel: React.FC = () => {
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d")!;
-
         canvas.width = img.width;
         canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, img.width, img.height);
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const colors: string[] = [];
+        const pixels = imageData.data;
+        const colorMap: { [key: string]: number } = {};
 
-        // استخراج الألوان (تبسيط)
-        for (let i = 0; i < imageData.data.length; i += 40000) {
-          const r = imageData.data[i];
-          const g = imageData.data[i + 1];
-          const b = imageData.data[i + 2];
-          const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-          if (!colors.includes(hex)) {
-            colors.push(hex);
-          }
+        // تحليل الألوان (مثال بسيط: كل 100 بكسل)
+        for (let i = 0; i < pixels.length; i += 4 * 100) {
+          const r = pixels[i];
+          const g = pixels[i + 1];
+          const b = pixels[i + 2];
+          const color = `${r},${g},${b}`;
+          colorMap[color] = (colorMap[color] || 0) + 1;
         }
 
-        // إنشاء لوحة ألوان
-        const paletteCanvas = document.createElement("canvas");
-        const paletteCtx = paletteCanvas.getContext("2d")!;
+        // تحويل إلى مصفوفة وفرز حسب التكرار
+        const sortedColors = Object.entries(colorMap).sort(
+          (a, b) => b[1] - a[1],
+        );
 
-        paletteCanvas.width = 500;
-        paletteCanvas.height = 100;
+        // أخذ أول 5 ألوان مهيمنة
+        const dominantColors = sortedColors
+          .slice(0, 5)
+          .map((entry) => `rgb(${entry[0]})`);
 
-        const colorWidth = paletteCanvas.width / Math.min(colors.length, 10);
+        alert(
+          "الألوان المهيمنة المستخرجة:\n" + dominantColors.join("\n"),
+        );
+        // يمكنك هنا عرض هذه الألوان في الواجهة أو تنزيلها كنص
+        const blob = new Blob([dominantColors.join('\n')], { type: 'text/plain' });
+        downloadBlob(blob, `color-palette-${file.name.split('.')[0]}.txt`);
 
-        colors.slice(0, 10).forEach((color, index) => {
-          paletteCtx.fillStyle = color;
-          paletteCtx.fillRect(
-            index * colorWidth,
-            0,
-            colorWidth,
-            paletteCanvas.height,
-          );
-        });
-
-        paletteCanvas.toBlob((blob) => {
-          if (blob) {
-            downloadBlob(blob, `color-palette-${file.name.split(".")[0]}.png`);
-          }
-        }, "image/png");
       };
       img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
 
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // فلترة الأدوات
+  const filteredTools = realTools.filter((tool) => {
+    const matchesCategory =
+      selectedCategory === "all" || tool.category === selectedCategory;
+    const matchesSearch =
+      !searchQuery ||
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
+  // فئات الأدوات
   const categories = [
-    {
-      id: "all",
-      name: "جميع الأدوات",
-      nameEn: "All Tools",
-      icon: "🛠️",
-      count: realTools.length,
-    },
-    {
-      id: "image",
-      name: "الصور",
-      nameEn: "Images",
-      icon: "🖼️",
-      count: realTools.filter((t) => t.category === "image").length,
-    },
-    {
-      id: "video",
-      name: "الفيديو",
-      nameEn: "Video",
-      icon: "📹",
-      count: realTools.filter((t) => t.category === "video").length,
-    },
-    {
-      id: "audio",
-      name: "الصوت",
-      nameEn: "Audio",
-      icon: "🎵",
-      count: realTools.filter((t) => t.category === "audio").length,
-    },
-    {
-      id: "text",
-      name: "النصوص",
-      nameEn: "Text",
-      icon: "📝",
-      count: realTools.filter((t) => t.category === "text").length,
-    },
-    {
-      id: "utility",
-      name: "أدوات مساعدة",
-      nameEn: "Utility",
-      icon: "⚙️",
-      count: realTools.filter((t) => t.category === "utility").length,
-    },
+    { id: "all", name: "الكل", icon: "🔧" },
+    { id: "image", name: "صور", icon: "🖼️" },
+    { id: "video", name: "فيديو", icon: "🎬" },
+    { id: "audio", name: "صوت", icon: "🎵" },
+    { id: "text", name: "نصوص", icon: "📝" },
+    { id: "utility", name: "أدوات مساعدة", icon: "🛠️" },
   ];
 
-  const filteredTools =
-    selectedCategory === "all"
-      ? realTools
-      : realTools.filter((tool) => tool.category === selectedCategory);
-
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            🛠️ صندوق الأدوات الحقيقي
-          </h1>
-          <p className="text-xl text-blue-200">
-            أدوات محلية 100% تعمل بـ JavaScript - لا خدمات خارجية!
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-knoux-purple to-knoux-neon bg-clip-text text-transparent">
+            صندوق الأدوات
+          </h2>
+          <p className="text-white/70 mt-2">
+            مجموعة من الأدوات المحلية لمعالجة الوسائط والنصوص
           </p>
         </div>
-
-        {/* Categories */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`
-                p-4 rounded-xl border-2 transition-all duration-300 text-center
-                ${
-                  selectedCategory === category.id
-                    ? "border-blue-400 bg-blue-500/20 scale-105"
-                    : "border-blue-600/30 bg-white/5 hover:bg-white/10"
-                }
-              `}
-            >
-              <div className="text-2xl mb-2">{category.icon}</div>
-              <div className="text-white font-semibold text-sm">
-                {category.name}
-              </div>
-              <div className="text-blue-300 text-xs">{category.nameEn}</div>
-              <div className="text-blue-400 text-xs mt-1">
-                {category.count} أداة
-              </div>
-            </button>
-          ))}
+        {/* Credits Display - Placeholder as local tools don't consume credits */}
+        <div className="glass-card p-4 rounded-xl">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-knoux-neon">مجاني</div>
+            <div className="text-white/70 text-sm">أدوات محلية</div>
+            <div className="text-xs text-white/50 mt-1">لا توجد نقاط مطلوبة</div>
+          </div>
         </div>
+      </div>
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTools.map((tool) => (
+      {/* Search */}
+      <div className="relative max-w-md">
+        <input
+          type="text"
+          placeholder="ابحث عن أداة..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full glass-card px-4 py-3 pr-12 rounded-xl text-white placeholder-white/50 border-white/20 focus:border-knoux-purple/50 transition-all duration-300"
+        />
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50">
+          🔍
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => setSelectedCategory(category.id)}
+            className={`glass-card interactive p-4 rounded-xl text-center transition-all duration-300 ${
+              selectedCategory === category.id
+                ? "bg-knoux-purple/20 border-knoux-purple"
+                : "hover:bg-white/10"
+            }`}
+          >
+            <div className="text-2xl mb-2">{category.icon}</div>
+            <div
+              className={`font-semibold text-sm ${
+                selectedCategory === category.id
+                  ? "text-knoux-purple"
+                  : "text-white"
+              }`}
+            >
+              {category.name}
+            </div>
+            <div className="text-xs text-white/50">
+              {
+                realTools.filter((t) =>
+                  category.id === "all" ? true : t.category === category.id,
+                ).length
+              }{" "}
+              أدوات
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredTools.length > 0 ? (
+          filteredTools.map((tool) => (
             <div
               key={tool.id}
-              className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden hover:transform hover:scale-105 transition-all duration-300"
+              onClick={tool.functionality} // Directly call the functionality
+              className="glass-card interactive rounded-xl overflow-hidden group cursor-pointer"
             >
-              <div className="p-6">
-                <div className="text-4xl mb-4 text-center">{tool.icon}</div>
-
-                <h3 className="text-white font-bold text-lg mb-2 text-center">
+              {/* Tool Header */}
+              <div className="p-6 text-center">
+                <div className="text-4xl mb-3">{tool.icon}</div>
+                <h3 className="font-orbitron font-bold text-white mb-2">
                   {tool.nameAr}
                 </h3>
-
-                <p className="text-blue-200 text-sm mb-4 text-center">
+                <p className="text-white/70 text-sm line-clamp-2 mb-4">
                   {tool.descriptionAr}
                 </p>
 
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
-                    ✅ محلي 100%
-                  </span>
-                  <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">
-                    {tool.category}
+                {/* Badges - Simplified for local tools */}
+                <div className="flex flex-wrap gap-1 mb-4 justify-center">
+                  <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">
+                    محلي 💯
                   </span>
                 </div>
 
-                <button
-                  onClick={tool.functionality}
-                  disabled={processingFiles.has(tool.id)}
-                  className={`
-                    w-full py-3 rounded-lg font-semibold transition-all duration-200
-                    ${
-                      activeToolId === tool.id
-                        ? "bg-yellow-500 text-yellow-900"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  `}
-                >
-                  {activeToolId === tool.id
-                    ? "🔄 جار المعالجة..."
-                    : "🚀 تشغيل الأداة"}
-                </button>
+                {/* Credits Cost - Show as Free */}
+                <div className="flex items-center justify-center space-x-2 text-sm">
+                  <span className="text-knoux-neon font-bold">مجاني</span>
+                  <span className="text-white/70">الاستخدام</span>
+                </div>
+              </div>
 
-                {tool.fileTypes && (
-                  <div className="mt-2 text-center">
-                    <span className="text-xs text-white/60">
-                      يدعم: {tool.fileTypes.join(", ")}
-                    </span>
-                  </div>
-                )}
+              {/* Hover Effect */}
+              <div className="absolute inset-0 bg-knoux-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="bg-knoux-purple text-white px-4 py-2 rounded-lg font-semibold transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                  استخدم الأداة
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-12 text-center bg-white/5 rounded-xl p-6">
-          <h3 className="text-2xl font-bold text-white mb-4">
-            🎯 مميزات صندوق الأدوات
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-blue-200">
-            <div>
-              <div className="text-3xl mb-2">⚡</div>
-              <h4 className="font-semibold mb-2">سرعة فائقة</h4>
-              <p className="text-sm">معالجة محلية بدون تأخير الشبكة</p>
-            </div>
-            <div>
-              <div className="text-3xl mb-2">🔒</div>
-              <h4 className="font-semibold mb-2">خصوصية كاملة</h4>
-              <p className="text-sm">ملفاتك لا تغادر جهازك أبداً</p>
-            </div>
-            <div>
-              <div className="text-3xl mb-2">🆓</div>
-              <h4 className="font-semibold mb-2">مجاني 100%</h4>
-              <p className="text-sm">لا اشتراكات أو حدود استخدام</p>
-            </div>
+          ))
+        ) : (
+          <div className="text-center py-12 col-span-full">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-white/80">
+              لم يتم العثور على أدوات
+            </h3>
+            <p className="text-white/60 mt-2">
+              حاول البحث بكلمات مختلفة أو تغيير الفئة.
+            </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
