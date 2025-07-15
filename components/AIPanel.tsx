@@ -502,268 +502,185 @@ const AIPanel: React.FC<AIPanelProps> = ({ recordings, onUpdateRecording }) => {
     }
   };
 
-  // تصفية التسجيلات لعرض فقط تلك التي تحتوي على نص كافٍ للتحليل
-  const recordingsWithTranscript = recordings.filter(
-    (r) => r.transcript && r.transcript.length > 20
-  );
-
-  /**
-   * دالة مساعدة لعرض تفاصيل نتائج التحليل بشكل منسق.
-   * @param recordingId معرف التسجيل.
-   * @param resultKey المفتاح الذي يحمل النتيجة في analysisResults.
-   * @returns عنصر JSX لعرض النتيجة.
-   */
-  const renderAnalysisDetail = (recordingId: string, resultKey: string) => {
-    const results = analysisResults[recordingId]?.[resultKey];
-    if (!results) return null; // لا تعرض شيئاً إذا لم تكن هناك نتائج
-
-    switch (resultKey) {
-      case "textAnalysis":
-        return (
-          <div className="text-xs text-white/80 space-y-1">
-            <div>📊 **كلمات**: {results.wordCount}</div>
-            <div>📄 **جمل**: {results.sentenceCount}</div>
-            <div>⏱️ **قراءة**: {results.readingTime} دقيقة</div>
-            {results.topWords && results.topWords.length > 0 && (
-                <div>✨ **أهم الكلمات**: {results.topWords.map((w: any) => w.word).join(", ")}</div>
-            )}
-          </div>
-        );
-      case "keywords":
-        return (
-          <div className="text-xs text-white/80">
-            🔑 **الكلمات المفتاحية**:{" "}
-            {results.slice(0, 5).map((k: any) => k.word).join(", ")}
-          </div>
-        );
-      case "summary":
-        return (
-          <div className="text-xs text-white/80">
-            📋 **الملخص**:{" "}
-            {results.length > 150 ? `${results.substring(0, 150)}...` : results}
-          </div>
-        );
-      case "sentiment":
-        return (
-          <div className="text-xs text-white/80">
-            😊 **المشاعر**: {results.sentiment} (ثقة: {results.confidence}%)
-          </div>
-        );
-      case "language":
-        return (
-          <div className="text-xs text-white/80">
-            🌍 **اللغة**: {results.language} (ثقة: {results.confidence}%)
-          </div>
-        );
-      case "topics":
-        return (
-            <div className="text-xs text-white/80">
-                💡 **الموضوع الرئيسي**: {results.dominantTopic} (ثقة: {results.confidence}%)
-            </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  // --- بدء عرض المكون (JSX) ---
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 font-sans">
-      <div className="max-w-7xl mx-auto">
-        {/* رأس الصفحة */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4 animate-fade-in">
-            🧠 مختبر الذكاء الاصطناعي المحلي 🚀
-          </h1>
-          <p className="text-xl text-indigo-200">
-            تحليل ذكي محلي 100% - بياناتك آمنة، معالجة فورية، ودائمًا مجاني!
-          </p>
-        </div>
+    <div className="p-6 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 min-h-screen text-white font-inter rounded-xl shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-white">
+        🧠 أدوات الذكاء الاصطناعي
+      </h2>
 
-        {/* شريط التنقل الرئيسي (التبويبات) */}
-        <div className="flex justify-center flex-wrap gap-2 mb-8 bg-white/5 rounded-full p-2 shadow-lg">
-          {mainTools.map((tool) => (
-            <button
-              key={tool.id}
-              onClick={() => setSelectedMainTool(tool.id)}
-              className={`
-                px-4 sm:px-6 py-2 sm:py-3 rounded-full text-base sm:text-lg font-medium transition-all duration-300
-                flex items-center space-x-2
-                ${
-                  selectedMainTool === tool.id
-                    ? "bg-purple-600 text-white shadow-xl scale-105"
-                    : "text-indigo-200 hover:bg-white/10 hover:text-white"
-                }
-              `}
-            >
-              <span className="text-xl sm:text-2xl">{tool.icon}</span>
-              <span>{tool.name}</span>
-            </button>
-          ))}
-        </div>
+      {/* Main Navigation Tabs */}
+      <div className="flex justify-center gap-4 mb-8 flex-wrap">
+        {mainTools.map((tool) => (
+          <button
+            key={tool.id}
+            onClick={() => setSelectedMainTool(tool.id)}
+            className={`
+              px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300
+              flex items-center gap-2
+              ${
+                selectedMainTool === tool.id
+                  ? "bg-blue-600 text-white shadow-lg scale-105"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+              }
+            `}
+          >
+            <span className="text-2xl">{tool.icon}</span>
+            {tool.name}
+          </button>
+        ))}
+      </div>
 
-        {/* المحتوى بناءً على التبويب المحدد */}
-        {selectedMainTool === "text-analysis" ? (
-          <>
-            {/* شبكة أدوات تحليل النصوص */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {textAnalysisTools.map((tool) => (
-                <div
-                  key={tool.id}
-                  className={`
-                    glass-card border-2 rounded-xl p-6 transition-all duration-300
-                    border-${tool.color} bg-${tool.color}/10
-                  `}
-                >
-                  <div className="text-4xl mb-4 text-center">{tool.icon}</div>
-                  <h3 className="text-white font-bold text-lg mb-2 text-center">
-                    {tool.name}
-                  </h3>
-                  <p className="text-white/70 text-sm text-center mb-4">
-                    {tool.description}
-                  </p>
-                  <div className="text-center">
-                    <span className="px-3 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
-                      ✅ نشط ويعمل
-                    </span>
+      {/* Conditional Rendering of Panels */}
+      {selectedMainTool !== "text-analysis" && (
+        <div className="mt-8">
+          {mainTools.find(tool => tool.id === selectedMainTool)?.component}
+        </div>
+      )}
+
+      {selectedMainTool === "text-analysis" && (
+        <>
+          {/* Text Analysis Tools Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {textAnalysisTools.map((tool) => (
+              <div
+                key={tool.id}
+                className={`
+                  glass-card p-5 rounded-xl border-2 transition-all duration-300
+                  ${
+                    tool.status === "active"
+                      ? `border-${tool.color}/50 hover:border-${tool.color} cursor-pointer`
+                      : "border-gray-600 opacity-50 cursor-not-allowed"
+                  }
+                `}
+              >
+                <div className="flex items-center mb-3">
+                  <span className={`text-4xl mr-3 text-${tool.color}`}>
+                    {tool.icon}
+                  </span>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {tool.name}
+                    </h3>
+                    <p className="text-sm text-gray-400">{tool.nameEn}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* قائمة التسجيلات لتحليل النصوص */}
-            <div className="glass-card rounded-xl p-6">
-              <h2 className="text-2xl font-bold text-white mb-6">
-                📋 التسجيلات المتاحة للتحليل النصي ({recordingsWithTranscript.length})
-              </h2>
-
-              {recordingsWithTranscript.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📝</div>
-                  <p className="text-xl text-white/70 mb-2">
-                    لا توجد تسجيلات تحتوي على نص كافٍ للتحليل.
-                  </p>
-                  <p className="text-white/50">
-                    قم بإنشاء تسجيل يحتوي على كلام (أكثر من 20 حرفًا) لتفعيل أدوات الذكاء الاصطناعي.
-                  </p>
+                <p className="text-gray-300 text-sm mb-4">
+                  {tool.description}
+                </p>
+                <div className="text-xs text-gray-500">
+                  الحالة:{" "}
+                  <span
+                    className={`font-semibold ${
+                      tool.status === "active" ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    {tool.status === "active" ? "نشط" : "غير نشط"}
+                  </span>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {recordingsWithTranscript.map((recording) => (
-                    <div key={recording.id} className="bg-white/5 rounded-xl p-6 border border-white/10 shadow-lg">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-white mb-1">
-                            {recording.name}
-                          </h3>
-                          <p className="text-sm text-white/60">
-                            {recording.transcript?.substring(0, 150)}...
-                          </p>
-                        </div>
-                        <span className="text-xs text-green-400 bg-green-500/20 px-3 py-1 rounded-full">
-                          نص متاح
-                        </span>
-                      </div>
+              </div>
+            ))}
+          </div>
 
-                      {/* عرض نتائج التحليل */}
+          {/* Recordings List for Text Analysis */}
+          <div className="bg-gray-800 p-6 rounded-xl shadow-inner">
+            <h3 className="text-2xl font-bold text-white mb-6">
+              تسجيلاتك لتحليل الذكاء الاصطناعي
+            </h3>
+            {recordings.length === 0 ? (
+              <p className="text-gray-400 text-center py-10">
+                لا توجد تسجيلات متاحة للتحليل. ابدأ بتسجيل جديد!
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {recordings.map((recording) => (
+                  <div
+                    key={recording.id}
+                    className="bg-gray-700 p-4 rounded-lg flex flex-col md:flex-row items-start md:items-center justify-between shadow-md"
+                  >
+                    <div className="flex-grow mb-3 md:mb-0">
+                      <h4 className="text-lg font-semibold text-white">
+                        {recording.name}
+                      </h4>
+                      <p className="text-sm text-gray-300 mt-1">
+                        المدة: {recording.duration.toFixed(1)} ثانية | الحجم:{" "}
+                        {(recording.size / (1024 * 1024)).toFixed(2)} ميجابايت
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        النص المستخرج:{" "}
+                        {recording.transcript
+                          ? recording.transcript.substring(0, 100) + "..."
+                          : "لا يوجد نص مستخرج"}
+                      </p>
+                      {/* Display Analysis Results if available */}
                       {analysisResults[recording.id] && (
-                        <div className="mb-4 p-4 bg-white/10 rounded-lg border border-white/20">
-                          <h4 className="text-base font-bold text-white mb-2">
-                            نتائج التحليل:
-                          </h4>
-                          <div className="space-y-1">
-                            {textAnalysisTools.map(tool => (
-                                <React.Fragment key={tool.id}>
-                                    {/* استدعاء الدالة المساعدة لعرض التفاصيل */}
-                                    {renderAnalysisDetail(recording.id, tool.resultKey)}
-                                </React.Fragment>
-                            ))}
-                          </div>
+                        <div className="mt-3 text-sm text-gray-200 bg-gray-600 p-3 rounded-md">
+                          {analysisResults[recording.id].textAnalysis && (
+                            <p>
+                              <strong>تحليل النص:</strong> كلمات: {analysisResults[recording.id].textAnalysis.wordCount},{" "}
+                              جمل: {analysisResults[recording.id].textAnalysis.sentenceCount},{" "}
+                              وقت القراءة: {analysisResults[recording.id].textAnalysis.readingTime} دقيقة
+                            </p>
+                          )}
+                          {analysisResults[recording.id].keywords && (
+                            <p>
+                              <strong>كلمات مفتاحية:</strong>{" "}
+                              {analysisResults[recording.id].keywords.map((k: any) => k.word).join(", ")}
+                            </p>
+                          )}
+                          {analysisResults[recording.id].summary && (
+                            <p>
+                              <strong>ملخص:</strong> {analysisResults[recording.id].summary}
+                            </p>
+                          )}
+                          {analysisResults[recording.id].sentiment && (
+                            <p>
+                              <strong>المشاعر:</strong> {analysisResults[recording.id].sentiment.sentiment}{" "}
+                              (ثقة: {analysisResults[recording.id].sentiment.confidence}%)
+                            </p>
+                          )}
+                          {analysisResults[recording.id].language && (
+                            <p>
+                              <strong>اللغة:</strong> {analysisResults[recording.id].language.language}{" "}
+                              (ثقة: {analysisResults[recording.id].language.confidence}%)
+                            </p>
+                          )}
+                          {analysisResults[recording.id].topics && (
+                            <p>
+                              <strong>الموضوع الرئيسي:</strong> {analysisResults[recording.id].topics.dominantTopic}{" "}
+                              (ثقة: {analysisResults[recording.id].topics.confidence}%)
+                            </p>
+                          )}
                         </div>
                       )}
-
-                      {/* أزرار الإجراءات لكل نوع تحليل */}
-                      <div className="flex flex-wrap gap-2">
-                        {textAnalysisTools.map((tool) => (
-                          <button
-                            key={tool.id}
-                            onClick={() =>
-                              handleProcessRecording(recording, tool.id)
-                            }
-                            disabled={
-                              !recording.transcript || processing === `${recording.id}-${tool.id}`
-                            }
-                            className={`
-                              px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
-                              flex items-center space-x-1
-                              ${
-                                processing === `${recording.id}-${tool.id}`
-                                  ? "bg-gray-700 text-gray-400 cursor-not-allowed animate-pulse"
-                                  : `bg-${tool.color}-600 hover:bg-${tool.color}-700 text-white shadow-md`
-                              }
-                            `}
-                          >
-                            {processing === `${recording.id}-${tool.id}` ? (
-                              <>
-                                <div className="loading-dots">
-                                  <div></div>
-                                  <div></div>
-                                  <div></div>
-                                </div>
-                                <span>جاري المعالجة...</span>
-                              </>
-                            ) : (
-                              <>
-                                <span>{tool.icon}</span>
-                                <span>{tool.name}</span>
-                              </>
-                            )}
-                          </button>
-                        ))}
-                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          // عرض المكونات الأخرى (لوحة الأداء، إدارة النماذج، إلخ.)
-          <div className="mt-8">
-            {/* البحث عن المكون المطابق لـ `selectedMainTool` وعرضه */}
-            {mainTools.find(tool => tool.id === selectedMainTool)?.component}
+                    <div className="flex flex-wrap gap-2 md:flex-col md:ml-4">
+                      {textAnalysisTools.map((tool) => (
+                        <button
+                          key={tool.id}
+                          onClick={() => handleProcessRecording(recording, tool.id)}
+                          disabled={!recording.transcript || processing === `${recording.id}-${tool.id}`}
+                          className={`
+                            px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200
+                            ${
+                              !recording.transcript
+                                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                : processing === `${recording.id}-${tool.id}`
+                                  ? `bg-${tool.color}/30 text-${tool.color} animate-pulse`
+                                  : `bg-${tool.color} hover:bg-${tool.color}/80 text-white`
+                            }
+                          `}
+                        >
+                          {processing === `${recording.id}-${tool.id}` ? "جاري..." : `تحليل ${tool.name}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-
-        {/* قسم معلومات مميزات الذكاء الاصطناعي المحلي */}
-        <div className="mt-12 text-center bg-white/5 rounded-xl p-8 border border-white/10 shadow-xl">
-          <h3 className="text-3xl font-bold text-white mb-6">
-            🎯 مميزات الذكاء الاصطناعي المحلي
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-indigo-200">
-            <div className="flex flex-col items-center">
-              <div className="text-5xl mb-3 glow-text">🔒</div>
-              <h4 className="font-bold text-xl mb-2">خصوصية كاملة</h4>
-              <p className="text-base text-white/70">يتم التحليل محليًا على جهازك، لا يتم إرسال بياناتك أبدًا إلى أي خوادم خارجية.</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-5xl mb-3 glow-text">⚡</div>
-              <h4 className="font-bold text-xl mb-2">سرعة فائقة</h4>
-              <p className="text-base text-white/70">معالجة فورية للتسجيلات بدون الاعتماد على سرعات الإنترنت أو قوائم الانتظار.</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-5xl mb-3 glow-text">🆓</div>
-              <h4 className="font-bold text-xl mb-2">مجاني بالكامل</h4>
-              <p className="text-base text-white/70">لا توجد رسوم خفية أو حدود للاستخدام، استمتع بجميع الميزات مجانًا.</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-5xl mb-3 glow-text">🌐</div>
-              <h4 className="font-bold text-xl mb-2">يعمل بدون إنترنت</h4>
-              <p className="text-base text-white/70">استخدم جميع أدوات الذكاء الاصطناعي حتى عندما لا تكون متصلاً بالشبكة.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

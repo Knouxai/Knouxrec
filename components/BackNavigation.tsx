@@ -1,7 +1,21 @@
 import React from "react";
 
 interface BackNavigationProps {
-  currentView: string;
+  currentView:
+    | "main"
+    | "recordings"
+    | "ai"
+    | "settings"
+    | "files"
+    | "templates"
+    | "toolbox"
+    | "offline-tools"
+    | "visual-patch-lab"
+    | "ai-body-editor"
+    | "knoux-morph-core"
+    | "arabic-ai-tools"
+    | "elysian"
+    | "real-content";
   onBack: () => void;
   onNavigate: (
     view:
@@ -16,7 +30,9 @@ interface BackNavigationProps {
       | "visual-patch-lab"
       | "ai-body-editor"
       | "knoux-morph-core"
-      | "arabic-ai-tools",
+      | "arabic-ai-tools"
+      | "elysian"
+      | "real-content",
   ) => void;
 }
 
@@ -46,9 +62,13 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
       case "ai-body-editor":
         return "🔞 AI Body Editor (18+)";
       case "knoux-morph-core":
-        return "🧱 Knoux MorphCore™ - Offline Visual Patch Lab";
+        return "🧱 Knoux MorphCore™";
       case "arabic-ai-tools":
         return "🤖 أدوات الذكاء الاصطناعي العربية";
+      case "elysian":
+        return "🌌 Elysian Canvas";
+      case "real-content":
+        return "✨ Real Content Manager";
       default:
         return "🏠 KNOUX REC";
     }
@@ -61,10 +81,13 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
     { id: "offline-tools", icon: "🧠", label: "أدوات أوفلاين" },
     { id: "arabic-ai-tools", icon: "🤖", label: "أدوات عربية" },
     { id: "visual-patch-lab", icon: "🧩", label: "Visual Patch" },
+    { id: "knoux-morph-core", icon: "🧱", label: "MorphCore" },
     { id: "ai-body-editor", icon: "🔞", label: "AI Body Editor" },
-    { id: "recordings", icon: "🎬", label: "Recordings" },
+    { id: "recordings", icon: "�", label: "Recordings" },
     { id: "ai", icon: "🧠", label: "AI Tools" },
     { id: "files", icon: "📁", label: "Files" },
+    { id: "elysian", icon: "🌌", label: "Elysian" },
+    { id: "real-content", icon: "✨", label: "Real Content" },
   ];
 
   return (
@@ -102,13 +125,13 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
           </div>
         </div>
 
-        {/* Quick Navigation */}
-        <div className="hidden md:flex items-center space-x-2">
+        {/* Quick Navigation - Desktop */}
+        <div className="hidden md:flex items-center space-x-2 overflow-x-auto pb-1">
           {navigationItems.map((item) => (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id as any)}
-              className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 ${
+              className={`flex-shrink-0 px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 ${
                 currentView === item.id
                   ? "bg-knoux-purple/30 border border-knoux-purple text-knoux-purple"
                   : "hover:bg-white/10 text-white/70 hover:text-white"
@@ -121,13 +144,13 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
           ))}
         </div>
 
-        {/* Mobile Quick Navigation */}
-        <div className="md:hidden flex items-center space-x-2">
+        {/* Quick Navigation - Mobile (Icons only) */}
+        <div className="md:hidden flex items-center space-x-2 overflow-x-auto pb-1">
           {navigationItems.map((item) => (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id as any)}
-              className={`p-2 rounded-lg transition-all duration-300 ${
+              className={`flex-shrink-0 p-2 rounded-lg transition-all duration-300 ${
                 currentView === item.id
                   ? "bg-knoux-purple/30 border border-knoux-purple text-knoux-purple"
                   : "hover:bg-white/10 text-white/70 hover:text-white"
@@ -165,3 +188,4 @@ const BackNavigation: React.FC<BackNavigationProps> = ({
 };
 
 export default BackNavigation;
+�

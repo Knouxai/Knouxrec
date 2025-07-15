@@ -5,7 +5,8 @@ import Features from "./Features";
 import Actions from "./Actions";
 import RecordingsGallery from "./RecordingsGallery";
 import VideoPreview from "./VideoPreview";
-import SettingsModal from "./SettingsModal";
+import EnhancedSettingsModal from "./EnhancedSettingsModal";
+import EnhancedNavigation from "./EnhancedNavigation";
 import NotificationsDropdown from "./NotificationsDropdown";
 import TrimModal from "./TrimModal";
 import AIPanel from "./AIPanel";
@@ -16,10 +17,6 @@ import ToolboxPanel from "./ToolboxPanel";
 import OfflineAIToolsPanel from "./OfflineAIToolsPanel";
 import VisualPatchLabPanel from "./VisualPatchLabPanel";
 import AIBodyEditorPanel from "./AIBodyEditorPanel";
-import KnouxMorphCorePanel from "./KnouxMorphCorePanel"; // New import
-import ArabicAIToolsPanel from "./ArabicAIToolsPanel"; // New import
-import AutoAllocationCoordinator from "./AutoAllocationCoordinator"; // New import
-import RealContentManager from "./RealContentManager"; // New import
 import ElysianCanvas from "../elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./AdvancedProgressIndicator";
 import AdvancedModelSettings from "./AdvancedModelSettings";
@@ -38,9 +35,12 @@ import UIEnhancer from "./UIEnhancer";
 import { useRecorder } from "../hooks/useRecorder";
 import { Recording, RecordingSettings, Theme, Notification } from "../types";
 import { offlineAI } from "../services/offlineAI";
+import { videoProcessor } from "../services/videoProcessor";
 import { audioProcessor } from "../services/audioProcessor";
+import { imageProcessor } from "../services/imageProcessor";
 import { feedbackService } from "../services/feedbackService";
-// Removed: videoProcessor, imageProcessor, systemTester as per merge conflict resolution
+import { systemTester } from "../services/systemTester";
+import LanguageService from "../services/languageService";
 import {
   enhancedModelManager,
   LoadingProgress,
@@ -64,10 +64,7 @@ const LuxuryApp = () => {
     | "offline-tools"
     | "visual-patch-lab"
     | "ai-body-editor"
-    | "knoux-morph-core" // New view
-    | "arabic-ai-tools" // New view
     | "elysian"
-    | "real-content" // New view
   >("main");
 
   const [settings, setSettings] = useState<RecordingSettings>({
@@ -112,8 +109,16 @@ const LuxuryApp = () => {
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress[]>([]);
   const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
   const [errorReports, setErrorReports] = useState<ErrorReport[]>([]);
-  const [showAutoAllocation, setShowAutoAllocation] = useState(false); // New state
-  const [showRealContent, setShowRealContent] = useState(false); // New state
+
+  // Enhanced state
+  const [currentLanguage, setCurrentLanguage] = useState("ar");
+  const [compactMode, setCompactMode] = useState(false);
+  const [showEnhancedNavigation, setShowEnhancedNavigation] = useState(false);
+  const [navigationHistory, setNavigationHistory] = useState<string[]>([
+    "main",
+  ]);
+
+  const languageService = useRef(LanguageService.getInstance());
 
   const addNotification = useCallback(
     (message: string, type: Notification["type"]) => {
@@ -145,7 +150,7 @@ const LuxuryApp = () => {
     async (recording: Recording) => {
       if (!recording.transcript || recording.transcript.trim().length < 10) {
         addNotification(
-          `تم تخطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`, // Resolved conflict
+          `تم تخطي التحليل الذكي لـ "${recording.name}" (النص قصير جداً).`,
           "info",
         );
         setRecordings((prev) =>
@@ -168,7 +173,7 @@ const LuxuryApp = () => {
           0,
         );
         addNotification(
-          `جار المعالجة بالذكاء الاصطناعي لـ "${recording.name}"...`,
+          `جار المعالجة بالذكاء الاصطناعي ��ـ "${recording.name}"...`,
           "info",
         );
 
@@ -216,7 +221,7 @@ const LuxuryApp = () => {
                 ),
               );
               feedbackService.dismiss(loadingId);
-              addNotification(`فشل التحليل الذكي: ${task.error}`, "error"); // Resolved conflict
+              addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
             } else if (task.status === "processing") {
               setTimeout(checkTaskStatus, 2000);
             }
@@ -227,7 +232,7 @@ const LuxuryApp = () => {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "خطأ غير معروف";
-        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error"); // Resolved conflict
+        addNotification(`فشل التحليل الذكي: ${errorMessage}`, "error");
         setRecordings((prev) =>
           prev.map((r) =>
             r.id === recording.id
@@ -263,16 +268,24 @@ const LuxuryApp = () => {
         setPendingRecording(newRecording);
       } else {
         setRecordings((prev) => [newRecording, ...prev]);
-        addNotification(`تم حفظ التسجيل "${newRecording.name}".`, "success");
-        feedbackService.success(`تم حفظ التسجيل بنجاح! 🎬`, { // Resolved conflict
-          actions: [
-            {
-              label: "عرض",
-              action: () => setCurrentView("recordings"),
-              style: "primary",
-            },
-          ],
-        });
+        addNotification(
+          languageService.current.translateWithParams("recordingSaved", {
+            name: newRecording.name,
+          }),
+          "success",
+        );
+        feedbackService.success(
+          languageService.current.translate("recordingSaved") + " 🎬",
+          {
+            actions: [
+              {
+                label: languageService.current.translate("view"),
+                action: () => setCurrentView("recordings"),
+                style: "primary",
+              },
+            ],
+          },
+        );
 
         if (newRecording.isProcessing && transcript) {
           runAiProcessing(newRecording);
@@ -281,10 +294,13 @@ const LuxuryApp = () => {
         if (!transcript && settings.aiProcessingEnabled) {
           try {
             const audioLoadingId = feedbackService.loading(
-              "جار استخراج الصوت وتحويله لنص...",
+              languageService.current.translate("extractingAudio"),
               0,
             );
-            addNotification("جار استخراج الصوت وتحويله لنص...", "info");
+            addNotification(
+              languageService.current.translate("extractingAudio"),
+              "info",
+            );
             const audioBlob = await audioProcessor.extractAudioFromVideo(blob);
             const extractedText = await audioProcessor.speechToText(
               audioBlob,
@@ -306,7 +322,7 @@ const LuxuryApp = () => {
               runAiProcessing(updatedRecording);
             } else {
               feedbackService.warning(
-                "لم يتم اكتشاف نص واضح في التسجيل الصوتي",
+                languageService.current.translate("noTextDetected"),
               );
             }
           } catch (error) {
@@ -324,6 +340,20 @@ const LuxuryApp = () => {
     document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(theme);
   }, [theme]);
+
+  // Language initialization
+  useEffect(() => {
+    const handleLanguageChange = (newLanguage: string) => {
+      setCurrentLanguage(newLanguage);
+    };
+
+    languageService.current.onLanguageChange(handleLanguageChange);
+    setCurrentLanguage(languageService.current.getCurrentLanguage());
+
+    return () => {
+      languageService.current.offLanguageChange(handleLanguageChange);
+    };
+  }, []);
 
   useEffect(() => {
     enhancedErrorHandler.onError("app", (report) => {
@@ -398,8 +428,13 @@ const LuxuryApp = () => {
 
   const onSettingsSave = (newSettings: RecordingSettings) => {
     handleSettingsChange(newSettings);
-    addNotification("Settings saved!", "success");
-    feedbackService.success("تم حفظ الإعدادات بنجاح! ⚙️");
+    addNotification(
+      languageService.current.translate("settingsSaved"),
+      "success",
+    );
+    feedbackService.success(
+      languageService.current.translate("settingsSaved") + " ⚙️",
+    );
   };
 
   const handleDeleteRecording = (id: string) => {
@@ -415,37 +450,54 @@ const LuxuryApp = () => {
         return true;
       }),
     );
-    addNotification("Recording deleted.", "info");
-    feedbackService.warning("تم حذف التسجيل");
+    addNotification(
+      languageService.current.translate("recordingDeleted"),
+      "info",
+    );
+    feedbackService.warning(
+      languageService.current.translate("recordingDeleted"),
+    );
   };
 
   const handleScreenshot = useCallback(async () => {
     try {
-      const loadingId = feedbackService.loading("جار التقاط لقطة الشاشة...", 0); // Resolved conflict
+      const loadingId = feedbackService.loading(
+        languageService.current.translate("takingScreenshot"),
+        0,
+      );
       const result = await recorderActions.takeScreenshot();
       feedbackService.dismiss(loadingId);
 
       if (result.success) {
-        feedbackService.success(`تم التقاط لقطة الشاشة بنجاح! 📸`, {
-          message: `الملف: ${result.filename}`,
-          actions: [
-            {
-              label: "فتح",
-              action: () => {
-                if (result.dataUrl) {
-                  window.open(result.dataUrl, "_blank");
-                }
+        feedbackService.success(
+          languageService.current.translate("screenshotTaken") + " 📸",
+          {
+            message: `الملف: ${result.filename}`,
+            actions: [
+              {
+                label: languageService.current.translate("open"),
+                action: () => {
+                  if (result.dataUrl) {
+                    window.open(result.dataUrl, "_blank");
+                  }
+                },
+                style: "primary",
               },
-              style: "primary",
-            },
-          ],
-        });
+            ],
+          },
+        );
       } else {
-        feedbackService.error(`فشل في التقاط لقطة الشاشة: ${result.error}`);
+        feedbackService.error(
+          languageService.current.translateWithParams("screenshotFailed", {
+            error: result.error || "Unknown error",
+          }),
+        );
       }
     } catch (error) {
       feedbackService.error(
-        `خطأ في التقاط لقطة الشاشة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+        languageService.current.translateWithParams("screenshotError", {
+          error: error instanceof Error ? error.message : "خطأ غير معروف",
+        }),
       );
     }
   }, [recorderActions]);
@@ -462,6 +514,26 @@ const LuxuryApp = () => {
     }
     setGalleryPlaybackUrl(rec.url);
   };
+
+  // Enhanced navigation functions
+  const handleViewChange = useCallback(
+    (view: string) => {
+      setNavigationHistory((prev) => [...prev, currentView]);
+      setCurrentView(view as any);
+    },
+    [currentView],
+  );
+
+  const handleBack = useCallback(() => {
+    if (navigationHistory.length > 1) {
+      const prevHistory = [...navigationHistory];
+      const previousView = prevHistory.pop();
+      setNavigationHistory(prevHistory);
+      setCurrentView(previousView as any);
+    } else {
+      setCurrentView("main");
+    }
+  }, [navigationHistory]);
 
   useEffect(() => {
     const checkHotkey = (e: KeyboardEvent, hotkey: string): boolean => {
@@ -597,14 +669,14 @@ const LuxuryApp = () => {
         {/* Quick Access Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <button
-            onClick={() => setCurrentView("templates")}
+            onClick={() => handleViewChange("templates")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group"
           >
             <div className="mb-3">
               <TemplatesIcon size={48} className="mx-auto" />
             </div>
             <div className="luxury-text font-bold text-lg mb-1">
-              قوالب الفيديو
+              {languageService.current.translate("templates")}
             </div>
             <div className="luxury-text text-sm opacity-70">
               Video Templates
@@ -612,33 +684,33 @@ const LuxuryApp = () => {
           </button>
 
           <button
-            onClick={() => setCurrentView("toolbox")}
+            onClick={() => handleViewChange("toolbox")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group"
           >
             <div className="mb-3">
               <ToolboxIcon size={48} className="mx-auto" />
             </div>
             <div className="luxury-text font-bold text-lg mb-1">
-              صندوق الأدوات
+              {languageService.current.translate("toolbox")}
             </div>
             <div className="luxury-text text-sm opacity-70">AI Toolbox</div>
           </button>
 
           <button
-            onClick={() => setCurrentView("offline-tools")}
+            onClick={() => handleViewChange("offline-tools")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group hologram-effect"
           >
             <div className="mb-3">
               <AIToolsIcon size={48} className="mx-auto" />
             </div>
             <div className="luxury-text font-bold text-lg mb-1 neon-glow">
-              أدوات أوفلاين
+              {languageService.current.translate("offlineTools")}
             </div>
             <div className="luxury-text text-sm opacity-70">38 أداة ذكية</div>
           </button>
 
           <button
-            onClick={() => setCurrentView("visual-patch-lab")}
+            onClick={() => handleViewChange("visual-patch-lab")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group diamond-effect"
           >
             <div className="mb-3">
@@ -651,64 +723,7 @@ const LuxuryApp = () => {
           </button>
 
           <button
-            onClick={() => setCurrentView("recordings")}
-            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group"
-          >
-            <div className="mb-3">
-              <RecordingsIcon size={48} className="mx-auto" />
-            </div>
-            <div className="luxury-text font-bold text-lg mb-1">التسجيلات</div>
-            <div className="luxury-text text-sm opacity-70">
-              {recordings.length} ملف
-            </div>
-          </button>
-
-          <button
-            onClick={() => setCurrentView("files")}
-            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group"
-          >
-            <div className="mb-3">
-              <FilesIcon size={48} className="mx-auto" />
-            </div>
-            <div className="luxury-text font-bold text-lg mb-1">
-              إدارة الملفات
-            </div>
-            <div className="luxury-text text-sm opacity-70">File Manager</div>
-          </button>
-
-          {/* New buttons from main branch */}
-          <button
-            onClick={() => setCurrentView("arabic-ai-tools")}
-            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group hologram-effect border-2 border-yellow-500/50"
-          >
-            <div className="mb-3">
-              <div className="text-5xl mx-auto text-yellow-400">🤖</div>
-            </div>
-            <div className="luxury-text font-bold text-lg mb-1 text-yellow-300">
-              أدوات الذكاء الاصطناعي
-            </div>
-            <div className="luxury-text text-sm opacity-70 text-yellow-400">
-              38 أداة عربية • محلياً
-            </div>
-          </button>
-
-          <button
-            onClick={() => setCurrentView("knoux-morph-core")}
-            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group cosmic-glow border-2 border-purple-500/50"
-          >
-            <div className="mb-3">
-              <div className="text-5xl mx-auto text-purple-400">🧱</div>
-            </div>
-            <div className="luxury-text font-bold text-lg mb-1 text-purple-300">
-              Knoux MorphCore™
-            </div>
-            <div className="luxury-text text-sm opacity-70 text-purple-400">
-              50 أداة محلية • بدون AI
-            </div>
-          </button>
-
-          <button
-            onClick={() => setCurrentView("ai-body-editor")}
+            onClick={() => handleViewChange("ai-body-editor")}
             className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group electric-effect border-2 border-red-500/50"
           >
             <div className="mb-3">
@@ -721,6 +736,59 @@ const LuxuryApp = () => {
               18+ محرر الجسم
             </div>
           </button>
+
+          <button
+            onClick={() => handleViewChange("recordings")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group"
+          >
+            <div className="mb-3">
+              <RecordingsIcon size={48} className="mx-auto" />
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1">
+              {languageService.current.translate("recordings")}
+            </div>
+            <div className="luxury-text text-sm opacity-70">
+              {recordings.length} ملف
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleViewChange("files")}
+            className="luxury-glass-card interactive-hover p-6 rounded-2xl text-center group"
+          >
+            <div className="mb-3">
+              <FilesIcon size={48} className="mx-auto" />
+            </div>
+            <div className="luxury-text font-bold text-lg mb-1">
+              {languageService.current.translate("files")}
+            </div>
+            <div className="luxury-text text-sm opacity-70">File Manager</div>
+          </button>
+        </div>
+
+        {/* Enhanced Navigation Toggle */}
+        <div className="luxury-glass-card p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="luxury-text font-semibold">Navigation Options</h3>
+            <button
+              onClick={() => setShowEnhancedNavigation(!showEnhancedNavigation)}
+              className="luxury-button"
+            >
+              {showEnhancedNavigation ? "Standard" : "Enhanced"}
+            </button>
+          </div>
+
+          {showEnhancedNavigation && (
+            <EnhancedNavigation
+              currentView={currentView}
+              onNavigate={handleViewChange}
+              onBack={handleBack}
+              showBackButton={navigationHistory.length > 1}
+              compactMode={compactMode}
+              language={currentLanguage as "ar" | "en"}
+              notifications={notifications.length}
+            />
+          )}
         </div>
 
         {/* Memory Monitor */}
@@ -730,78 +798,6 @@ const LuxuryApp = () => {
             className="mt-4"
           />
         </div>
-
-        {/* Loading Progress Indicators */}
-        {loadingProgress.length > 0 && (
-          <div className="luxury-glass-card space-y-3">
-            <h3 className="luxury-text font-semibold text-lg flex items-center gap-2">
-              ⏳ جار تحميل النماذج
-            </h3>
-            {loadingProgress.map((progress) => (
-              <AdvancedProgressIndicator
-                key={progress.modelName}
-                progress={progress}
-                memoryStatus={memoryStatus || undefined}
-                onCancel={() => {
-                  console.log(`إلغاء تحميل ${progress.modelName}`);
-                }}
-                showDetails={progress.stage === "error"}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Error Reports */}
-        {errorReports.length > 0 && (
-          <div className="luxury-glass-card space-y-3">
-            <h3 className="luxury-text font-semibold text-lg flex items-center gap-2">
-              ⚠️ تقارير الأخطاء
-            </h3>
-            {errorReports.slice(0, 3).map((report) => (
-              <div
-                key={report.id}
-                className="luxury-glass-card border border-red-500/30"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="luxury-text text-red-300 font-medium">
-                    {report.solution.title}
-                  </h4>
-                  <button
-                    onClick={() =>
-                      setErrorReports((prev) =>
-                        prev.filter((r) => r.id !== report.id),
-                      )
-                    }
-                    className="luxury-text text-red-400 hover:text-red-300 text-sm"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <p className="luxury-text opacity-70 text-sm mb-3">
-                  {report.solution.description}
-                </p>
-                <div className="flex gap-2">
-                  {report.solution.actions.slice(0, 2).map((action, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        enhancedErrorHandler.resolveError(report.id, index);
-                        setErrorReports((prev) =>
-                          prev.filter((r) => r.id !== report.id),
-                        );
-                      }}
-                      className={`luxury-button text-sm ${
-                        action.isPrimary ? "electric-effect" : ""
-                      }`}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </main>
   );
@@ -875,26 +871,8 @@ const LuxuryApp = () => {
             <AIBodyEditorPanel />
           </div>
         );
-      case "arabic-ai-tools": // New case
-        return <ArabicAIToolsPanel />;
-      case "knoux-morph-core": // New case
-        return <KnouxMorphCorePanel onClose={() => setCurrentView("main")} />;
       case "elysian":
         return <ElysianCanvas onClose={() => setCurrentView("main")} />;
-      case "real-content": // New case
-        return (
-          <div className="flex-grow p-4 md:p-6 max-w-screen-2xl w-full mx-auto z-10">
-            <RealContentManager
-              onContentUpdate={(stats) => {
-                console.log("تم تحديث المحتوى الحقيقي:", stats);
-                addNotification(
-                  `تم تفعيل ${stats.total} عنصر محتوى حقيقي!`,
-                  "success",
-                );
-              }}
-            />
-          </div>
-        );
       default:
         return renderMainView();
     }
@@ -902,123 +880,90 @@ const LuxuryApp = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative luxury-arabic">
-      {/* تحسينات الواجهة الشاملة */}
+      {/* UI Enhancer */}
       <UIEnhancer />
 
-      {/* التأثيرات البصرية الفاخرة */}
+      {/* Background Effects */}
       <LuxuryBackgroundEffects
         effects={["starfield", "orbs", "waves"]}
         intensity={recorderState.isRecording ? 0.8 : 0.4}
       />
 
-      {/* الجسيمات المتحركة */}
+      {/* Floating Particles */}
       <FloatingParticles />
 
-      {/* الرأسية الفاخرة */}
-      <LuxuryHeader
-        onSettingsClick={() => setIsSettingsOpen(true)}
-        onNotificationsClick={() => setIsNotificationsOpen(true)}
-        onThemeToggle={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-        currentTheme={theme}
-        notificationCount={notifications.length}
-        onAdvancedSettingsClick={() => setIsAdvancedSettingsOpen(true)}
-        onAutoAllocationClick={() => setShowAutoAllocation(true)} // New prop
-        onRealContentClick={() => setShowRealContent(true)} // New prop
-      />
-
-      {/* التنقل الخلفي */}
+      {/* Navigation */}
       {currentView !== "main" && (
-        <BackNavigation onBack={() => setCurrentView("main")} />
+        <BackNavigation
+          currentView={currentView}
+          onBack={handleBack}
+          onNavigate={handleViewChange}
+        />
       )}
 
-      {/* المحتوى الرئيسي بناءً على currentView */}
-      {renderContent()}
+      {/* Header */}
+      <LuxuryHeader
+        isRecording={recorderState.isRecording}
+        onSettingsClick={() => setIsSettingsOpen(true)}
+        onNotificationsClick={() => setIsNotificationsOpen((p) => !p)}
+        notificationCount={notifications.length}
+        currentView={currentView}
+        onViewChange={handleViewChange}
+      />
 
-      {/* إعدادات التسجيل */}
-      <SettingsModal
+      {/* Notifications */}
+      <NotificationsDropdown
+        isOpen={isNotificationsOpen}
+        notifications={notifications}
+        onClose={() => setIsNotificationsOpen(false)}
+        onDismiss={(id) =>
+          setNotifications((p) => p.filter((n) => n.id !== id))
+        }
+      />
+
+      {/* Enhanced Settings Modal */}
+      <EnhancedSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        theme={theme}
+        setTheme={setTheme}
         settings={settings}
         onSave={onSettingsSave}
       />
 
-      {/* إعدادات النموذج المتقدمة */}
+      {/* Advanced Model Settings */}
       <AdvancedModelSettings
         isOpen={isAdvancedSettingsOpen}
         onClose={() => setIsAdvancedSettingsOpen(false)}
-        loadingProgress={loadingProgress}
-        memoryStatus={memoryStatus}
-        errorReports={errorReports}
-        onLoadingProgress={handleLoadingProgress} // Pass handler
-        onMemoryStatusChange={setMemoryStatus} // Pass handler
-      />
-
-      {/* Notifications Dropdown */}
-      <NotificationsDropdown
-        isOpen={isNotificationsOpen}
-        onClose={() => setIsNotificationsOpen(false)}
-        notifications={notifications}
-        onClearNotification={(id) => setNotifications(prev => prev.filter(n => n.id !== id))}
-        onClearAll={() => setNotifications([])}
+        onSave={(modelSettings) => {
+          console.log("حُفظت إعدادات النماذج:", modelSettings);
+          addNotification("تم حفظ إعدادات النماذج المتقدمة!", "success");
+        }}
       />
 
       {/* Trim Modal */}
       {pendingRecording && (
         <TrimModal
           recording={pendingRecording}
-          onClose={() => setPendingRecording(null)}
-          onTrimComplete={(trimmedBlob) => {
-            const trimmedRecording = {
-              ...pendingRecording,
-              blob: trimmedBlob,
-              url: URL.createObjectURL(trimmedBlob),
-              size: trimmedBlob.size,
-            };
-            setRecordings((prev) => [trimmedRecording, ...prev]);
-            addNotification(
-              `تم قص التسجيل "${trimmedRecording.name}" وحفظه.`,
-              "success",
-            );
-            if (trimmedRecording.isProcessing && trimmedRecording.transcript) {
-              runAiProcessing(trimmedRecording);
-            }
+          onSave={(rec, trimData) => {
+            addNotification("تم قص الفيديو بنجاح! ✂️", "success");
+            feedbackService.success("تم قص الفيديو بنجاح! ✂️");
+            setRecordings((prev) => [{ ...rec, trim: trimData }, ...prev]);
             setPendingRecording(null);
           }}
+          onSaveFull={(rec) => {
+            setRecordings((prev) => [rec, ...prev]);
+            addNotification(`Recording "${rec.name}" saved.`, "success");
+            feedbackService.success("تم حفظ التسجيل كاملاً! 🎬");
+            if (rec.isProcessing) runAiProcessing(rec);
+            setPendingRecording(null);
+          }}
+          onClose={() => setPendingRecording(null)}
         />
       )}
 
-      {/* Auto Allocation Coordinator Modal */}
-      {showAutoAllocation && (
-        <Modal
-          isOpen={showAutoAllocation}
-          onClose={() => setShowAutoAllocation(false)}
-          title="تنسيق التخصيص التلقائي"
-        >
-          <AutoAllocationCoordinator
-            onAllocationUpdate={(stats) => {
-              addNotification(`تم تخصيص ${stats.totalAllocated} مورد تلقائياً.`, "info");
-              console.log("Auto Allocation Stats:", stats);
-            }}
-            onClose={() => setShowAutoAllocation(false)}
-          />
-        </Modal>
-      )}
-
-      {/* Real Content Manager Modal (if needed, or directly rendered) */}
-      {showRealContent && (
-        <Modal
-          isOpen={showRealContent}
-          onClose={() => setShowRealContent(false)}
-          title="إدارة المحتوى الحقيقي"
-        >
-          <RealContentManager
-            onContentUpdate={(stats) => {
-              addNotification(`تم تفعيل ${stats.total} عنصر محتوى حقيقي!`, "success");
-              console.log("Real Content Stats:", stats);
-            }}
-          />
-        </Modal>
-      )}
+      {/* Main Content */}
+      {renderContent()}
     </div>
   );
 };
