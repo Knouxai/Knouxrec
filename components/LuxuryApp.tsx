@@ -17,6 +17,7 @@ import OfflineAIToolsPanel from "./OfflineAIToolsPanel";
 import VisualPatchLabPanel from "./VisualPatchLabPanel";
 import AIBodyEditorPanel from "./AIBodyEditorPanel";
 import KnouxMorphCorePanel from "./KnouxMorphCorePanel";
+import ArabicAIToolsPanel from "./ArabicAIToolsPanel";
 import ElysianCanvas from "../elysian-canvas/ElysianCanvas";
 import AdvancedProgressIndicator from "./AdvancedProgressIndicator";
 import AdvancedModelSettings from "./AdvancedModelSettings";
@@ -63,6 +64,7 @@ const LuxuryApp = () => {
     | "visual-patch-lab"
     | "ai-body-editor"
     | "knoux-morph-core"
+    | "arabic-ai-tools"
     | "elysian"
     | "real-content"
   >("main");
@@ -213,7 +215,7 @@ const LuxuryApp = () => {
                 ),
               );
               feedbackService.dismiss(loadingId);
-              addNotification(`فشل التحليل الذكي: ${task.error}`, "error");
+              addNotification(`فشل التحليل ال��كي: ${task.error}`, "error");
             } else if (task.status === "processing") {
               setTimeout(checkTaskStatus, 2000);
             }
@@ -418,7 +420,10 @@ const LuxuryApp = () => {
 
   const handleScreenshot = useCallback(async () => {
     try {
-      const loadingId = feedbackService.loading("جار التقاط لقطة الشاشة...", 0);
+      const loadingId = feedbackService.loading(
+        "جار التقا�� لقطة الشاشة...",
+        0,
+      );
       const result = await recorderActions.takeScreenshot();
       feedbackService.dismiss(loadingId);
 
