@@ -136,15 +136,24 @@ const VisualPatchToolCard: React.FC<VisualPatchToolCardProps> = ({
           </div>
 
           {/* Settings Button */}
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
               onSettings(tool.id);
             }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-lg hover:bg-white/10"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onSettings(tool.id);
+              }
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-lg hover:bg-white/10 cursor-pointer"
           >
             <span className="text-white/70 hover:text-white text-xs">⚙️</span>
-          </button>
+          </div>
         </div>
 
         {/* Selection Indicator */}
@@ -183,15 +192,24 @@ const VisualPatchToolCard: React.FC<VisualPatchToolCardProps> = ({
           <div className="text-4xl mb-2">{tool.icon}</div>
 
           {/* Settings Button */}
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
               onSettings(tool.id);
             }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 rounded-lg hover:bg-white/10"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onSettings(tool.id);
+              }
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 rounded-lg hover:bg-white/10 cursor-pointer"
           >
             <span className="text-white/70 hover:text-white">⚙️</span>
-          </button>
+          </div>
         </div>
 
         {/* Tool Names */}
